@@ -1,12 +1,13 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/kindergarten
+    url: jdbc:mysql://localhost:3306/kindergarten?createDatabaseIfNotExist=true&serverTimezone=UTC
     username: root
     password: 1234
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
