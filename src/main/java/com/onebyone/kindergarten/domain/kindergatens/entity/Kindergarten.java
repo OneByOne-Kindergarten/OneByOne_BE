@@ -1,10 +1,16 @@
 package com.onebyone.kindergarten.domain.kindergatens.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Kindergarten {
 
     @Id
@@ -59,6 +65,7 @@ public class Kindergarten {
     @Column(nullable = false)
     private Integer specialPupilCount;
 
+    /// TODO : 이후 위도+경도 추가 마이그레이션 작업 필요
     private Double latitude; // 위도
     private Double longitude; // 경도
 }
