@@ -1,5 +1,6 @@
 package com.onebyone.kindergarten.domain.sample.service;
 
+import com.onebyone.kindergarten.domain.sample.exception.SampleException;
 import com.onebyone.kindergarten.domain.sample.repository.SampleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,6 @@ public class SampleService {
     private final SampleRepository sampleRepository;
 
     public void getSample() {
-        sampleRepository.findById(1L);
+        throw new SampleException("sample");
     }
 }
