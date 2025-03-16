@@ -2,12 +2,10 @@ package com.onebyone.kindergarten.domain.inquires.entity;
 
 import com.onebyone.kindergarten.domain.inquires.enums.InquiryStatus;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
-
 @Entity
-public class Inquiry {
+public class Inquiry extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 문의 코드
@@ -24,7 +22,4 @@ public class Inquiry {
 
     @Enumerated(EnumType.STRING)
     private InquiryStatus status; // 문의 상태 - 처리중, 답변완료, 답변대기
-
-    private LocalDateTime createdAt; // 생성일
-    private LocalDateTime answeredAt; // 답변일
 }

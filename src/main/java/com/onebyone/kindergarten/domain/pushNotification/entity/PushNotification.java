@@ -2,12 +2,11 @@ package com.onebyone.kindergarten.domain.pushNotification.entity;
 
 import com.onebyone.kindergarten.domain.pushNotification.enums.NotificationType;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
-
-@Entity
-public class PushNotification {
+@Entity(name = "push_notification")
+public class PushNotification extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 알림 코드
@@ -26,5 +25,4 @@ public class PushNotification {
     private NotificationType type; // 알림 타입 - 리뷰, 댓글, 좋아요, 시스템
 
     private Boolean isRead = false; // 읽음 여부
-    private LocalDateTime createdAt; // 발송일
 }

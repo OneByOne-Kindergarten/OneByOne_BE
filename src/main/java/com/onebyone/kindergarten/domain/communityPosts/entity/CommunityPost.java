@@ -2,13 +2,12 @@ package com.onebyone.kindergarten.domain.communityPosts.entity;
 
 import com.onebyone.kindergarten.domain.communityPosts.enums.PostCategory;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-public class CommunityPost {
+public class CommunityPost extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 게시글 코드
@@ -26,13 +25,12 @@ public class CommunityPost {
     @Enumerated(EnumType.STRING)
     private PostCategory category; // 게시글 카테고리 - 선생님, 예비
 
+    @Column(name = "like_count")
     private Integer likeCount = 0; // 좋아요 수
+
+    @Column(name = "comment_count")
     private Integer commentCount = 0; // 댓글 수
 
-    private LocalDateTime createdAt; // 작성일
-    private LocalDateTime updatedAt; // 수정일
-
+    @Enumerated(EnumType.STRING)
     private ReportStatus status = ReportStatus.YET; // 게시글 상태 - 차단 여부 (PENDING, PROCESSED, REJECTED)
-
-    private LocalDateTime deletedAt; // 삭제일
 }

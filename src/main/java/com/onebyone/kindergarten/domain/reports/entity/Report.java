@@ -2,13 +2,14 @@ package com.onebyone.kindergarten.domain.reports.entity;
 
 import com.onebyone.kindergarten.domain.reports.enums.ReportTargetType;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-public class Report {
+public class Report extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 신고 코드
@@ -28,6 +29,4 @@ public class Report {
 
     @Enumerated(EnumType.STRING)
     private ReportStatus status; // 신고 상태 - 처리중, 처리완료, 거절
-
-    private LocalDateTime createdAt; // 신고일
 }
