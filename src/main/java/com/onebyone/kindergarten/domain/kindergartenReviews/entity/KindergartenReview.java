@@ -1,14 +1,20 @@
 package com.onebyone.kindergarten.domain.kindergartenReviews.entity;
 
+import com.onebyone.kindergarten.domain.kindergartenReviews.dto.CategoryDetail;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.global.enums.ReviewType;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import jakarta.persistence.*;
-
+import lombok.Getter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import java.util.Map;
+import java.util.HashMap;
 
 @Entity(name = "kindergarten_review")
+@Getter
 public class KindergartenReview extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,4 +52,27 @@ public class KindergartenReview extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ReportStatus status = ReportStatus.YET; // 게시글 상태 - 차단 여부 (PENDING, PROCESSED, REJECTED)
+    
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
+    private Map<String, CategoryDetail> categoryScores; // 카테고리별 점수와 내용
+
+    public void setCategoryScores(Map<String, CategoryDetail> categoryScores) {
+        this.categoryScores = categoryScores;
+    }
+
+    // 카테고리 추가 메서드
+    public void addCategory(String categoryName, CategoryDetail detail) {
+        if (this.categoryScores == null) {
+            this.categoryScores = new HashMap<>();
+        }
+        this.categoryScores.put(categoryName, detail);
+    }
+
+    // 카테고리 제거 메서드
+    public void removeCategory(String categoryName) {
+        if (this.categoryScores != null) {
+            this.categoryScores.remove(categoryName);
+        }
+    }
 }

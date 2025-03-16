@@ -5,8 +5,10 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class CommunityPost extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +27,10 @@ public class CommunityPost extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PostCategory category; // 게시글 카테고리 - 선생님, 예비
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private CommunityCategory communityCategory; // 커뮤니티 카테고리
+
     @Column(name = "like_count")
     private Integer likeCount = 0; // 좋아요 수
 
@@ -33,4 +39,8 @@ public class CommunityPost extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ReportStatus status = ReportStatus.YET; // 게시글 상태 - 차단 여부 (PENDING, PROCESSED, REJECTED)
+
+    public void setCategory(CommunityCategory category) {
+        this.communityCategory = category;
+    }
 }
