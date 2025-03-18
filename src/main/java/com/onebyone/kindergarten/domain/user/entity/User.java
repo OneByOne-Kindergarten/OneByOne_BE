@@ -4,9 +4,14 @@ import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@Entity
-public abstract class User extends BaseEntity {
+@Entity(name = "user")
+@Getter
+@RequiredArgsConstructor
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 사용자 ID
@@ -34,5 +39,17 @@ public abstract class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private UserStatus status; // 상태 - 활성, 정지, 삭제
+
+    @Builder
+    public User(String email, String password, UserProvider provider, Long providerId, String nickname, UserRole role, String profileImageUrl) {
+        this.email = email;
+        this.password = password;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.nickname = nickname;
+        this.role = role;
+        this.profileImageUrl = profileImageUrl;
+        this.status = UserStatus.ACTIVE;
+    }
 }
 

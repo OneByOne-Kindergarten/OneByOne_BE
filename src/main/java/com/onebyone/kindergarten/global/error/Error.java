@@ -11,6 +11,7 @@ public enum Error {
 //    REFRESH_TOKEN_NOT_FOUND("이미 로그아웃된 사용자입니다."),
 //    POST_NOT_FOUND("게시글을 찾을 수 없습니다."),
 //    COMMENT_NOT_FOUND("댓글을 찾을 수 없습니다.");
+    INVALID_PASSWORD_ERROR("비밀번호가 일치하지 않습니다."),
     SAMPLE("예시 에러입니다");
 
     private final String message;
