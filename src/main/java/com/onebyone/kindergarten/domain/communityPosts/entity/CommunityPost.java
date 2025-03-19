@@ -5,10 +5,13 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class CommunityPost extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +42,19 @@ public class CommunityPost extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ReportStatus status = ReportStatus.YET; // 게시글 상태 - 차단 여부 (PENDING, PROCESSED, REJECTED)
+
+    @Column(name = "view_count")
+    private Integer viewCount = 0; // 조회수
+
+    @Builder
+    public CommunityPost(User user, String title, String content, 
+                        PostCategory category, CommunityCategory communityCategory) {
+        this.user = user;
+        this.title = title;
+        this.content = content;
+        this.category = category;
+        this.communityCategory = communityCategory;
+    }
 
     public void setCategory(CommunityCategory category) {
         this.communityCategory = category;

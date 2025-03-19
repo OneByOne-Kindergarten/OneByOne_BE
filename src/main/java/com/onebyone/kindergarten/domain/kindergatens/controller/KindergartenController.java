@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSearchDTO;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenResponseDTO;
-import com.onebyone.kindergarten.domain.kindergatens.dto.PageResponseDTO;
+import com.onebyone.kindergarten.global.common.PageResponseDTO;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;

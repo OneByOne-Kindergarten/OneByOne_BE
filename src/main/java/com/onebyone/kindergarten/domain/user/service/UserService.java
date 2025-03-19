@@ -89,4 +89,9 @@ public class UserService{
         User user = findUser(email);
         user.withdraw();
     }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmailAndDeletedAtIsNull(email)
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다"));
+    }
 }

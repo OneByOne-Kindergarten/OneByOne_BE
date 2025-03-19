@@ -1,4 +1,4 @@
-package com.onebyone.kindergarten.domain.kindergatens.dto;
+package com.onebyone.kindergarten.global.common;
 
 import lombok.Getter;
 import org.springframework.data.domain.Page;
