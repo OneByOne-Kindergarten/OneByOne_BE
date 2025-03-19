@@ -24,11 +24,11 @@ public class JwtEntryPoint implements AuthenticationEntryPoint {
 
         try {
             String jsonResponse = new JSONObject()
-                    .put("message", authException.getMessage())
+                    .put("message", "인증에 실패했습니다")
                     .toString();
             response.getWriter().write(jsonResponse);
         } catch (org.json.JSONException e) {
-            response.getWriter().write("{\"message\": \"Unknown error occurred\"}");
+            response.getWriter().write("알 수 없는 에러");
         }
     }
 }

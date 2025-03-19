@@ -16,7 +16,6 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
-        // 자격정보는 있으나 접근 권한이 없는 경우 403 에러 반환
         log.error("Forbidden Error : {}", accessDeniedException.getMessage());
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
@@ -24,12 +23,12 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
         try {
             String jsonResponse = new JSONObject()
-                    .put("message", accessDeniedException.getMessage())
+                    .put("message", "권한이 없습니다.")
                     .toString();
             response.getWriter().write(jsonResponse);
         } catch (org.json.JSONException e) {
             log.error("Error while creating JSON response", e);
-            response.getWriter().write("{\"message\": \"Unknown error occurred\"}");
+            response.getWriter().write("알 수 없는 에러");
         }
     }
 }
