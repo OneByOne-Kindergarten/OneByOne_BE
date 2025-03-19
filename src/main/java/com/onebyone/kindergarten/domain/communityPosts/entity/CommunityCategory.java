@@ -2,6 +2,7 @@ package com.onebyone.kindergarten.domain.communityPosts.entity;
 
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,11 +22,19 @@ public class CommunityCategory extends BaseEntity {
     @Column(length = 500)
     private String description; // 카테고리 설명
 
-    // 정렬을 위한 순서
-    @Column(name = "display_order")
-    private Integer displayOrder;
+    @Column(name = "display_order", nullable = true)
+    private Integer displayOrder; // 정렬을 위한 순서
 
-    // 활성화 여부
     @Column(nullable = false)
-    private Boolean isActive = true;
+    private Boolean isActive = true; // 활성화 여부
+
+
+    @Builder
+    public CommunityCategory(String categoryName, String description, Integer displayOrder, Boolean isActive) {
+        this.categoryName = categoryName;
+        this.description = description;
+        this.displayOrder = displayOrder;
+        this.isActive = isActive;
+    }
+
 } 
