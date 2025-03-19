@@ -12,8 +12,9 @@ public enum Error {
 //    POST_NOT_FOUND("게시글을 찾을 수 없습니다."),
 //    COMMENT_NOT_FOUND("댓글을 찾을 수 없습니다.");
     INVALID_PASSWORD_ERROR("비밀번호가 일치하지 않습니다."),
-    SAMPLE("예시 에러입니다");
-
+    SAMPLE("예시 에러입니다"),
+    NOT_FOUND_EMAIL_ERROR("이메일이 존재하지 않습니다."),
+    PASSWORD_MISMATCH_ERROR("비밀번호가 일치하지 않습니다.");
     private final String message;
 
     Error(String message) {

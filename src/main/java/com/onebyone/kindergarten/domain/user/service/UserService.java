@@ -1,11 +1,14 @@
 package com.onebyone.kindergarten.domain.user.service;
 
+import com.onebyone.kindergarten.domain.user.dto.ModifyUserNicknameRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.ModifyUserPasswordRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.SignInRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.SignUpRequestDTO;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
+import com.onebyone.kindergarten.domain.user.exception.PasswordMismatchException;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -50,7 +53,7 @@ public class UserService{
     }
 
     public String signIn(SignInRequestDTO request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
                 .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -58,5 +61,32 @@ public class UserService{
         }
 
         return user.getEmail();
+    }
+
+    @Transactional
+    public void changeNickname(String email, ModifyUserNicknameRequestDTO request) {
+        User user = findUser(email);
+        user.changeNickname(request.getNewNickname());
+    }
+
+    @Transactional
+    public void changePassword(String email, ModifyUserPasswordRequestDTO request) {
+        User user = findUser(email);
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
+        }
+
+        user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+    }
+
+    private User findUser(String email) {
+        return userRepository.findByEmailAndDeletedAtIsNull(email).orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다"));
+    }
+
+    @Transactional
+    public void withdraw(String email) {
+        User user = findUser(email);
+        user.withdraw();
     }
 }

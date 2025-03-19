@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity(name = "user")
 @Getter
 @RequiredArgsConstructor
@@ -50,6 +52,19 @@ public class User extends BaseEntity {
         this.role = role;
         this.profileImageUrl = profileImageUrl;
         this.status = UserStatus.ACTIVE;
+    }
+
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
+    public void withdraw() {
+        this.status = UserStatus.DELETED;
+        this.deletedAt = LocalDateTime.now();
     }
 }
 
