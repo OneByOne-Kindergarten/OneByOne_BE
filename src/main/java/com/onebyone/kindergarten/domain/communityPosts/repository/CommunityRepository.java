@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CommunitySearchDTO;
@@ -38,4 +37,8 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
             AND (:#{#search.endDate} IS NULL OR p.createdAt <= :#{#search.endDate})
             """)
     Page<CommunityPost> search(@Param("search") CommunitySearchDTO search, Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE CommunityPost p SET p.likeCount = p.likeCount + :delta WHERE p.id = :postId")
+    void updateLikeCount(@Param("postId") Long postId, @Param("delta") int delta);
 }
