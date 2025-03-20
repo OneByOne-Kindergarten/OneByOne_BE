@@ -6,6 +6,8 @@ import com.onebyone.kindergarten.domain.communityPosts.service.CommunityService;
 import com.onebyone.kindergarten.global.common.PageResponseDTO;
 import com.onebyone.kindergarten.global.common.ResponseDto;
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CommunitySearchDTO;
+import com.onebyone.kindergarten.domain.communityPosts.service.CommunityLikeService;
+import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityLikeResponseDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ import java.util.List;
 @RequestMapping("/community")
 public class CommunityController {
     private final CommunityService communityService;
+    private final CommunityLikeService communityLikeService;
 
     @PostMapping()
     @Operation(summary = "커뮤니티 게시글 생성", description = "게시글을 생성합니다.")
@@ -55,5 +58,23 @@ public class CommunityController {
     @Operation(summary = "인기 게시글 TOP 10 조회", description = "좋아요 수와 조회수를 기준으로 인기 게시글 TOP 10을 조회합니다.")
     public ResponseDto<List<CommunityPostResponseDTO>> getTopPosts() {
         return ResponseDto.success(communityService.getTopPosts());
+    }
+
+    @PostMapping("/{postId}/like")
+    @Operation(summary = "게시글 좋아요 토글", description = "게시글에 좋아요를 추가하거나 취소합니다.")
+    public ResponseDto<CommunityLikeResponseDTO> toggleLike(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseDto.success(communityLikeService.toggleLike(postId, userDetails.getUsername()));
+    }
+
+    @GetMapping("/{postId}/like")
+    @Operation(summary = "게시글 좋아요 상태 조회", description = "현재 사용자가 게시글에 좋아요를 눌렀는지 확인합니다.")
+    public ResponseDto<CommunityLikeResponseDTO> getLikeStatus(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseDto.success(communityLikeService.getLikeInfo(postId, userDetails.getUsername()));
     }
 }

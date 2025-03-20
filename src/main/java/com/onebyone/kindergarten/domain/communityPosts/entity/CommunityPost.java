@@ -59,4 +59,14 @@ public class CommunityPost extends BaseEntity {
     public void setCategory(CommunityCategory category) {
         this.communityCategory = category;
     }
+
+    // 좋아요 증가
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    // 좋아요 감소
+    public void decreaseLikeCount() {
+        this.likeCount--;
+    }
 }
