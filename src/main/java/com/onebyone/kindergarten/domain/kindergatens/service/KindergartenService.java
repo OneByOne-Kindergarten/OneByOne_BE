@@ -34,6 +34,7 @@ public class KindergartenService {
                 .name(dto.getName())
                 .establishment(dto.getEstablishment())
                 .establishmentDate(dto.getEstablishmentDate())
+                .openDate(dto.getOpenDate())
                 .address(dto.getAddress())
                 .homepage(dto.getHomepage())
                 .phoneNumber(dto.getPhoneNumber())

@@ -29,6 +29,9 @@ public class Kindergarten extends BaseEntity {
     @Column(name = "establishment_date", nullable = false)
     private LocalDate establishmentDate; // 설립일 - EDATE
 
+    @Column(name = "open_date", nullable = false)
+    private LocalDate openDate; // 개원일 - ODATE
+
     @Column(nullable = false)
     private String address; // 주소 - ADDR
 
