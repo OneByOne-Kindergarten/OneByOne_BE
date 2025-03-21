@@ -15,6 +15,8 @@ public class KindergartenDTO {
 
     private LocalDate establishmentDate;
 
+    private LocalDate openDate;
+
     private String address;
 
     private String homepage;
