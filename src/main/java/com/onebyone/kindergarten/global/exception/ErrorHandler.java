@@ -43,6 +43,13 @@ public class ErrorHandler {
         return buildError(Error.PASSWORD_MISMATCH_ERROR);
     }
 
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // 기본적으로 500 처리
+    public ErrorResponse handleAllExceptions(Exception e) {
+        log.error("알 수 없는 예외 발생: {}", e.getMessage(), e);
+        return buildError(Error.INTERNAL_SERVER_ERROR);
+    }
+
     private ErrorResponse buildError(Error error) {
         ErrorResponse retError = ErrorResponse.builder()
                 .message(error.getMessage())

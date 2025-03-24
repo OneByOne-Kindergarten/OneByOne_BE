@@ -52,12 +52,17 @@ public class UserService{
         return passwordEncoder.encode(password);
     }
 
+    @Transactional
     public String signIn(SignInRequestDTO request) {
         User user = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
                 .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+        }
+
+        if (request.getFcmToken() != null) {
+            user.updateFcmToken(request.getFcmToken());
         }
 
         return user.getEmail();

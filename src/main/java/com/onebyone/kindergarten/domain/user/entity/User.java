@@ -24,6 +24,9 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = false)
     private String password; // 비밀번호
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     @Enumerated(EnumType.STRING)
     private UserProvider provider; // 제공자 - 일반, 구글, 애플
 
@@ -43,9 +46,10 @@ public class User extends BaseEntity {
     private UserStatus status; // 상태 - 활성, 정지, 삭제
 
     @Builder
-    public User(String email, String password, UserProvider provider, Long providerId, String nickname, UserRole role, String profileImageUrl) {
+    public User(String email, String password, String fcmToken, UserProvider provider, Long providerId, String nickname, UserRole role, String profileImageUrl) {
         this.email = email;
         this.password = password;
+        this.fcmToken = fcmToken;
         this.provider = provider;
         this.providerId = providerId;
         this.nickname = nickname;
@@ -65,6 +69,10 @@ public class User extends BaseEntity {
     public void withdraw() {
         this.status = UserStatus.DELETED;
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }
 
