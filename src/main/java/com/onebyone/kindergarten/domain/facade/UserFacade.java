@@ -18,8 +18,6 @@ public class UserFacade {
     public void signUp(SignUpRequestDTO request) throws AccountNotFoundException {
         Long userId = userService.signUp(request);
         String email = userService.findById(userId);
-
-        System.out.println(jwtProvider.generateAccessToken(email));
     }
 
     public SignInResponseDTO signIn(SignInRequestDTO request) {

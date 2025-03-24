@@ -14,7 +14,8 @@ public enum Error {
     INVALID_PASSWORD_ERROR("비밀번호가 일치하지 않습니다."),
     SAMPLE("예시 에러입니다"),
     NOT_FOUND_EMAIL_ERROR("이메일이 존재하지 않습니다."),
-    PASSWORD_MISMATCH_ERROR("비밀번호가 일치하지 않습니다.");
+    PASSWORD_MISMATCH_ERROR("비밀번호가 일치하지 않습니다."),
+    INTERNAL_SERVER_ERROR("알 수 없는 에러 발생");
     private final String message;
 
     Error(String message) {
