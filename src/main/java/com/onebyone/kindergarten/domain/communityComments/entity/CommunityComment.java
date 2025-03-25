@@ -5,8 +5,13 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity(name = "community_comment")
+@Getter
+@NoArgsConstructor
 public class CommunityComment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,5 +28,13 @@ public class CommunityComment extends BaseEntity {
     @Column(nullable = false, length = 500)
     private String content; // 내용
 
+    @Enumerated(EnumType.STRING)
     private ReportStatus status = ReportStatus.YET; // 댓글 상태 - 차단 여부 (PENDING, PROCESSED, REJECTED)
+
+    @Builder
+    public CommunityComment(CommunityPost post, User user, String content) {
+        this.post = post;
+        this.user = user;
+        this.content = content;
+    }
 }
