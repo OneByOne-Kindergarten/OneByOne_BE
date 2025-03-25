@@ -45,8 +45,11 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserStatus status; // 상태 - 활성, 정지, 삭제
 
+    @Column(name = "career")
+    private String career; // 커리어
+
     @Builder
-    public User(String email, String password, String fcmToken, UserProvider provider, Long providerId, String nickname, UserRole role, String profileImageUrl) {
+    public User(String email, String password, String fcmToken, UserProvider provider, Long providerId, String nickname, UserRole role, String profileImageUrl, String career) {
         this.email = email;
         this.password = password;
         this.fcmToken = fcmToken;
@@ -56,6 +59,7 @@ public class User extends BaseEntity {
         this.role = role;
         this.profileImageUrl = profileImageUrl;
         this.status = UserStatus.ACTIVE;
+        this.career = career;
     }
 
     public void changeNickname(String nickname) {
@@ -73,6 +77,10 @@ public class User extends BaseEntity {
 
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public String getTotalCareer() {
+        return career;
     }
 }
 
