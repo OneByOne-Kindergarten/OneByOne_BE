@@ -5,10 +5,18 @@ import com.onebyone.kindergarten.global.enums.ReviewType;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Entity(name = "kindergarten_work_history")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class KindergartenWorkHistory extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

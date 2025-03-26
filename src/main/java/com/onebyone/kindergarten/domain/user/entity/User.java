@@ -82,5 +82,9 @@ public class User extends BaseEntity {
     public String getTotalCareer() {
         return career;
     }
+
+    public void updateCareer(String career) {
+        this.career = career;
+    }
 }
 
