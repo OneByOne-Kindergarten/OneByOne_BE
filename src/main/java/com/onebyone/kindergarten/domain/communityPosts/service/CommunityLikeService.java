@@ -67,7 +67,7 @@ public class CommunityLikeService {
     public boolean isLiked(Long postId, String email) {
         User user = userService.getUserByEmail(email);
         CommunityPost post = communityRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
 
         return communityLikeRepository.existsByUserAndPost(user, post);
     }
