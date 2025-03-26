@@ -99,4 +99,9 @@ public class UserService{
         return userRepository.findByEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다"));
     }
+
+    @Transactional
+    public void updateCareer(User user, String career) {
+        user.updateCareer(career);
+    }
 }

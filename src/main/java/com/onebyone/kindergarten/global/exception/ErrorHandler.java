@@ -2,6 +2,9 @@ package com.onebyone.kindergarten.global.exception;
 
 import com.onebyone.kindergarten.domain.communityPosts.exception.PostNotFoundException;
 import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotFoundException;
+import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.KindergartenNotFoundException;
+import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException;
+import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.WorkHistoryNotFoundException;
 import com.onebyone.kindergarten.domain.sample.exception.SampleException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
@@ -66,7 +69,26 @@ public class ErrorHandler {
         return buildError(Error.POST_NOT_FOUND);
     }
 
+    @ExceptionHandler(KindergartenNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse handleKindergartenNotFoundException(KindergartenNotFoundException e) {
+        log.error("KindergartenNotFoundException 발생: {}", e.getMessage(), e);
+        return buildError(Error.KINDERGARTEN_NOT_FOUND);
+    }
 
+    @ExceptionHandler(WorkHistoryNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse handleWorkHistoryNotFoundException(WorkHistoryNotFoundException e) {
+        log.error("WorkHistoryNotFoundException 발생: {}", e.getMessage(), e);
+        return buildError(Error.WORK_HISTORY_NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnauthorizedDeleteException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    protected ErrorResponse handleUnauthorizedDeleteException(UnauthorizedDeleteException e) {
+        log.error("UnauthorizedDeleteException 발생: {}", e.getMessage(), e);
+        return buildError(Error.UNAUTHORIZED_DELETE);
+    }
 
     private ErrorResponse buildError(Error error) {
         ErrorResponse retError = ErrorResponse.builder()

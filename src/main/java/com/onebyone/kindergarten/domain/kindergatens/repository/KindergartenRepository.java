@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSearchDTO;
 
+import java.util.Optional;
+
 @Repository
 public interface KindergartenRepository extends JpaRepository<Kindergarten, Long> {
 
@@ -24,4 +26,7 @@ public interface KindergartenRepository extends JpaRepository<Kindergarten, Long
            "AND (:#{#search.latitude} IS NULL OR :#{#search.longitude} IS NULL OR :#{#search.radius} IS NULL OR " +
            "6371 * acos(cos(radians(:#{#search.latitude})) * cos(radians(k.latitude)) * cos(radians(k.longitude) - radians(:#{#search.longitude})) + sin(radians(:#{#search.latitude})) * sin(radians(k.latitude))) <= :#{#search.radius})")
     Page<Kindergarten> findBySearchCriteria(@Param("search") KindergartenSearchDTO search, Pageable pageable);
+
+    /// 유치원 이름으로 검색
+    Optional<Kindergarten> findByName(String name);
 }

@@ -17,7 +17,10 @@ public enum Error {
     PASSWORD_MISMATCH_ERROR("비밀번호가 일치하지 않습니다."),
     INTERNAL_SERVER_ERROR("알 수 없는 에러 발생"),
     INQUIRY_NOT_FOUND("문의를 찾을 수 없습니다."),
-    POST_NOT_FOUND("게시글을 찾을 수 없습니다.");
+    POST_NOT_FOUND("게시글을 찾을 수 없습니다."),
+    KINDERGARTEN_NOT_FOUND("유치원을 찾을 수 없습니다."),
+    WORK_HISTORY_NOT_FOUND("이력을 찾을 수 없습니다."),
+    UNAUTHORIZED_DELETE("삭제 권한이 없습니다.");
 
     private final String message;
 
