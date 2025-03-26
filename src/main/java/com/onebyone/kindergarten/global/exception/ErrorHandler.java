@@ -1,5 +1,7 @@
 package com.onebyone.kindergarten.global.exception;
 
+import com.onebyone.kindergarten.domain.communityPosts.exception.PostNotFoundException;
+import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotFoundException;
 import com.onebyone.kindergarten.domain.sample.exception.SampleException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
@@ -49,6 +51,22 @@ public class ErrorHandler {
         log.error("알 수 없는 예외 발생: {}", e.getMessage(), e);
         return buildError(Error.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(InquiryNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse inQueryNotFoundExceptions (InquiryNotFoundException error) {
+        log.error("InquiryNotFoundException 발생: {}", error.getMessage(), error);
+        return buildError(Error.INQUIRY_NOT_FOUND);
+    }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse postNotFoundExceptions (PostNotFoundException error) {
+        log.error("PostNotFoundException 발생: {}", error.getMessage(), error);
+        return buildError(Error.POST_NOT_FOUND);
+    }
+
+
 
     private ErrorResponse buildError(Error error) {
         ErrorResponse retError = ErrorResponse.builder()

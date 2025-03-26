@@ -62,7 +62,7 @@ public class CommunityService {
     @Transactional
     public CommunityPostResponseDTO getPost(Long id) {
         CommunityPost post = communityRepository.findById(id)
-                .orElseThrow(() -> new PostNotFoundException(id));
+                .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
 
         // 조회수 증가
         communityRepository.increaseViewCount(id);
