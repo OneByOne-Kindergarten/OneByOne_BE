@@ -69,4 +69,9 @@ public class CommunityPost extends BaseEntity {
     public void decreaseLikeCount() {
         this.likeCount--;
     }
+
+    /// 게시물 신고 상태 변경
+    public void updateStatus(ReportStatus status) {
+        this.status = status;
+    }
 }

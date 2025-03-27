@@ -37,4 +37,9 @@ public class CommunityComment extends BaseEntity {
         this.user = user;
         this.content = content;
     }
+
+    /// 댓글 신고 상태 변경
+    public void updateStatus(ReportStatus status) {
+        this.status = status;
+    }
 }
