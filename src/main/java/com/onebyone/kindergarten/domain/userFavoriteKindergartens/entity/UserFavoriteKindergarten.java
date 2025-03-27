@@ -4,8 +4,13 @@ import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity(name = "user_favorite_kindergarten")
+@Getter
+@NoArgsConstructor
 public class UserFavoriteKindergarten extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,4 +23,10 @@ public class UserFavoriteKindergarten extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "kindergarten_id", nullable = false)
     private Kindergarten kindergarten; // 유치원
+
+    @Builder
+    public UserFavoriteKindergarten(User user, Kindergarten kindergarten) {
+        this.user = user;
+        this.kindergarten = kindergarten;
+    }
 }
