@@ -20,7 +20,10 @@ public enum Error {
     POST_NOT_FOUND("게시글을 찾을 수 없습니다."),
     KINDERGARTEN_NOT_FOUND("유치원을 찾을 수 없습니다."),
     WORK_HISTORY_NOT_FOUND("이력을 찾을 수 없습니다."),
-    UNAUTHORIZED_DELETE("삭제 권한이 없습니다.");
+    UNAUTHORIZED_DELETE("삭제 권한이 없습니다."),
+    REPORT_NOT_FOUND("신고를 찾을 수 없습니다."),
+    INVALID_REPORT_STATUS("잘못된 신고 상태입니다."),
+    INVALID_REPORT_TARGET("존재하지 않는 신고 대상입니다.");
 
     private final String message;
 

@@ -5,6 +5,9 @@ import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotFoundExcept
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.KindergartenNotFoundException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.WorkHistoryNotFoundException;
+import com.onebyone.kindergarten.domain.reports.exception.InvalidReportStatusException;
+import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException;
+import com.onebyone.kindergarten.domain.reports.exception.ReportNotFoundException;
 import com.onebyone.kindergarten.domain.sample.exception.SampleException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
@@ -88,6 +91,27 @@ public class ErrorHandler {
     protected ErrorResponse handleUnauthorizedDeleteException(UnauthorizedDeleteException e) {
         log.error("UnauthorizedDeleteException 발생: {}", e.getMessage(), e);
         return buildError(Error.UNAUTHORIZED_DELETE);
+    }
+
+    @ExceptionHandler(ReportNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse handleReportNotFoundException(ReportNotFoundException e) {
+        log.error("ReportNotFoundException 발생: {}", e.getMessage(), e);
+        return buildError(Error.REPORT_NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidReportStatusException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleInvalidReportStatusException(InvalidReportStatusException e) {
+        log.error("InvalidReportStatusException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INVALID_REPORT_STATUS);
+    }
+
+    @ExceptionHandler(InvalidReportTargetException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleInvalidReportTargetException(InvalidReportTargetException e) {
+        log.error("InvalidReportTargetException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INVALID_REPORT_TARGET);
     }
 
     private ErrorResponse buildError(Error error) {

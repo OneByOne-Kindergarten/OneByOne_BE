@@ -5,10 +5,15 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class Report extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,4 +34,17 @@ public class Report extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ReportStatus status; // 신고 상태 - 처리중, 처리완료, 거절
+
+    @Builder
+    public Report(User reporter, Long targetId, ReportTargetType targetType, String reason, ReportStatus status) {
+        this.reporter = reporter;
+        this.targetId = targetId;
+        this.targetType = targetType;
+        this.reason = reason;
+        this.status = status;
+    }
+
+    public void updateStatus(ReportStatus status) {
+        this.status = status;
+    }
 }
