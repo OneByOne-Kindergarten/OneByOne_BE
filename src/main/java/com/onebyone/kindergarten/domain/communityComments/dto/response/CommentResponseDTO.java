@@ -15,18 +15,18 @@ import lombok.Getter;
 public class CommentResponseDTO {
     private Long id;
     private String content;
-    private String userName;
+    private String nickName;
     private String career;    // 경력 정보 (예: "5년 3개월")
     private UserRole userRole;
     private LocalDateTime createdAt;
     private ReportStatus status;
 
-    public CommentResponseDTO(Long id, String content, String userName, 
+    public CommentResponseDTO(Long id, String content, String nickName,
                             String career, UserRole userRole, 
                             LocalDateTime createdAt, ReportStatus status) {
         this.id = id;
         this.content = content;
-        this.userName = userName;
+        this.nickName = nickName;
         this.career = career;
         this.userRole = userRole;
         this.createdAt = createdAt;
@@ -39,7 +39,7 @@ public class CommentResponseDTO {
         return CommentResponseDTO.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
-                .userName(user.getNickname())
+                .nickName(user.getNickname())
                 .career(user.getCareer())
                 .userRole(user.getRole())
                 .createdAt(comment.getCreatedAt())
