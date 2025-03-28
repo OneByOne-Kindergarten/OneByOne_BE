@@ -1,5 +1,6 @@
 package com.onebyone.kindergarten.domain.communityComments.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -23,8 +24,10 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/community/{postId}/comments")
+@RequestMapping("/community/{postId}/comment")
+@Tag(name = "댓글", description = "게시글의 댓글 관련 API")
 public class CommunityCommentController {
+
     private final CommunityCommentService commentService;
 
     @PostMapping
@@ -45,4 +48,5 @@ public class CommunityCommentController {
     ) {
         return new PageResponseDTO<>(commentService.getComments(postId, pageable));
     }
+
 }
