@@ -1,6 +1,8 @@
 package com.onebyone.kindergarten.global.exception;
 
 import com.onebyone.kindergarten.domain.communityPosts.exception.PostNotFoundException;
+import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotAdminReadException;
+import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotAdminWriteException;
 import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotFoundException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.KindergartenNotFoundException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException;
@@ -112,6 +114,20 @@ public class ErrorHandler {
     protected ErrorResponse handleInvalidReportTargetException(InvalidReportTargetException e) {
         log.error("InvalidReportTargetException 발생: {}", e.getMessage(), e);
         return buildError(Error.INVALID_REPORT_TARGET);
+    }
+
+    @ExceptionHandler(InquiryNotAdminReadException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    protected ErrorResponse handleInquiryNotAdminException(InquiryNotAdminReadException e) {
+        log.error("InquiryNotAdminException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INQUIRY_NOT_ADMIN_CANNOT_READ);
+    }
+
+    @ExceptionHandler(InquiryNotAdminWriteException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    protected ErrorResponse handleInquiryNotAdminWriteException(InquiryNotAdminWriteException e) {
+        log.error("InquiryNotAdminWriteException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INQUIRY_NOT_ADMIN_CANNOT_WRITE);
     }
 
     private ErrorResponse buildError(Error error) {

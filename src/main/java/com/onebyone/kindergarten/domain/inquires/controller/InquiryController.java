@@ -8,6 +8,7 @@ import com.onebyone.kindergarten.domain.inquires.service.InquiryService;
 import com.onebyone.kindergarten.global.common.PageResponseDTO;
 import com.onebyone.kindergarten.global.common.ResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/inquiry")
+@Tag(name = "문의하기", description = "문의하기 관련 API")
 public class InquiryController {
     private final InquiryService inquiryService;
 
@@ -44,7 +46,7 @@ public class InquiryController {
     @GetMapping("/my")
     @Operation(summary = "내 문의 목록 조회", description = "내가 작성한 문의 목록을 조회합니다.")
     public PageResponseDTO<InquiryResponseDTO> getMyInquiries(
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return new PageResponseDTO<>(inquiryService.getUserInquiries(userDetails.getUsername(), pageable));
@@ -53,7 +55,7 @@ public class InquiryController {
     @GetMapping("/all")
     @Operation(summary = "모든 문의 목록 조회", description = "모든 문의 목록을 조회합니다. (관리자 전용)")
     public PageResponseDTO<InquiryResponseDTO> getAllInquiries(
-            @PageableDefault(size = 10) Pageable pageable,
+            @PageableDefault Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return new PageResponseDTO<>(inquiryService.getAllInquiries(userDetails.getUsername(), pageable));
@@ -63,7 +65,7 @@ public class InquiryController {
     @Operation(summary = "상태별 문의 목록 조회", description = "상태별 문의 목록을 조회합니다. (관리자 전용)")
     public PageResponseDTO<InquiryResponseDTO> getInquiriesByStatus(
             @PathVariable InquiryStatus status,
-            @PageableDefault(size = 10) Pageable pageable,
+            @PageableDefault Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return new PageResponseDTO<>(inquiryService.getInquiriesByStatus(status, userDetails.getUsername(), pageable));
