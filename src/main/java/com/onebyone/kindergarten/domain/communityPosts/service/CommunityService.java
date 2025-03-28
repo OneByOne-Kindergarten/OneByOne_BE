@@ -27,10 +27,13 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final CommunityCategoryRepository communityCategoryRepository;
     private final UserService userService;
+
     private final CommunityPostMapper communityPostMapper;
 
+    /// 게시글 생성
     @Transactional
     public CommunityPostResponseDTO createPost(CreateCommunityPostRequestDTO request, String email) {
+
         // 사용자 조회
         User user = userService.getUserByEmail(email);
 
@@ -54,24 +57,29 @@ public class CommunityService {
                 .build();
     }
 
+    /// 게시글 목록 조회
     public Page<CommunityPostResponseDTO> getPosts(CommunitySearchDTO searchDTO, Pageable pageable) {
         return communityRepository.search(searchDTO, pageable)
                 .map(communityPostMapper::toResponse);
     }
 
+    /// 게시글 상세 조회
     @Transactional
     public CommunityPostResponseDTO getPost(Long id) {
-        CommunityPost post = communityRepository.findById(id)
-                .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
 
-        // 조회수 증가
+        // 게시글 조회 (User 정보 포함)
+        CommunityPost post = communityRepository.findByIdWithUser(id)
+                .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
+        
+        // 게시글이 존재할 때만 조회수 증가
         communityRepository.increaseViewCount(id);
         
         return communityPostMapper.toResponse(post);
     }
 
+    /// 인기 게시글 TOP 10 조회
     public List<CommunityPostResponseDTO> getTopPosts() {
-        return communityRepository.findTop10ByOrderByLikeCountDescViewCountDesc()
+        return communityRepository.findTop10WithUserOrderByLikeCountDescViewCountDesc()
                 .stream()
                 .map(communityPostMapper::toResponse)
                 .collect(Collectors.toList());
