@@ -16,66 +16,49 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CommunityLikeService {
+
     private final CommunityLikeRepository communityLikeRepository;
     private final CommunityRepository communityRepository;
     private final UserService userService;
 
-    /**
-     * 게시글 좋아요 상태 조회 및 좋아요 수 조회
-     */
+    /// 게시글 좋아요 상태 조회 및 좋아요 수 조회
     public CommunityLikeResponseDTO getLikeInfo(Long postId, String email) {
+
+        // 사용자 조회
         User user = userService.getUserByEmail(email);
-        boolean isLiked = communityLikeRepository.existsByUserAndPost(user,
-                communityRepository.getReferenceById(postId));
-        int likeCount = communityLikeRepository.countByPostId(postId);
         
-        return new CommunityLikeResponseDTO(isLiked, likeCount);
+        // 한 번의 쿼리로 좋아요 상태와 개수를 함께 조회
+        return communityLikeRepository.findLikeInfo(postId, user)
+                .orElse(new CommunityLikeResponseDTO(false, 0));
     }
 
-    /**
-     * 게시글 좋아요/좋아요 취소 토글
-     */
+    /// 게시글 좋아요/좋아요 취소 토글
     @Transactional
     public CommunityLikeResponseDTO toggleLike(Long postId, String email) {
-        User user = userService.getUserByEmail(email);
-        // getReferenceById는 실제 DB 조회 없이 프록시 객체만 생성 (성능 향상)
-        CommunityPost post = communityRepository.getReferenceById(postId);
 
-        // 좋아요를 눌렀는지 확인
-        return communityLikeRepository.findByUserAndPost(user, post)
+        // 사용자 조회
+        User user = userService.getUserByEmail(email);
+
+        // 게시글 존재 여부와 좋아요 여부를 한 번에 확인
+        return communityLikeRepository.findByUserAndPostId(user, postId)
                 .map(like -> {
                     // 좋아요 취소
                     communityLikeRepository.delete(like);
-                    // 단일 필드만 업데이트하는 쿼리 사용 (성능 향상)
                     communityRepository.updateLikeCount(postId, -1);
-                    return new CommunityLikeResponseDTO(false, communityLikeRepository.countByPostId(postId));
+                    return new CommunityLikeResponseDTO(false, like.getPost().getLikeCount() - 1);
                 })
                 .orElseGet(() -> {
-                    // 좋아요 추가
-                    communityLikeRepository.save(CommunityLike.builder()
+                    // 게시글 존재 여부 확인 및 좋아요 추가
+                    CommunityPost post = communityRepository.findById(postId)
+                            .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
+                    
+                    CommunityLike newLike = CommunityLike.builder()
                             .user(user)
                             .post(post)
-                            .build());
+                            .build();
+                    communityLikeRepository.save(newLike);
                     communityRepository.updateLikeCount(postId, 1);
-                    return new CommunityLikeResponseDTO(true, communityLikeRepository.countByPostId(postId));
+                    return new CommunityLikeResponseDTO(true, post.getLikeCount() + 1);
                 });
-    }
-
-    /**
-     * 사용자가 게시글에 좋아요를 눌렀는지 확인
-     */
-    public boolean isLiked(Long postId, String email) {
-        User user = userService.getUserByEmail(email);
-        CommunityPost post = communityRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
-
-        return communityLikeRepository.existsByUserAndPost(user, post);
-    }
-    
-    /**
-     * 게시글의 좋아요 수 조회
-     */
-    public int getLikeCount(Long postId) {
-        return communityLikeRepository.countByPostId(postId);
     }
 } 

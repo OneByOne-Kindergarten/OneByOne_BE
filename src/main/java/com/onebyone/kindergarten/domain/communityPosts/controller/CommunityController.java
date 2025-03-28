@@ -10,6 +10,7 @@ import com.onebyone.kindergarten.domain.communityPosts.service.CommunityLikeServ
 import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityLikeResponseDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/community")
+@Tag(name = "커뮤니티 게시글", description = "커뮤니티 게시글 관련 API")
 public class CommunityController {
     private final CommunityService communityService;
     private final CommunityLikeService communityLikeService;
@@ -41,7 +43,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 게시글 목록 조회", description = "게시글 목록을 조회하고 검색합니다.")
     public PageResponseDTO<CommunityPostResponseDTO> getPosts(
             CommunitySearchDTO searchDTO,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return new PageResponseDTO<>(communityService.getPosts(searchDTO, pageable));
     }

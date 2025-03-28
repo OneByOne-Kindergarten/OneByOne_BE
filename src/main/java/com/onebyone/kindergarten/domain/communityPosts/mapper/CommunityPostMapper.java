@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommunityPostMapper {
     
-    // 엔티티 변환
+    /// 엔티티 변환
     public CommunityPost toEntity(CreateCommunityPostRequestDTO request, User user, CommunityCategory category) {
         return CommunityPost.builder()
                 .title(request.getTitle())
@@ -21,7 +21,7 @@ public class CommunityPostMapper {
                 .build();
     }
 
-    // 응답 DTO 변환
+    /// 응답 DTO 변환
     public CommunityPostResponseDTO toResponse(CommunityPost post) {
         return CommunityPostResponseDTO.builder()
                 .id(post.getId())
