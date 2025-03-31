@@ -9,23 +9,36 @@ import java.time.LocalDateTime;
 
 @Getter
 public class ReportResponseDTO {
-    private Long id;
-    private String reporterNickname;
-    private Long targetId;
-    private ReportTargetType targetType;
-    private String reason;
-    private ReportStatus status;
-    private LocalDateTime createdAt;
+    private final Long id;
+    private final String reporterNickname;
+    private final Long targetId;
+    private final ReportTargetType targetType;
+    private final String reason;
+    private final ReportStatus status;
+    private final LocalDateTime createdAt;
+
+    // JPQL 위한 생성자 추가
+    public ReportResponseDTO(Long id, String reporterNickname, Long targetId,
+                             ReportTargetType targetType, String reason,
+                             ReportStatus status, LocalDateTime createdAt) {
+        this.id = id;
+        this.reporterNickname = reporterNickname;
+        this.targetId = targetId;
+        this.targetType = targetType;
+        this.reason = reason;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
 
     public static ReportResponseDTO fromEntity(Report report) {
-        ReportResponseDTO dto = new ReportResponseDTO();
-        dto.id = report.getId();
-        dto.reporterNickname = report.getReporter().getNickname();
-        dto.targetId = report.getTargetId();
-        dto.targetType = report.getTargetType();
-        dto.reason = report.getReason();
-        dto.status = report.getStatus();
-        dto.createdAt = report.getCreatedAt();
-        return dto;
+        return new ReportResponseDTO(
+                report.getId(),
+                report.getReporter().getNickname(),
+                report.getTargetId(),
+                report.getTargetType(),
+                report.getReason(),
+                report.getStatus(),
+                report.getCreatedAt()
+        );
     }
 } 
