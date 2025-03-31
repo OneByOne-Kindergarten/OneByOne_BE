@@ -39,58 +39,69 @@ public class KindergartenWorkHistoryService {
             currentCareerMonths - (int)monthsBetween;
     }
 
+    /// 유치원 근무 이력 추가
     @Transactional
     public KindergartenWorkHistoryResponse addCertification(String email, KindergartenWorkHistoryRequest request) {
+
+        // 유치원 이름으로 유치원 조회
         Kindergarten kindergarten = kindergartenRepository.findByName(request.getKindergartenName())
                 .orElseThrow(KindergartenNotFoundException::new);
 
+        // 사용자 조회
         User user = userService.getUserByEmail(email);
-        
+
+        // 유치원 경력 개월 수 업데이트
         int newCareerMonths = calculateCareerMonths(
             user, 
             request.getStartDate(),
             request.getEndDate(), 
             true
         );
-
-        /// 경력 개월 수 업데이트
         userService.updateCareer(user, String.valueOf(newCareerMonths));
 
+        // 유치원 근무 이력 저장
         KindergartenWorkHistory workHistory = request.toEntity(user, kindergarten);
-        return KindergartenWorkHistoryResponse.from(workHistoryRepository.save(workHistory));
+        workHistoryRepository.save(workHistory);
+        
+        return KindergartenWorkHistoryResponse.from(workHistory);
     }
 
+    /// 유치원 근무 이력 조회
     public List<KindergartenWorkHistoryResponse> getCertification(String email) {
 
+        // 사용자 조회
         User user = userService.getUserByEmail(email);
 
-        return workHistoryRepository.findByUserOrderByStartDateDesc(user)
-                .stream()
-                .map(KindergartenWorkHistoryResponse::from)
-                .collect(Collectors.toList());
+        // 유치원 근무 이력 조회
+        return workHistoryRepository.findDtosByUser(user);
     }
 
+    /// 유치원 근무 이력 삭제
     @Transactional
     public void deleteCertification(String email, Long historyId) {
-        KindergartenWorkHistory workHistory = workHistoryRepository.findById(historyId)
+
+        // 유치원 근무 이력 조회
+        KindergartenWorkHistory workHistory = workHistoryRepository.findByIdWithKindergarten(historyId)
                 .orElseThrow(WorkHistoryNotFoundException::new);
 
+        // 사용자 조회
         User user = userService.getUserByEmail(email);
-        
+
+        // 유치원 근무 이력 소유자 확인
         if (!workHistory.getUser().equals(user)) {
             throw new UnauthorizedDeleteException();
         }
 
+        // 유치원 경력 개월 수 업데이트
         int newCareerMonths = calculateCareerMonths(
             user, 
             workHistory.getStartDate(), 
             workHistory.getEndDate(), 
             false
         );
-
-        /// 경력 개월 수 업데이트
         userService.updateCareer(user, String.valueOf(newCareerMonths));
 
+        // 유치원 근무 이력 삭제
         workHistoryRepository.delete(workHistory);
     }
 } 
