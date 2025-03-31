@@ -1,6 +1,7 @@
 package com.onebyone.kindergarten.domain.user.service;
 
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,10 @@ public class CustomUserDetailService implements UserDetailsService{
         return org.springframework.security.core.userdetails.User.builder()
                 .username(email)
                 .password(user.getPassword())
-                .roles("USER")
+                /// TODO : 주훈님 확인 부탁드려요!! 이렇게 써도 되는거죠?
+                .roles(
+                        user.getRole() == UserRole.ADMIN ? "ADMIN" : "USER"
+                )
                 .build();
     }
 }

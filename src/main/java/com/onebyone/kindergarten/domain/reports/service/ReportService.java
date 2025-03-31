@@ -13,101 +13,125 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import com.onebyone.kindergarten.domain.reports.dto.request.ReportSearchDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.onebyone.kindergarten.domain.reports.exception.ReportNotFoundException;
-import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException; 
+import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class ReportService {
-   private final ReportRepository reportRepository;
-   private final UserService userService;
-   private final CommunityRepository communityRepository;
-   private final CommunityCommentRepository commentRepository;
 
-   public ReportService(ReportRepository reportRepository, 
-                       UserService userService,
-                       CommunityRepository communityRepository,
-                       CommunityCommentRepository commentRepository) {
-      this.reportRepository = reportRepository;
-      this.userService = userService;
-      this.communityRepository = communityRepository;
-      this.commentRepository = commentRepository;
-   }
+    private final ReportRepository reportRepository;
+    private final UserService userService;
+    private final CommunityRepository communityRepository;
+    private final CommunityCommentRepository commentRepository;
 
-   /// 신고 생성
-   @Transactional
-   public ReportResponseDTO createReport(CreateReportRequestDTO dto, String email) {
-      User reporter = userService.getUserByEmail(email);
-      
-      Report report = Report.builder()
-              .reporter(reporter)
-              .targetId(dto.getTargetId())
-              .targetType(dto.getTargetType())
-              .reason(dto.getReason())
-              .status(ReportStatus.PENDING)
-              .build();
+    /// 신고 생성 (사용자)
+    @Transactional
+    public ReportResponseDTO createReport(CreateReportRequestDTO dto, String email) {
 
-      Report savedReport = reportRepository.save(report);
-      return ReportResponseDTO.fromEntity(savedReport);
-   }
+        // 사용자 조회
+        User reporter = userService.getUserByEmail(email);
 
-   /// 내 신고 목록 조회
-   public Page<ReportResponseDTO> getMyReports(String email, Pageable pageable) {
-      User user = userService.getUserByEmail(email);
-      return reportRepository.findByReporter(user, pageable)
-              .map(ReportResponseDTO::fromEntity);
-   }
+        // 신고 대상 존재 여부 확인을 위한 메서드 추가
+        validateReportTarget(dto.getTargetType(), dto.getTargetId());
 
-   /// 신고 처리
-   @Transactional
-   public ReportResponseDTO processReport(Long reportId, ReportStatus status) {
-      Report report = reportRepository.findById(reportId)
-              .orElseThrow(() -> new ReportNotFoundException("존재하지 않는 신고입니다."));
+        // 신고 저장
+        Report report = Report.builder()
+                .reporter(reporter)
+                .targetId(dto.getTargetId())
+                .targetType(dto.getTargetType())
+                .reason(dto.getReason())
+                .status(ReportStatus.PENDING)
+                .build();
+        reportRepository.save(report);
+        return ReportResponseDTO.fromEntity(report);
+    }
 
-      /// 신고 상태 업데이트
-      report.updateStatus(status);
-      _updateTargetStatus(report.getTargetType(), report.getTargetId(), status);
+    /// 내 신고 목록 조회 (사용자)
+    public Page<ReportResponseDTO> getMyReports(String email, Pageable pageable) {
 
-      return ReportResponseDTO.fromEntity(report);
-   }
+        // 사용자 조회
+        User user = userService.getUserByEmail(email);
 
-   /// 전체 신고 목록 조회
-   public Page<ReportResponseDTO> getAllReports(ReportSearchDTO searchDTO, Pageable pageable) {
-      return reportRepository.findAllByCondition(
-              searchDTO.getStatus(),
-              searchDTO.getTargetType(),
-              pageable
-      ).map(ReportResponseDTO::fromEntity);
-   }
+        // 신고 목록 조회
+        return reportRepository.findDtosByReporter(user, pageable);
+    }
 
-   /// 신고 상세 조회
-   public ReportResponseDTO getReportDetail(Long reportId) {
-      Report report = reportRepository.findById(reportId)
-              .orElseThrow(() -> new ReportNotFoundException("존재하지 않는 신고입니다."));
-      return ReportResponseDTO.fromEntity(report);
-   }
+    /// 신고 처리 (관리자)
+    @Transactional
+    public ReportResponseDTO processReport(Long reportId, ReportStatus status) {
 
-   /// 신고 대상 상태 업데이트
-   private void _updateTargetStatus(ReportTargetType targetType, Long targetId, ReportStatus status) {
-      switch (targetType) {
-         case POST -> {
-            CommunityPost post = communityRepository.findById(targetId)
+        // 신고 존재 여부 확인
+        Report report = reportRepository.findByIdWithReporter(reportId)
+                .orElseThrow(() -> new ReportNotFoundException("존재하지 않는 신고입니다."));
+
+        // 신고 상태 업데이트
+        report.updateStatus(status);
+
+        // 신고 대상 상태 업데이트
+        CompletableFuture.runAsync(() ->
+                _updateTargetStatus(report.getTargetType(), report.getTargetId(), status)
+        );
+
+        return ReportResponseDTO.fromEntity(report);
+    }
+
+    /// 전체 신고 목록 조회 (관리자)
+    public Page<ReportResponseDTO> getAllReports(ReportSearchDTO searchDTO, Pageable pageable) {
+
+        // 신고 목록 조회
+        return reportRepository.findAllDtosByCondition(
+                searchDTO.getStatus(),
+                searchDTO.getTargetType(),
+                pageable
+        );
+    }
+
+    /// 신고 상세 조회 (관리자)
+    public ReportResponseDTO getReportDetail(Long reportId) {
+
+        // 신고 상세 조회
+        return reportRepository.findByIdWithReporter(reportId)
+                .map(ReportResponseDTO::fromEntity)
+                .orElseThrow(() -> new ReportNotFoundException("존재하지 않는 신고입니다."));
+    }
+
+    /// 신고 대상 상태 업데이트
+    private void _updateTargetStatus(ReportTargetType targetType, Long targetId, ReportStatus status) {
+        switch (targetType) {
+            case POST -> {
+                CommunityPost post = communityRepository.findById(targetId)
+                        .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 게시글입니다."));
+                post.updateStatus(status);
+            }
+            case COMMENT -> {
+                CommunityComment comment = commentRepository.findById(targetId)
+                        .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 댓글입니다."));
+                comment.updateStatus(status);
+            }
+            case REVIEW -> {
+                throw new InvalidReportTargetException("리뷰 처리는 아직 구현되지 않았습니다.");
+            }
+            default -> throw new InvalidReportTargetException("지원하지 않는 신고 대상 타입입니다.");
+        }
+    }
+
+    /// 신고 대상 검증
+    private void validateReportTarget(ReportTargetType targetType, Long targetId) {
+        switch (targetType) {
+            case POST -> communityRepository.findById(targetId)
                     .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 게시글입니다."));
-            post.updateStatus(status);
-         }
-         case COMMENT -> {
-            CommunityComment comment = commentRepository.findById(targetId)
+            case COMMENT -> commentRepository.findById(targetId)
                     .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 댓글입니다."));
-            comment.updateStatus(status);
-         }
-         case REVIEW -> {
-            throw new InvalidReportTargetException("리뷰 처리는 아직 구현되지 않았습니다.");
-         }
-         default -> throw new InvalidReportTargetException("지원하지 않는 신고 대상 타입입니다.");
-      }
-   }
+            case REVIEW -> throw new InvalidReportTargetException("리뷰 처리는 아직 구현되지 않았습니다.");
+        }
+    }
 }
