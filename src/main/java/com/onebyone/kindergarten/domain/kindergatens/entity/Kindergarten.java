@@ -1,5 +1,9 @@
 package com.onebyone.kindergarten.domain.kindergatens.entity;
 
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReviewAggregate.entity.KindergartenInternshipReviewAggregate;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
+import com.onebyone.kindergarten.domain.kindergartenWorkReviewAggregate.entity.KindergartenWorkReviewAggregate;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -75,4 +80,18 @@ public class Kindergarten extends BaseEntity {
     /// TODO : 이후 위도+경도 추가 마이그레이션 작업 필요
     private Double latitude; // 위도
     private Double longitude; // 경도
+
+    @OneToMany(mappedBy = "kindergarten", fetch = FetchType.LAZY)
+    private List<KindergartenWorkReview> workReviews;
+
+    @OneToMany(mappedBy = "kindergarten", fetch = FetchType.LAZY)
+    private List<KindergartenInternshipReview> internshipReviews;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kindergarten_intership_review_aggregate_id")
+    private KindergartenInternshipReviewAggregate kindergartenInternshipReviewAggregate;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kindergarten_work_review_aggregate_id")
+    private KindergartenWorkReviewAggregate kindergartenWorkReviewAggregate;
 }
