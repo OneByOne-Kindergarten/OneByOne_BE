@@ -6,66 +6,67 @@ import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenRepo
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.domain.userFavoriteKindergartens.dto.response.FavoriteKindergartenResponseDTO;
+import com.onebyone.kindergarten.domain.userFavoriteKindergartens.dto.response.FavoriteToggleResponseDTO;
 import com.onebyone.kindergarten.domain.userFavoriteKindergartens.entity.UserFavoriteKindergarten;
 import com.onebyone.kindergarten.domain.userFavoriteKindergartens.repository.UserFavoriteKindergartenRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class UserFavoriteKindergartenService {
+
     private final UserFavoriteKindergartenRepository favoriteRepository;
     private final UserService userService;
     private final KindergartenRepository kindergartenRepository;
 
-    public UserFavoriteKindergartenService(
-            UserFavoriteKindergartenRepository favoriteRepository,
-            UserService userService,
-            KindergartenRepository kindergartenRepository) {
-        this.favoriteRepository = favoriteRepository;
-        this.userService = userService;
-        this.kindergartenRepository = kindergartenRepository;
-    }
-
+    /// 유치원 즐겨찾기 토글
     @Transactional
-    public FavoriteKindergartenResponseDTO toggleFavorite(String email, Long kindergartenId) {
+    public FavoriteToggleResponseDTO toggleFavorite(String email, Long kindergartenId) {
+
+        // 사용자 조회
         User user = userService.getUserByEmail(email);
-        Kindergarten kindergarten = kindergartenRepository.findById(kindergartenId)
-                .orElseThrow(KindergartenNotFoundException::new);
-
-        Optional<UserFavoriteKindergarten> existingFavorite = 
-                favoriteRepository.findByUserAndKindergartenWithFetch(user, kindergarten);
-
-        if (existingFavorite.isPresent()) {
-            favoriteRepository.delete(existingFavorite.get());
-            return null;
+        
+        // 즐겨찾기 존재 여부 확인 및 삭제 시도
+        boolean existed = favoriteRepository.existsByUserAndKindergartenId(user, kindergartenId);
+        
+        if (existed) {
+            // 존재 - 삭제
+            favoriteRepository.deleteByUserAndKindergartenId(user, kindergartenId);
+            return new FavoriteToggleResponseDTO(false);
+        } else {
+            // 존재 하지 않음 - 추가
+            UserFavoriteKindergarten favorite = UserFavoriteKindergarten.builder()
+                    .user(user)
+                    .kindergarten(Kindergarten.builder().id(kindergartenId).build())
+                    .build();
+            favoriteRepository.save(favorite);
+            return new FavoriteToggleResponseDTO(true);
         }
-
-        UserFavoriteKindergarten favorite = UserFavoriteKindergarten.builder()
-                .user(user)
-                .kindergarten(kindergarten)
-                .build();
-
-        return FavoriteKindergartenResponseDTO.fromEntity(favoriteRepository.save(favorite));
     }
 
+    /// 즐겨찾기 목록 조회
     public List<FavoriteKindergartenResponseDTO> getMyFavorites(String email) {
+
+        // 사용자 조회
         User user = userService.getUserByEmail(email);
-        return favoriteRepository.findAllByUserWithKindergarten(user)
-                .stream()
-                .map(FavoriteKindergartenResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+
+        // 즐겨찾기 목록 조회
+        return favoriteRepository.findDtosByUser(user);
     }
 
+    /// 즐겨찾기 상태 확인
     public boolean isFavorite(String email, Long kindergartenId) {
-        User user = userService.getUserByEmail(email);
-        Kindergarten kindergarten = kindergartenRepository.findById(kindergartenId)
-                .orElseThrow(KindergartenNotFoundException::new);
 
-        return favoriteRepository.existsByUserAndKindergarten(user, kindergarten);
+        // 사용자 조회
+        User user = userService.getUserByEmail(email);
+
+        // 유치원 존재 여부 확인
+        return favoriteRepository.existsByUserAndKindergartenId(user, kindergartenId);
     }
 }

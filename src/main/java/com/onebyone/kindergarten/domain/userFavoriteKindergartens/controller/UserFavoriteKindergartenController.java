@@ -1,5 +1,6 @@
 package com.onebyone.kindergarten.domain.userFavoriteKindergartens.controller;
 
+import com.onebyone.kindergarten.domain.userFavoriteKindergartens.dto.response.FavoriteToggleResponseDTO;
 import com.onebyone.kindergarten.global.common.ResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,14 +22,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/favorite-kindergartens")
-@Tag(name = "UserFavoriteKindergarten", description = "유치원 즐겨찾기 API")
+@Tag(name = "유치원 즐겨찾기", description = "유치원 즐겨찾기 API")
 @RequiredArgsConstructor
 public class UserFavoriteKindergartenController {
     private final UserFavoriteKindergartenService favoriteService;
 
     @PostMapping
     @Operation(summary = "유치원 즐겨찾기 토글", description = "유치원을 즐겨찾기에 추가하거나 제거합니다.")
-    public ResponseDto<FavoriteKindergartenResponseDTO> toggleFavorite(
+    public ResponseDto<FavoriteToggleResponseDTO> toggleFavorite(
             @Valid @RequestBody ToggleFavoriteRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
