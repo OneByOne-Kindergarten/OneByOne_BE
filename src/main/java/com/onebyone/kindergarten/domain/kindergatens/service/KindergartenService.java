@@ -2,7 +2,11 @@ package com.onebyone.kindergarten.domain.kindergatens.service;
 
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
+import com.onebyone.kindergarten.domain.kindergatens.entity.KindergartenInternshipReviewAggregate;
+import com.onebyone.kindergarten.domain.kindergatens.entity.KindergartenWorkReviewAggregate;
+import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenInternshipReviewAggregateRepository;
 import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenRepository;
+import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenWorkReviewAggregateRepository;
 import com.onebyone.kindergarten.global.exception.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,14 +16,16 @@ import org.springframework.data.domain.Pageable;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSearchDTO;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenResponseDTO;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
 public class KindergartenService {
-
     private final KindergartenRepository kindergartenRepository;
+    private final KindergartenInternshipReviewAggregateRepository kindergartenInternshipReviewAggregateRepository;
+    private final KindergartenWorkReviewAggregateRepository kindergartenWorkReviewAggregateRepository;
 
     /// 유치원 정보 저장
     @Transactional
@@ -39,6 +45,28 @@ public class KindergartenService {
                             () -> {
                                 Kindergarten newKindergarten = convertToEntity(dto);
                                 updatedKindergartens.add(kindergartenRepository.save(newKindergarten));
+
+                                KindergartenInternshipReviewAggregate kindergartenInternshipReviewAggregate = KindergartenInternshipReviewAggregate.builder()
+                                        .instructionTeacherScoreAggregate(BigDecimal.valueOf(0.0))
+                                        .workEnvironmentScoreAggregate(BigDecimal.valueOf(0.0))
+                                        .learningSupportScoreAggregate(BigDecimal.valueOf(0.0))
+                                        .kindergarten(newKindergarten)
+                                        .build();
+
+                                kindergartenInternshipReviewAggregateRepository.save(kindergartenInternshipReviewAggregate);
+                                newKindergarten.updateInternshipReviewAggregate(kindergartenInternshipReviewAggregate);
+
+                                KindergartenWorkReviewAggregate kindergartenWorkReviewAggregate = KindergartenWorkReviewAggregate.builder()
+                                        .benefitAndSalaryScoreAggregate(BigDecimal.valueOf(0.0))
+                                        .workLiftBalanceScoreAggregate(BigDecimal.valueOf(0.0))
+                                        .customerScoreAggregate(BigDecimal.valueOf(0.0))
+                                        .managerScoreAggregate(BigDecimal.valueOf(0.0))
+                                        .workEnvironmentScoreAggregate(BigDecimal.valueOf(0.0))
+                                        .kindergarten(newKindergarten)
+                                        .build();
+
+                                kindergartenWorkReviewAggregateRepository.save(kindergartenWorkReviewAggregate);
+                                newKindergarten.updateWorkReviewAggregate(kindergartenWorkReviewAggregate);
                             }
                     );
         }

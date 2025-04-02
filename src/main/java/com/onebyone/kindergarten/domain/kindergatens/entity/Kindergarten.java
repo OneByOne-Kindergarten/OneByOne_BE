@@ -1,9 +1,7 @@
 package com.onebyone.kindergarten.domain.kindergatens.entity;
 
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
-import com.onebyone.kindergarten.domain.kindergartenInternshipReviewAggregate.entity.KindergartenInternshipReviewAggregate;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
-import com.onebyone.kindergarten.domain.kindergartenWorkReviewAggregate.entity.KindergartenWorkReviewAggregate;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -89,7 +87,7 @@ public class Kindergarten extends BaseEntity {
     private List<KindergartenInternshipReview> internshipReviews;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "kindergarten_intership_review_aggregate_id")
+    @JoinColumn(name = "kindergarten_internship_review_aggregate_id")
     private KindergartenInternshipReviewAggregate kindergartenInternshipReviewAggregate;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -115,5 +113,13 @@ public class Kindergarten extends BaseEntity {
         this.specialPupilCount = kindergartenDTO.getSpecialPupilCount();
         this.latitude = kindergartenDTO.getLatitude();
         this.longitude = kindergartenDTO.getLongitude();
+    }
+
+    public void updateInternshipReviewAggregate(KindergartenInternshipReviewAggregate kindergartenInternshipReviewAggregate ) {
+        this.kindergartenInternshipReviewAggregate = kindergartenInternshipReviewAggregate;
+    }
+
+    public void updateWorkReviewAggregate(KindergartenWorkReviewAggregate kindergartenWorkReviewAggregate) {
+        this.kindergartenWorkReviewAggregate = kindergartenWorkReviewAggregate;
     }
 }
