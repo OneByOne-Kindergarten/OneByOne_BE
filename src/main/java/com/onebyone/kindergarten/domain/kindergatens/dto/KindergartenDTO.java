@@ -46,8 +46,10 @@ public class KindergartenDTO {
 
     @JsonProperty("specialPupilCount")
     private Integer specialPupilCount;
-    
+
+    @JsonProperty("latitude")
     private Double latitude;
 
+    @JsonProperty("longitude")
     private Double longitude;
 }

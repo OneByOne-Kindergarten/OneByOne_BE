@@ -4,6 +4,7 @@ import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.Kind
 import com.onebyone.kindergarten.domain.kindergartenInternshipReviewAggregate.entity.KindergartenInternshipReviewAggregate;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
 import com.onebyone.kindergarten.domain.kindergartenWorkReviewAggregate.entity.KindergartenWorkReviewAggregate;
+import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -94,4 +95,25 @@ public class Kindergarten extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "kindergarten_work_review_aggregate_id")
     private KindergartenWorkReviewAggregate kindergartenWorkReviewAggregate;
+
+    /// 유치원 정보 업데이트
+    public void update(KindergartenDTO kindergartenDTO) {
+        this.name = kindergartenDTO.getName();
+        this.establishment = kindergartenDTO.getEstablishment();
+        this.establishmentDate = kindergartenDTO.getEstablishmentDate();
+        this.openDate = kindergartenDTO.getOpenDate();
+        this.address = kindergartenDTO.getAddress();
+        this.homepage = kindergartenDTO.getHomepage();
+        this.phoneNumber = kindergartenDTO.getPhoneNumber();
+        this.classCount3 = kindergartenDTO.getClassCount3();
+        this.classCount4 = kindergartenDTO.getClassCount4();
+        this.classCount5 = kindergartenDTO.getClassCount5();
+        this.pupilCount3 = kindergartenDTO.getPupilCount3();
+        this.pupilCount4 = kindergartenDTO.getPupilCount4();
+        this.pupilCount5 = kindergartenDTO.getPupilCount5();
+        this.mixPupilCount = kindergartenDTO.getMixPupilCount();
+        this.specialPupilCount = kindergartenDTO.getSpecialPupilCount();
+        this.latitude = kindergartenDTO.getLatitude();
+        this.longitude = kindergartenDTO.getLongitude();
+    }
 }

@@ -29,4 +29,8 @@ public interface KindergartenRepository extends JpaRepository<Kindergarten, Long
 
     /// 유치원 이름으로 검색
     Optional<Kindergarten> findByName(String name);
+
+    /// 유치원 이름과 주소로 검색
+    @Query("SELECT k FROM Kindergarten k WHERE k.name = :name AND k.address = :address")
+    Optional<Kindergarten> findByNameAndAddress(@Param("name") String name, @Param("address") String address);
 }
