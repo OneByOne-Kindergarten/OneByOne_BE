@@ -13,7 +13,6 @@ import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSearchDTO;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenResponseDTO;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 
 @Service
@@ -43,9 +42,32 @@ public class KindergartenService {
                             }
                     );
         }
-
         return updatedKindergartens;
     }
+
+    /// 유치원 검색
+    public Page<KindergartenResponseDTO> searchKindergartens(KindergartenSearchDTO searchDTO, Pageable pageable) {
+        return kindergartenRepository.findBySearchCriteria(searchDTO, pageable)
+                .map(KindergartenResponseDTO::from);
+    }
+
+    /// 유치원 상세 조회
+    public KindergartenResponseDTO findById(Long id) {
+        Kindergarten kindergarten = kindergartenRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("유치원을 찾을 수 없습니다. ID: " + id));
+        return KindergartenResponseDTO.from(kindergarten);
+    }
+
+
+    /// 주변 유치원 조회
+    public List<KindergartenResponseDTO> getNearbyKindergarten(
+            double latitude,
+            double longitude,
+            double radiusKm
+    ) {
+        return kindergartenRepository.findNearbyKindergartens(latitude, longitude, radiusKm);
+    }
+
 
     /// DTO -> Entity 변환
     private Kindergarten convertToEntity(KindergartenDTO dto) {
@@ -68,19 +90,6 @@ public class KindergartenService {
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
                 .build();
-    }
-
-    /// 유치원 검색
-    public Page<KindergartenResponseDTO> searchKindergartens(KindergartenSearchDTO searchDTO, Pageable pageable) {
-        return kindergartenRepository.findBySearchCriteria(searchDTO, pageable)
-                .map(KindergartenResponseDTO::from);
-    }
-
-    /// 유치원 상세 조회
-    public KindergartenResponseDTO findById(Long id) {
-        Kindergarten kindergarten = kindergartenRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("유치원을 찾을 수 없습니다. ID: " + id));
-        return KindergartenResponseDTO.from(kindergarten);
     }
 
 }
