@@ -14,6 +14,7 @@ import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenResponseDTO
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,26 @@ public class KindergartenService {
     /// 유치원 정보 저장
     @Transactional
     public List<Kindergarten> saveAll(List<KindergartenDTO> kindergartenDTOs) {
-        List<Kindergarten> kindergartens = kindergartenDTOs.stream().map(this::convertToEntity).collect(Collectors.toList());
-        return kindergartenRepository.saveAll(kindergartens);
+        List<Kindergarten> updatedKindergartens = new ArrayList<>();
+
+        for (KindergartenDTO dto : kindergartenDTOs) {
+            // 유치원 이름과 주소로 검색
+            kindergartenRepository.findByNameAndAddress(dto.getName(), dto.getAddress())
+                    .ifPresentOrElse(
+                            // 존재하는 경우 - 정보 업데이트
+                            existingKindergarten -> {
+                                existingKindergarten.update(dto);
+                                updatedKindergartens.add(existingKindergarten);
+                            },
+                            // 존재하지 않는 경우 - 새로 생성
+                            () -> {
+                                Kindergarten newKindergarten = convertToEntity(dto);
+                                updatedKindergartens.add(kindergartenRepository.save(newKindergarten));
+                            }
+                    );
+        }
+
+        return updatedKindergartens;
     }
 
     /// DTO -> Entity 변환
