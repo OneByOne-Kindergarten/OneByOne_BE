@@ -39,7 +39,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/community/**",
                                 "/swagger-resources/**",
-                                "/webjars/**")
+                                "/webjars/**",
+                                "/notice/**")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 전용 API
                         .anyRequest().authenticated() // 나머지 요청은 인증된 사용자만 접근 가능

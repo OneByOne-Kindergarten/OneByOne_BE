@@ -25,7 +25,8 @@ public enum Error {
     UNAUTHORIZED_DELETE("삭제 권한이 없습니다."),
     REPORT_NOT_FOUND("신고를 찾을 수 없습니다."),
     INVALID_REPORT_STATUS("잘못된 신고 상태입니다."),
-    INVALID_REPORT_TARGET("존재하지 않는 신고 대상입니다.");
+    INVALID_REPORT_TARGET("존재하지 않는 신고 대상입니다."),
+    NOTICE_NOT_FOUND("존재하지 않는 공지사항입니다.");
 
     private final String message;
 

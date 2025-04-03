@@ -7,6 +7,7 @@ import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotFoundExcept
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.KindergartenNotFoundException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.WorkHistoryNotFoundException;
+import com.onebyone.kindergarten.domain.notice.exception.NoticeNotFoundException;
 import com.onebyone.kindergarten.domain.reports.exception.InvalidReportStatusException;
 import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException;
 import com.onebyone.kindergarten.domain.reports.exception.ReportNotFoundException;
@@ -128,6 +129,13 @@ public class ErrorHandler {
     protected ErrorResponse handleInquiryNotAdminWriteException(InquiryNotAdminWriteException e) {
         log.error("InquiryNotAdminWriteException 발생: {}", e.getMessage(), e);
         return buildError(Error.INQUIRY_NOT_ADMIN_CANNOT_WRITE);
+    }
+
+    @ExceptionHandler(NoticeNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse handleEntityNotFoundException(NoticeNotFoundException e) {
+        log.error("NoticeNotFoundException 발생: {}", e.getMessage(), e);
+        return buildError(Error.NOTICE_NOT_FOUND);
     }
 
     private ErrorResponse buildError(Error error) {
