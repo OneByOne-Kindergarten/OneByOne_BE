@@ -1,13 +1,20 @@
 package com.onebyone.kindergarten.domain.kindergartenWorkReview.entity;
 
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.ModifyWorkReviewRequestDTO;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.entity.User;
-import com.onebyone.kindergarten.global.enums.ReportStatus;
+import com.onebyone.kindergarten.global.enums.ReviewStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity(name = "kindergarten_work_review")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 public class KindergartenWorkReview extends BaseEntity {
     @Id
@@ -23,7 +30,7 @@ public class KindergartenWorkReview extends BaseEntity {
     private Kindergarten kindergarten; // 유치원
 
     @Enumerated(EnumType.STRING)
-    private ReportStatus status = ReportStatus.YET; // 게시글 상태 - 차단 여부 (PENDING, PROCESSED, REJECTED)
+    private ReviewStatus status = ReviewStatus.ACCEPTED;
 
     @Column(name = "work_year", nullable = false)
     private Integer workYear; // 근무/실습 년수
@@ -66,4 +73,26 @@ public class KindergartenWorkReview extends BaseEntity {
 
     @Column(name = "share_count")
     private Integer shareCount = 0; // 공유 수
+
+    public void updateReview(ModifyWorkReviewRequestDTO request) {
+        this.oneLineComment = request.getOneLineComment();
+        this.benefitAndSalaryComment = request.getBenefitAndSalaryComment();
+        this.benefitAndSalaryScore = request.getBenefitAndSalaryScore();
+        this.workLifeBalanceComment = request.getWorkLifeBalanceComment();
+        this.workLifeBalanceScore = request.getWorkLifeBalanceScore();
+        this.workEnvironmentComment = request.getWorkEnvironmentComment();
+        this.workEnvironmentScore = request.getWorkEnvironmentScore();
+        this.managerComment = request.getManagerComment();
+        this.managerScore = request.getManagerScore();
+        this.customerComment = request.getCustomerComment();
+        this.customerScore = request.getCustomerScore();
+    }
+
+    public void minusLikeCount() {
+        this.likeCount--;
+    }
+
+    public void plusLikeCount() {
+        this.likeCount++;
+    }
 }

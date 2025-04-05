@@ -4,10 +4,14 @@ import com.onebyone.kindergarten.domain.communityPosts.exception.PostNotFoundExc
 import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotAdminReadException;
 import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotAdminWriteException;
 import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotFoundException;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.exception.AlreadyExistInternshipReviewException;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.exception.NotFoundInternshipReviewException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.KindergartenNotFoundException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.WorkHistoryNotFoundException;
 import com.onebyone.kindergarten.domain.notice.exception.NoticeNotFoundException;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.exception.AlreadyExistWorkReviewException;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.exception.NotFoundWorkReviewException;
 import com.onebyone.kindergarten.domain.reports.exception.InvalidReportStatusException;
 import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException;
 import com.onebyone.kindergarten.domain.reports.exception.ReportNotFoundException;
@@ -63,14 +67,14 @@ public class ErrorHandler {
 
     @ExceptionHandler(InquiryNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    protected ErrorResponse inQueryNotFoundExceptions (InquiryNotFoundException error) {
+    protected ErrorResponse inQueryNotFoundExceptions(InquiryNotFoundException error) {
         log.error("InquiryNotFoundException 발생: {}", error.getMessage(), error);
         return buildError(Error.INQUIRY_NOT_FOUND);
     }
 
     @ExceptionHandler(PostNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    protected ErrorResponse postNotFoundExceptions (PostNotFoundException error) {
+    protected ErrorResponse postNotFoundExceptions(PostNotFoundException error) {
         log.error("PostNotFoundException 발생: {}", error.getMessage(), error);
         return buildError(Error.POST_NOT_FOUND);
     }
@@ -136,6 +140,41 @@ public class ErrorHandler {
     protected ErrorResponse handleEntityNotFoundException(NoticeNotFoundException e) {
         log.error("NoticeNotFoundException 발생: {}", e.getMessage(), e);
         return buildError(Error.NOTICE_NOT_FOUND);
+    }
+
+    @ExceptionHandler(NotFoundInternshipReviewException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleNotFoundInternshipReviewException(NotFoundInternshipReviewException e) {
+        log.error("NotFoundInternshipReviewException 발생: {}", e.getMessage(), e);
+        return buildError(Error.NOT_FOUND_INTERNSHIP_REVIEW);
+    }
+
+    @ExceptionHandler(AlreadyExistInternshipReviewException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleAlreadyExistInternshipReviewException(AlreadyExistInternshipReviewException e) {
+        log.error("AlearyExistsInternshipReviewException 발생: {}", e.getMessage(), e);
+        return buildError(Error.ALREADY_EXIST_INTERNSHIP_REVIEW);
+    }
+
+    @ExceptionHandler(NotFoundWorkReviewException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleNotFoundWorkReviewException(NotFoundWorkReviewException e) {
+        log.error("NotFoundWorkReviewException 발생: {}", e.getMessage(), e);
+        return buildError(Error.NOT_FOUND_WORK_REVIEW);
+    }
+
+    @ExceptionHandler(AlreadyExistWorkReviewException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleAlreadyExistWorkReviewException(AlreadyExistWorkReviewException e) {
+        log.error("AlreadyExistWorkReviewException 발생: {}", e.getMessage(), e);
+        return buildError(Error.ALREADY_EXIST_WORK_REVIEW);
+    }
+
+    @ExceptionHandler(IncorrectUserException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleIncorrectUserException(IncorrectUserException e) {
+        log.error("IncorrectUserException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INCORRECT_USER_EXCEPTION);
     }
 
     private ErrorResponse buildError(Error error) {

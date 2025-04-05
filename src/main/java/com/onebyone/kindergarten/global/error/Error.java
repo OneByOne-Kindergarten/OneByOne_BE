@@ -26,8 +26,12 @@ public enum Error {
     REPORT_NOT_FOUND("신고를 찾을 수 없습니다."),
     INVALID_REPORT_STATUS("잘못된 신고 상태입니다."),
     INVALID_REPORT_TARGET("존재하지 않는 신고 대상입니다."),
-    NOTICE_NOT_FOUND("존재하지 않는 공지사항입니다.");
-
+    NOTICE_NOT_FOUND("존재하지 않는 공지사항입니다."),
+    ALREADY_EXIST_INTERNSHIP_REVIEW("이미 등록된 실습 리뷰가 존재합니다."),
+    NOT_FOUND_INTERNSHIP_REVIEW("실습 리뷰가 존재하지 않습니다."),
+    ALREADY_EXIST_WORK_REVIEW("이미 등록된 근무 리뷰가 존재합니다."),
+    NOT_FOUND_WORK_REVIEW("근무 리뷰가 존재하지 않습니다."),
+    INCORRECT_USER_EXCEPTION("유저가 일치하지 않습니다.");
     private final String message;
 
     Error(String message) {
