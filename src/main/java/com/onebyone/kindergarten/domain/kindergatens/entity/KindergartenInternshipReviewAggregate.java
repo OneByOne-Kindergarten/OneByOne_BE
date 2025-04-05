@@ -30,4 +30,16 @@ public class KindergartenInternshipReviewAggregate extends BaseEntity {
 
     @Column(name = "instruction_teacher_score_aggregate", precision = 10, scale = 2)
     private BigDecimal instructionTeacherScoreAggregate; // 지도교사 총합
+
+    public void updateWorkEnvironmentScoreAggregate(BigDecimal avgWorkEnvironmentScore) {
+        this.workEnvironmentScoreAggregate = avgWorkEnvironmentScore;
+    }
+
+    public void updateLearningSupportScoreAggregate(BigDecimal avgLearningSupportScore) {
+        this.learningSupportScoreAggregate = avgLearningSupportScore;
+    }
+
+    public void updateInstructionTeacherScoreAggregate(BigDecimal avgInstructionTeacherScore) {
+        this.instructionTeacherScoreAggregate = avgInstructionTeacherScore;
+    }
 }

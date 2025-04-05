@@ -1,14 +1,21 @@
 package com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity;
 
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.ModifyInternshipReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.global.common.BaseEntity;
-import com.onebyone.kindergarten.global.enums.ReportStatus;
+import com.onebyone.kindergarten.global.enums.ReviewStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity(name = "kindergarten_internship_review")
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class KindergartenInternshipReview extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,15 +30,15 @@ public class KindergartenInternshipReview extends BaseEntity {
     private Kindergarten kindergarten; // 유치원
 
     @Enumerated(EnumType.STRING)
-    private ReportStatus status = ReportStatus.YET; // 게시글 상태 - 차단 여부 (PENDING, PROCESSED, REJECTED)
+    private ReviewStatus status = ReviewStatus.ACCEPTED;
 
     @Column(name = "one_line_comment", nullable = false)
     private String oneLineComment; // 한 줄 평가
 
-    @Column(name = "work_envoronment_comment", nullable = false)
+    @Column(name = "work_environment_comment", nullable = false)
     private String workEnvironmentComment; // 분위기 평가
 
-    @Column(name = "work_envoronment_score", nullable = false)
+    @Column(name = "work_environment_score", nullable = false)
     private Integer workEnvironmentScore; // 분위기 점수
 
     @Column(name = "learning_support_comment", nullable = false)
@@ -51,4 +58,22 @@ public class KindergartenInternshipReview extends BaseEntity {
 
     @Column(name = "share_count")
     private Integer shareCount = 0; // 공유 수
+
+    public void updateReview(ModifyInternshipReviewRequestDTO request) {
+        this.oneLineComment = request.getOneLineComment();
+        this.workEnvironmentComment = request.getWorkEnvironmentComment();
+        this.workEnvironmentScore = request.getWorkEnvironmentScore();
+        this.learningSupportComment = request.getLearningSupportComment();
+        this.learningSupportScore = request.getLearningSupportScore();
+        this.instructionTeacherComment = request.getInstructionTeacherComment();
+        this.instructionTeacherScore = request.getInstructionTeacherScore();
+    }
+
+    public void minusLikeCount() {
+        this.likeCount--;
+    }
+
+    public void plusLikeCount() {
+        this.likeCount++;
+    }
 }

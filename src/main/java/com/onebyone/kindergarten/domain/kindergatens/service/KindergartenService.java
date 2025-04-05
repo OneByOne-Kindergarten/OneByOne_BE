@@ -96,6 +96,10 @@ public class KindergartenService {
         return kindergartenRepository.findNearbyKindergartens(latitude, longitude, radiusKm);
     }
 
+    public Kindergarten getKindergartenById(Long id) {
+        return kindergartenRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("유치원을 찾을 수 없습니다. ID: " + id));
+    }
 
     /// DTO -> Entity 변환
     private Kindergarten convertToEntity(KindergartenDTO dto) {

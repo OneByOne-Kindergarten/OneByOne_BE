@@ -36,4 +36,24 @@ public class KindergartenWorkReviewAggregate extends BaseEntity {
 
     @Column(name = "customer_score_aggregate", precision = 10, scale = 2)
     private BigDecimal customerScoreAggregate; // 고객 총합
+
+    public void updateBenefitAndSalaryScoreAggregate(BigDecimal avgBenefitAndSalary) {
+        this.benefitAndSalaryScoreAggregate = avgBenefitAndSalary;
+    }
+
+    public void updateWorkLiftBalanceScoreAggregate(BigDecimal avgWorkLifeBalance) {
+        this.workLiftBalanceScoreAggregate = avgWorkLifeBalance;
+    }
+
+    public void updateWorkEnvironmentScoreAggregate(BigDecimal avgWorkEnvironment) {
+        this.workEnvironmentScoreAggregate = avgWorkEnvironment;
+    }
+
+    public void updateManagerScoreAggregate(BigDecimal avgManager) {
+        this.managerScoreAggregate = avgManager;
+    }
+
+    public void updateCustomerScoreAggregate(BigDecimal avgCustomer) {
+        this.customerScoreAggregate = avgCustomer;
+    }
 }
