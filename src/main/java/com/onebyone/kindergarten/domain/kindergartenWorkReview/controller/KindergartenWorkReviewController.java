@@ -39,9 +39,9 @@ public class KindergartenWorkReviewController {
     }
 
     @Operation(summary = "근무리뷰-03 리뷰 좋아요", description = "리뷰 좋아요")
-    @PostMapping("/review/{kindergartenInternshipReviewId}/like")
+    @PostMapping("/review/{workReviewId}/like")
     public void likeWorkReview(
-            @PathVariable("kindergartenInternshipReviewId") long id,
+            @PathVariable("workReviewId") long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         kindergartenWorkReviewService.likeWorkReview(id, userDetails.getUsername());
