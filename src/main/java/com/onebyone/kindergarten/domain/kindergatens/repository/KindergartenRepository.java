@@ -38,7 +38,7 @@ public interface KindergartenRepository extends JpaRepository<Kindergarten, Long
 
     /// 주변 유치원 조회
     @Query("SELECT new com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenResponseDTO(" +
-            "   k.id, k.name, k.establishment, k.establishmentDate, k.address, " +
+            "   k.id, k.name, k.establishment, k.establishmentDate, k.openDate ,k.address, " +
             "   k.homepage, k.phoneNumber, k.classCount3, k.classCount4, k.classCount5, " +
             "   k.pupilCount3, k.pupilCount4, k.pupilCount5, k.mixPupilCount, " +
             "   k.specialPupilCount, k.latitude, k.longitude) " +
