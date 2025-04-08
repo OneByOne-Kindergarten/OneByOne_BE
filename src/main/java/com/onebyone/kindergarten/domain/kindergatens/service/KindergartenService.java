@@ -29,7 +29,7 @@ public class KindergartenService {
 
     /// 유치원 정보 저장
     @Transactional
-    public List<Kindergarten> saveAll(List<KindergartenDTO> kindergartenDTOs) {
+    public Boolean saveAll(List<KindergartenDTO> kindergartenDTOs) {
         List<Kindergarten> updatedKindergartens = new ArrayList<>();
 
         for (KindergartenDTO dto : kindergartenDTOs) {
@@ -70,7 +70,7 @@ public class KindergartenService {
                             }
                     );
         }
-        return updatedKindergartens;
+        return !updatedKindergartens.isEmpty();
     }
 
     /// 유치원 검색

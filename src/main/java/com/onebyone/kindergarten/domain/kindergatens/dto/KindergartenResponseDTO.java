@@ -17,6 +17,10 @@ public class KindergartenResponseDTO {
     
     @JsonFormat(pattern = "yyyy-MM-dd")
     private final LocalDate establishmentDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private final LocalDate openDate;
+
     private final String address;
     private final String homepage;
     private final String phoneNumber;
@@ -36,7 +40,7 @@ public class KindergartenResponseDTO {
 
     // JPQL 생성자
     public KindergartenResponseDTO(
-            Long id, String name, String establishment, LocalDate establishmentDate,
+            Long id, String name, String establishment, LocalDate establishmentDate, LocalDate openDate,
             String address, String homepage, String phoneNumber,
             Integer classCount3, Integer classCount4, Integer classCount5,
             Integer pupilCount3, Integer pupilCount4, Integer pupilCount5,
@@ -47,6 +51,7 @@ public class KindergartenResponseDTO {
         this.name = name;
         this.establishment = establishment;
         this.establishmentDate = establishmentDate;
+        this.openDate = openDate;
         this.address = address;
         this.homepage = homepage;
         this.phoneNumber = phoneNumber;
@@ -69,7 +74,7 @@ public class KindergartenResponseDTO {
     // 모든 필드를 포함하는 생성자 (Builder용)
     @Builder
     public KindergartenResponseDTO(
-            Long id, String name, String establishment, LocalDate establishmentDate,
+            Long id, String name, String establishment, LocalDate establishmentDate, LocalDate openDate,
             String address, String homepage, String phoneNumber,
             Integer classCount3, Integer classCount4, Integer classCount5,
             Integer pupilCount3, Integer pupilCount4, Integer pupilCount5,
@@ -81,6 +86,7 @@ public class KindergartenResponseDTO {
         this.name = name;
         this.establishment = establishment;
         this.establishmentDate = establishmentDate;
+        this.openDate = openDate;
         this.address = address;
         this.homepage = homepage;
         this.phoneNumber = phoneNumber;
@@ -108,6 +114,7 @@ public class KindergartenResponseDTO {
                 .name(kindergarten.getName())
                 .establishment(kindergarten.getEstablishment())
                 .establishmentDate(kindergarten.getEstablishmentDate())
+                .openDate(kindergarten.getOpenDate())
                 .address(kindergarten.getAddress())
                 .homepage(kindergarten.getHomepage())
                 .phoneNumber(kindergarten.getPhoneNumber())

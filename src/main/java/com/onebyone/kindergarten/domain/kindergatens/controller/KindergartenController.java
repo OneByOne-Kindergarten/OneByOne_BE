@@ -29,7 +29,7 @@ public class KindergartenController {
     @PostMapping("/batch")
     @Operation(summary = "유치원 정보 저장",
             description = "global/docs/kindergartens.json 파일을 사용하여 유치원 정보를 저장합니다.")
-    public ResponseEntity<List<Kindergarten>> saveKindergartens(@RequestBody List<KindergartenDTO> kindergartenDTOs) {
+    public ResponseEntity<Boolean> saveKindergartens(@RequestBody List<KindergartenDTO> kindergartenDTOs) {
         return ResponseEntity.ok(kindergartenService.saveAll(kindergartenDTOs));
     }
 
@@ -53,8 +53,8 @@ public class KindergartenController {
 
     @GetMapping("/nearby")
     @Operation(summary = "주변 유치원 조회",
-            description = "현재 위치 기준으로 특정 반경 내의 즐겨찾기한 유치원을 조회합니다.")
-    public ResponseDto<List<KindergartenResponseDTO>> getNearbyFavorites(
+            description = "현재 위치 기준으로 특정 반경 내의 유치원을 조회합니다.")
+    public ResponseDto<List<KindergartenResponseDTO>> getNearby(
             @RequestParam double latitude,
             @RequestParam double longitude,
             @RequestParam(defaultValue = "2.0") double radiusKm
