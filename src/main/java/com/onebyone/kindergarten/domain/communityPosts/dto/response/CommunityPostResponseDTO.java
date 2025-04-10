@@ -1,5 +1,6 @@
 package com.onebyone.kindergarten.domain.communityPosts.dto.response;
 import com.onebyone.kindergarten.domain.communityPosts.enums.PostCategory;
+import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,7 +15,9 @@ public class CommunityPostResponseDTO {
     private PostCategory category;
     private String categoryName;
     private String categoryDescription;
-    private String userName;
+    private String userNickname;
+    private UserRole userRole;
+    private String career;
     private Integer viewCount;
     private Integer likeCount;
     private Integer commentCount;

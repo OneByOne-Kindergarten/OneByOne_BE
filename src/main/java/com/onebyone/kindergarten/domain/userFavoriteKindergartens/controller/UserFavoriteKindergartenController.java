@@ -1,5 +1,6 @@
 package com.onebyone.kindergarten.domain.userFavoriteKindergartens.controller;
 
+import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenResponseDTO;
 import com.onebyone.kindergarten.domain.userFavoriteKindergartens.dto.response.FavoriteToggleResponseDTO;
 import com.onebyone.kindergarten.global.common.ResponseDto;
 import jakarta.validation.Valid;
@@ -14,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import com.onebyone.kindergarten.domain.userFavoriteKindergartens.dto.response.FavoriteKindergartenResponseDTO;
 import com.onebyone.kindergarten.domain.userFavoriteKindergartens.dto.request.ToggleFavoriteRequestDTO;
 import com.onebyone.kindergarten.domain.userFavoriteKindergartens.service.UserFavoriteKindergartenService;
 
@@ -40,7 +40,7 @@ public class UserFavoriteKindergartenController {
 
     @GetMapping
     @Operation(summary = "즐겨찾기 목록 조회", description = "자신의 즐겨찾기 유치원 목록을 조회합니다.")
-    public ResponseDto<List<FavoriteKindergartenResponseDTO>> getMyFavorites(
+    public ResponseDto<List<KindergartenResponseDTO>> getMyFavorites(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return ResponseDto.success(
