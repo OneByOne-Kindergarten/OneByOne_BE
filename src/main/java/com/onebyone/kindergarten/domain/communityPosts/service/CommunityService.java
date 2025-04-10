@@ -53,7 +53,7 @@ public class CommunityService {
                 .id(savedPost.getId())
                 .title(savedPost.getTitle())
                 .content(savedPost.getContent())
-                .userName(user.getNickname())
+                .userNickname(user.getNickname())
                 .build();
     }
 
