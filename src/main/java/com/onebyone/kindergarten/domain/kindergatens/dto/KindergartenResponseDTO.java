@@ -37,7 +37,6 @@ public class KindergartenResponseDTO {
     private final Double longitude;
     private final Integer totalClassCount;
     private final Integer totalPupilCount;
-
     private final KindergartenInternshipReviewAggregateDTO internshipReviewAggregate;
     private final KindergartenWorkReviewAggregateDTO workReviewAggregate;
 
@@ -48,7 +47,7 @@ public class KindergartenResponseDTO {
             Integer classCount3, Integer classCount4, Integer classCount5,
             Integer pupilCount3, Integer pupilCount4, Integer pupilCount5,
             Integer mixPupilCount, Integer specialPupilCount,
-            Double latitude, Double longitude, KindergartenInternshipReviewAggregateDTO internshipReviewAggregate, KindergartenWorkReviewAggregateDTO workReviewAggregate) {
+            Double latitude, Double longitude) {
         
         this.id = id;
         this.name = name;
@@ -68,12 +67,13 @@ public class KindergartenResponseDTO {
         this.specialPupilCount = specialPupilCount;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.internshipReviewAggregate = internshipReviewAggregate;
-        this.workReviewAggregate = workReviewAggregate;
 
         // 총계 계산
         this.totalClassCount = classCount3 + classCount4 + classCount5;
         this.totalPupilCount = pupilCount3 + pupilCount4 + pupilCount5 + mixPupilCount + specialPupilCount;
+
+        this.internshipReviewAggregate = null;
+        this.workReviewAggregate = null;
     }
 
     // 모든 필드를 포함하는 생성자 (Builder용)
