@@ -177,6 +177,41 @@ public class ErrorHandler {
         return buildError(Error.INCORRECT_USER_EXCEPTION);
     }
 
+    @ExceptionHandler(ExpiredTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    protected ErrorResponse handleExpiredTokenException(ExpiredTokenException e) {
+        log.error("ExpiredTokenException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INVALID_TOKEN_EXPIRED);
+    }
+
+    @ExceptionHandler(UnsupportedTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    protected ErrorResponse handleUnsupportedTokenException(UnsupportedTokenException e) {
+        log.error("UnsupportedTokenException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INVALID_TOKEN_UNSUPPORTED);
+    }
+
+    @ExceptionHandler(MalformedTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    protected ErrorResponse handleMalformedTokenException(MalformedTokenException e) {
+        log.error("MalformedTokenException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INVALID_TOKEN_MALFORMED);
+    }
+
+    @ExceptionHandler(InvalidSignatureTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    protected ErrorResponse handleInvalidSignatureTokenException(InvalidSignatureTokenException e) {
+        log.error("InvalidSignatureTokenException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INVALID_TOKEN_SIGNATURE);
+    }
+
+    @ExceptionHandler(InvalidTokenArgumentException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    protected ErrorResponse handleInvalidTokenArgumentException(InvalidTokenArgumentException e) {
+        log.error("InvalidTokenArgumentException 발생: {}", e.getMessage(), e);
+        return buildError(Error.INVALID_TOKEN_ILLEGAL);
+    }
+
     private ErrorResponse buildError(Error error) {
         ErrorResponse retError = ErrorResponse.builder()
                 .message(error.getMessage())

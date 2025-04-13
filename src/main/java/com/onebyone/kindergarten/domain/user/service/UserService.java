@@ -1,9 +1,10 @@
 package com.onebyone.kindergarten.domain.user.service;
 
-import com.onebyone.kindergarten.domain.user.dto.ModifyUserNicknameRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.ModifyUserPasswordRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.SignInRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.SignUpRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.*;
+import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserNicknameRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserPasswordRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
@@ -103,5 +104,9 @@ public class UserService{
     @Transactional
     public void updateCareer(User user, String career) {
         user.updateCareer(career);
+    }
+
+    public UserDTO getUser(String email) {
+        return UserDTO.from(findUser(email));
     }
 }

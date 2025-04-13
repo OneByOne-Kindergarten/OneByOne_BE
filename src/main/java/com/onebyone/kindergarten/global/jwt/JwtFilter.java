@@ -27,6 +27,13 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String requestURI = request.getRequestURI();
+
+        if (requestURI.startsWith("/users/reissue")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String jwt = resolveToken(request);
 
         if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {

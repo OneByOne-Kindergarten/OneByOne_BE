@@ -1,10 +1,15 @@
 package com.onebyone.kindergarten.domain.user.controller;
 
 import com.onebyone.kindergarten.domain.facade.UserFacade;
-import com.onebyone.kindergarten.domain.user.dto.*;
+import com.onebyone.kindergarten.domain.user.dto.request.*;
+import com.onebyone.kindergarten.domain.user.dto.response.GetUserResponseDTO;
+import com.onebyone.kindergarten.domain.user.dto.response.ReIssueResponseDTO;
 import com.onebyone.kindergarten.domain.user.service.UserService;
+import com.onebyone.kindergarten.global.jwt.JwtProvider;
+import com.onebyone.kindergarten.global.jwt.exception.InvalidTokenException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +25,7 @@ import javax.security.auth.login.AccountNotFoundException;
 public class UserApiController {
     private final UserFacade userFacade;
     private final UserService userService;
+    private final JwtProvider jwtProvider;
 
     @Operation(summary = "유저-01 회원가입", description = "계정 생성합니다.")
     @PostMapping("/sign-up")
@@ -63,6 +69,39 @@ public class UserApiController {
         userService.withdraw(userDetails.getUsername());
     }
 
+    @Operation(summary = "유저-06 유저정보", description = "유저 조회입니다.")
+    @GetMapping
+    public GetUserResponseDTO getUser(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return new GetUserResponseDTO(userService.getUser(userDetails.getUsername()));
+    }
+
+    @Operation(summary = "유저-07 토큰 재발급", description = "토큰 재발급입니다.")
+    @PostMapping("/reissue")
+    public ReIssueResponseDTO reissue(
+            HttpServletRequest request
+    ) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new InvalidTokenException("RefreshToken이 존재하지 않거나 형식이 잘못되었습니다.");
+        }
+
+        String refreshToken = authHeader.substring(7);
+
+        // ✅ refreshToken에서 email 추출 및 검증
+        String email = jwtProvider.getEmailFromRefreshToken(refreshToken);
+
+        // ✅ 새 토큰 발급
+        String newAccessToken = jwtProvider.generateAccessToken(email);
+        String newRefreshToken = jwtProvider.generateRefreshToken(email);
+
+        return ReIssueResponseDTO.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+    }
 
 //  TODO: 방식 협의 됐을 때
 //    @Operation(summary = "이메일 찾기", description = "이메일 찾기")

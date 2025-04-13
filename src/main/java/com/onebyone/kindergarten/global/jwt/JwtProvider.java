@@ -1,7 +1,7 @@
 package com.onebyone.kindergarten.global.jwt;
 
 import com.onebyone.kindergarten.domain.user.service.CustomUserDetailService;
-import com.onebyone.kindergarten.global.jwt.exception.InvalidTokenException;
+import com.onebyone.kindergarten.global.exception.*;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -26,7 +26,6 @@ public class JwtProvider {
     private String secretKey;
 
     private final Long accessTokenValidationMs = 30 * 60 * 1000L;
-
     private final Long refreshTokenValidationMs = 15 * 24 * 60 * 60 * 1000L;
 
 //    public Long getRefreshTokenValidationMs() { // Redis에 저장 시 사용
@@ -78,20 +77,15 @@ public class JwtProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            log.error("만료된 토큰입니다. {}", e.toString());
-            return false;
+            throw new ExpiredTokenException("만료된 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            log.error("잘못된 형식의 토큰입니다. {}", e.toString());
-            return false;
+            throw new UnsupportedTokenException("잘못된 형식의 토큰입니다.");
         } catch (MalformedJwtException e) {
-            log.error("잘못된 구조의 토큰입니다. {}", e.toString());
-            return false;
+            throw new MalformedTokenException("잘못된 구조의 토큰입니다.");
         } catch (SignatureException e) {
-            log.error("잘못 서명된 토큰입니다. {}", e.toString());
-            return false;
+            throw new InvalidSignatureTokenException("잘못 서명된 토큰입니다.");
         } catch (IllegalArgumentException e) {
-            log.error("잘못 생성된 토큰입니다. {}", e.toString());
-            return false;
+            throw new InvalidTokenArgumentException("잘못 생성된 토큰입니다.");
         }
     }
 
@@ -109,7 +103,7 @@ public class JwtProvider {
         } catch (Exception e) {
             // 다른 예외인 경우 throw
             log.error("유효하지 않은 토큰입니다. {}", e.toString());
-            throw new InvalidTokenException("유효하지 않은 토큰입니다.");
+            throw new InvalidTokenArgumentException("유효하지 않은 토큰입니다.");
         }
     }
 
@@ -122,7 +116,7 @@ public class JwtProvider {
 
         if (email == null) {
             log.error("권한 정보가 없는 토큰입니다. {}", token);
-            throw new InvalidTokenException("권한 정보가 없는 토큰입니다.");
+            throw new InvalidTokenArgumentException("권한 정보가 없는 토큰입니다.");
         }
 
         UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
@@ -135,4 +129,11 @@ public class JwtProvider {
         return expiration.getTime() - now.getTime();
     }
 
+    public String getEmailFromRefreshToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
+            throw new InvalidTokenArgumentException("유효하지 않은 RefreshToken입니다.");
+        }
+
+        return getClaims(refreshToken).getSubject(); // email
+    }
 }
