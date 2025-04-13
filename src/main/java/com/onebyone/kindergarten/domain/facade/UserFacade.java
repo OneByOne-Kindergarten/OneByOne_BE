@@ -1,8 +1,8 @@
 package com.onebyone.kindergarten.domain.facade;
 
-import com.onebyone.kindergarten.domain.user.dto.SignInRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.SignInResponseDTO;
-import com.onebyone.kindergarten.domain.user.dto.SignUpRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.SignInResponseDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;

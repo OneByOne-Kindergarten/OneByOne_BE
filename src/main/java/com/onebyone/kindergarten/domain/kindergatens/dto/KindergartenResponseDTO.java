@@ -38,6 +38,9 @@ public class KindergartenResponseDTO {
     private final Integer totalClassCount;
     private final Integer totalPupilCount;
 
+    private final KindergartenInternshipReviewAggregateDTO internshipReviewAggregate;
+    private final KindergartenWorkReviewAggregateDTO workReviewAggregate;
+
     // JPQL 생성자
     public KindergartenResponseDTO(
             Long id, String name, String establishment, LocalDate establishmentDate, LocalDate openDate,
@@ -45,7 +48,7 @@ public class KindergartenResponseDTO {
             Integer classCount3, Integer classCount4, Integer classCount5,
             Integer pupilCount3, Integer pupilCount4, Integer pupilCount5,
             Integer mixPupilCount, Integer specialPupilCount,
-            Double latitude, Double longitude) {
+            Double latitude, Double longitude, KindergartenInternshipReviewAggregateDTO internshipReviewAggregate, KindergartenWorkReviewAggregateDTO workReviewAggregate) {
         
         this.id = id;
         this.name = name;
@@ -65,7 +68,9 @@ public class KindergartenResponseDTO {
         this.specialPupilCount = specialPupilCount;
         this.latitude = latitude;
         this.longitude = longitude;
-        
+        this.internshipReviewAggregate = internshipReviewAggregate;
+        this.workReviewAggregate = workReviewAggregate;
+
         // 총계 계산
         this.totalClassCount = classCount3 + classCount4 + classCount5;
         this.totalPupilCount = pupilCount3 + pupilCount4 + pupilCount5 + mixPupilCount + specialPupilCount;
@@ -80,7 +85,8 @@ public class KindergartenResponseDTO {
             Integer pupilCount3, Integer pupilCount4, Integer pupilCount5,
             Integer mixPupilCount, Integer specialPupilCount,
             Double latitude, Double longitude,
-            Integer totalClassCount, Integer totalPupilCount) {
+            Integer totalClassCount, Integer totalPupilCount, KindergartenInternshipReviewAggregateDTO internshipReviewAggregate,
+            KindergartenWorkReviewAggregateDTO workReviewAggregate) {
         
         this.id = id;
         this.name = name;
@@ -102,6 +108,8 @@ public class KindergartenResponseDTO {
         this.longitude = longitude;
         this.totalClassCount = totalClassCount;
         this.totalPupilCount = totalPupilCount;
+        this.internshipReviewAggregate = internshipReviewAggregate;
+        this.workReviewAggregate = workReviewAggregate;
     }
 
     public static KindergartenResponseDTO from(Kindergarten kindergarten) {
@@ -130,6 +138,12 @@ public class KindergartenResponseDTO {
                 .longitude(kindergarten.getLongitude())
                 .totalClassCount(totalClass)
                 .totalPupilCount(totalPupil)
+                .internshipReviewAggregate(
+                        KindergartenInternshipReviewAggregateDTO.from(
+                                kindergarten.getKindergartenInternshipReviewAggregate()))
+                .workReviewAggregate(
+                        KindergartenWorkReviewAggregateDTO.from(
+                                kindergarten.getKindergartenWorkReviewAggregate()))
                 .build();
     }
 } 

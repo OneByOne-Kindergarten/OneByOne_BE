@@ -31,7 +31,12 @@ public enum Error {
     NOT_FOUND_INTERNSHIP_REVIEW("실습 리뷰가 존재하지 않습니다."),
     ALREADY_EXIST_WORK_REVIEW("이미 등록된 근무 리뷰가 존재합니다."),
     NOT_FOUND_WORK_REVIEW("근무 리뷰가 존재하지 않습니다."),
-    INCORRECT_USER_EXCEPTION("유저가 일치하지 않습니다.");
+    INCORRECT_USER_EXCEPTION("유저가 일치하지 않습니다."),
+    INVALID_TOKEN_EXPIRED("만료된 토큰입니다."),
+    INVALID_TOKEN_UNSUPPORTED("지원되지 않는 토큰 형식입니다."),
+    INVALID_TOKEN_MALFORMED("구조가 잘못된 토큰입니다."),
+    INVALID_TOKEN_SIGNATURE("서명이 올바르지 않은 토큰입니다."),
+    INVALID_TOKEN_ILLEGAL("잘못 생성된 토큰입니다."),;
     private final String message;
 
     Error(String message) {

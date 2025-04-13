@@ -1,4 +1,4 @@
-package com.onebyone.kindergarten.domain.user.dto;
+package com.onebyone.kindergarten.domain.user.dto.request;
 
 import lombok.Getter;
 

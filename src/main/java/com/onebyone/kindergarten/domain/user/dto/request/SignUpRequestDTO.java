@@ -1,4 +1,4 @@
-package com.onebyone.kindergarten.domain.user.dto;
+package com.onebyone.kindergarten.domain.user.dto.request;
 
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.entity.UserProvider;
