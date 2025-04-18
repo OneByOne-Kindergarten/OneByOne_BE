@@ -1,13 +1,12 @@
-//package com.onebyone.kindergarten.global.batch.config;
-//
-//import com.onebyone.kindergarten.global.batch.job.InstantJob;
-//import org.quartz.*;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//
-//@Configuration
-//public class QuartzSchedulerConfig {
-//
+package com.onebyone.kindergarten.global.batch.config;
+import com.onebyone.kindergarten.global.batch.job.PushNotificationJob;
+import org.quartz.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class QuartzSchedulerConfig {
+//    // 테스트용 Job
 //    @Bean
 //    public JobDetail instantDetail() {
 //        return JobBuilder.newJob(
@@ -28,4 +27,33 @@
 //    public CronScheduleBuilder instantCronScheduler() {
 //        return CronScheduleBuilder.cronSchedule("0 * * * * ?");
 //    }
-//}
+
+    /// 푸시 알림 Job 설정
+    @Bean
+    public JobDetail pushNotificationJobDetail() {
+        return JobBuilder.newJob(
+                PushNotificationJob.class
+        ).storeDurably()
+                .withIdentity("pushNotificationJob")
+                .withDescription("푸시 알림 발송 작업")
+                .build();
+    }
+
+    /// 푸시 알림 Trigger 설정
+    @Bean
+    public Trigger pushNotificationTrigger() {
+        return TriggerBuilder.newTrigger()
+                .forJob(pushNotificationJobDetail())
+                .withIdentity("pushNotificationTrigger")
+                .withDescription("15분마다 미발송 푸시 알림 발송")
+                .startNow()
+                .withSchedule(pushNotificationCronScheduler())
+                .build();
+    }
+
+    /// 15분마다 실행되는 크론 표현식 (0, 15, 30, 45분)
+    public CronScheduleBuilder pushNotificationCronScheduler() {
+        // 15분마다 실행 (0, 15, 30, 45분)
+        return CronScheduleBuilder.cronSchedule("0 0/1 * * * ?");
+    }
+}
