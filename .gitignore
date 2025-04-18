@@ -38,3 +38,6 @@ out/
 
 # MAC OS
 .DS_Store
+
+# Firebase Key
+src/main/resources/OnebyoneFirebaseKey.json

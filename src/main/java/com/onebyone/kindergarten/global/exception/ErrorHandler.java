@@ -12,6 +12,7 @@ import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.Work
 import com.onebyone.kindergarten.domain.notice.exception.NoticeNotFoundException;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.exception.AlreadyExistWorkReviewException;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.exception.NotFoundWorkReviewException;
+import com.onebyone.kindergarten.domain.pushNotification.exception.NotificationException;
 import com.onebyone.kindergarten.domain.reports.exception.InvalidReportStatusException;
 import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException;
 import com.onebyone.kindergarten.domain.reports.exception.ReportNotFoundException;
@@ -210,6 +211,15 @@ public class ErrorHandler {
     protected ErrorResponse handleInvalidTokenArgumentException(InvalidTokenArgumentException e) {
         log.error("InvalidTokenArgumentException 발생: {}", e.getMessage(), e);
         return buildError(Error.INVALID_TOKEN_ILLEGAL);
+    }
+
+    @ExceptionHandler(NotificationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleNotificationException(NotificationException e) {
+        log.error("NotificationException 발생: {}", e.getMessage(), e);
+        return ErrorResponse.builder()
+                .message(e.getMessage())
+                .build();
     }
 
     private ErrorResponse buildError(Error error) {
