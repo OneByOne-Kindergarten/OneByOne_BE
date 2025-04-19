@@ -1,5 +1,6 @@
 package com.onebyone.kindergarten.domain.user.entity;
 
+import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import com.onebyone.kindergarten.global.common.BaseEntity;
@@ -47,6 +48,10 @@ public class User extends BaseEntity {
 
     @Column(name = "career")
     private String career; // 커리어
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kindergarten_id")
+    private Kindergarten Kindergarten;
 
     @Builder
     public User(String email, String password, String fcmToken, UserProvider provider, Long providerId, String nickname, UserRole role, String profileImageUrl, String career) {

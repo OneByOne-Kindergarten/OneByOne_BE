@@ -5,7 +5,10 @@ import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserNicknameReque
 import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserPasswordRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.response.KakaoUserResponse;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.domain.user.entity.UserProvider;
+import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
@@ -25,7 +28,7 @@ public class UserService{
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public Long signUp(SignUpRequestDTO request) {
+    public String signUp(SignUpRequestDTO request) {
         if (isExistedEmail(request.getEmail())) {
             throw new EmailDuplicationException(request.getEmail());
         }
@@ -33,7 +36,7 @@ public class UserService{
         String encodedPassword = encodePassword(request.getPassword());
         User user = userRepository.save(request.toEntity(encodedPassword));
 
-        return user.getId();
+        return user.getEmail();
     }
 
     @Transactional(readOnly = true)
@@ -107,6 +110,35 @@ public class UserService{
     }
 
     public UserDTO getUser(String email) {
-        return UserDTO.from(findUser(email));
+        return UserDTO.from(userRepository.findUserWithKindergarten(email).orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다")));
     }
+
+    @Transactional
+    public String signUpByKakao(KakaoUserResponse userResponse) {
+        String email = userResponse.getKakao_account().getEmail();
+
+        String nickname = userResponse.getKakao_account().getProfile() != null ?
+                userResponse.getKakao_account().getProfile().getNickname() : "카카오_" + userResponse.getId();
+
+        if (isExistedEmail(email)) {
+            return email;
+        }
+
+        String dummyPassword = encodePassword("kakao_" + userResponse.getId());
+
+        User user = User.builder()
+                .email(email)
+                .password(dummyPassword)  // 엔티티 구조상 임의로 생성
+                .nickname(nickname)
+                .role(UserRole.GENERAL)
+                .profileImageUrl(userResponse.getKakao_account().getProfile().getProfile_image_url())
+                .provider(UserProvider.KAKAO)
+                .providerId(userResponse.getId())
+                .build();
+
+        userRepository.save(user);
+
+        return user.getEmail();
+    }
+
 }

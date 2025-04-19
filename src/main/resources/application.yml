@@ -19,3 +19,10 @@ spring:
     job-store-type: jdbc
     jdbc:
       initialize-schema: always
+
+oauth:
+  secret-key: 7cdba1313f2ffad101e4b06e2c4381e5
+  url:
+    auth: https://kauth.kakao.com
+    api: https://kapi.kakao.com
+    redirect-uri: http://ec2-43-201-114-78.ap-northeast-2.compute.amazonaws.com:8080/users/kakao/callback
