@@ -4,6 +4,8 @@ import com.onebyone.kindergarten.domain.facade.UserFacade;
 import com.onebyone.kindergarten.domain.user.dto.request.*;
 import com.onebyone.kindergarten.domain.user.dto.response.GetUserResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.ReIssueResponseDTO;
+import com.onebyone.kindergarten.domain.user.dto.response.SignInResponseDTO;
+import com.onebyone.kindergarten.domain.user.dto.response.SignUpResponseDTO;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.jwt.JwtProvider;
 import com.onebyone.kindergarten.global.jwt.exception.InvalidTokenException;
@@ -29,10 +31,10 @@ public class UserApiController {
 
     @Operation(summary = "유저-01 회원가입", description = "계정 생성합니다.")
     @PostMapping("/sign-up")
-    public void signUp(
+    public SignUpResponseDTO signUp(
             @RequestBody @Valid final SignUpRequestDTO request
-    ) throws AccountNotFoundException {
-        userFacade.signUp(request);
+    ) {
+        return userFacade.signUp(request);
     }
 
     @Operation(summary = "유저-02 로그인", description = "로그인 입니다")
@@ -90,10 +92,8 @@ public class UserApiController {
 
         String refreshToken = authHeader.substring(7);
 
-        // ✅ refreshToken에서 email 추출 및 검증
         String email = jwtProvider.getEmailFromRefreshToken(refreshToken);
 
-        // ✅ 새 토큰 발급
         String newAccessToken = jwtProvider.generateAccessToken(email);
         String newRefreshToken = jwtProvider.generateRefreshToken(email);
 
@@ -101,6 +101,14 @@ public class UserApiController {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    @Operation(summary = "유저-08 카카오 소셜 로그인", description = "카카오 소셜로그인을 진행합니다")
+    @GetMapping("/kakao/callback")
+    public SignInResponseDTO getKakaoAuthorizationCode(
+            @RequestParam(name = "code") String code
+    ) {
+        return userFacade.kakaoLogin(code);
     }
 
 //  TODO: 방식 협의 됐을 때

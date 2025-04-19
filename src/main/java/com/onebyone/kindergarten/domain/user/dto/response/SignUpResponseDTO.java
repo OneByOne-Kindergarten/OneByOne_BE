@@ -1,15 +1,15 @@
-package com.onebyone.kindergarten.domain.user.dto.request;
+package com.onebyone.kindergarten.domain.user.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class SignInResponseDTO {
+public class SignUpResponseDTO {
     private String accessToken;
     private String refreshToken;
 
     @Builder
-    public SignInResponseDTO(String accessToken, String refreshToken) {
+    public SignUpResponseDTO(String accessToken, String refreshToken) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }
