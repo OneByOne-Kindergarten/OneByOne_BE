@@ -12,6 +12,8 @@ import com.onebyone.kindergarten.domain.communityComments.dto.response.CommentRe
 import com.onebyone.kindergarten.domain.communityComments.entity.CommunityComment;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityPost;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
+import com.onebyone.kindergarten.domain.pushNotification.enums.NotificationType;
+import com.onebyone.kindergarten.domain.pushNotification.event.PushNotificationEventPublisher;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 
@@ -23,6 +25,7 @@ public class CommunityCommentService {
     private final CommunityCommentRepository commentRepository;
     private final CommunityRepository postRepository;
     private final UserService userService;
+    private final PushNotificationEventPublisher notificationEventPublisher;
 
     /// 댓글 작성
     @Transactional
@@ -31,8 +34,9 @@ public class CommunityCommentService {
         // 사용자 조회
         User user = userService.getUserByEmail(email);
         
-        // 게시글 - 프록시 객체 조회
-        CommunityPost post = postRepository.getReferenceById(postId);
+        // 게시글 조회 (작성자 정보를 포함)
+        CommunityPost post = postRepository.findByIdWithUser(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
         // 댓글 작성
         CommunityComment comment = CommunityComment.builder()
@@ -44,6 +48,19 @@ public class CommunityCommentService {
 
         // 댓글 수 업데이트
         postRepository.incrementCommentCount(postId);
+
+        /// TODO : 타입별 공통 형태 메서드 구현 필요
+        if (!post.getUser().getId().equals(user.getId())) {
+            // 푸시 알림 이벤트 발행
+            notificationEventPublisher.publish(
+                    post.getUser().getId(),
+                    user.getNickname() + "님이 댓글을 남겼습니다",
+                    dto.getContent(),
+                    NotificationType.COMMENT,
+                    postId
+            );
+        }
+        
         return CommentResponseDTO.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
