@@ -17,6 +17,8 @@ import com.onebyone.kindergarten.domain.pushNotification.event.PushNotificationE
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,7 +29,7 @@ public class CommunityCommentService {
     private final UserService userService;
     private final PushNotificationEventPublisher notificationEventPublisher;
 
-    /// 댓글 작성
+    /// 댓글 작성 (원댓글 또는 대댓글)
     @Transactional
     public CommentResponseDTO createComment(Long postId, CreateCommentRequestDTO dto, String email) {
 
@@ -38,42 +40,68 @@ public class CommunityCommentService {
         CommunityPost post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
+        CommunityComment parent = null;
+        
+        // 대댓글인 경우 부모 댓글 조회
+        if (dto.getParentId() != null) {
+            parent = commentRepository.findById(dto.getParentId())
+                    .orElseThrow(() -> new IllegalArgumentException("원댓글을 찾을 수 없습니다."));
+            
+            // 부모 댓글의 게시글과 요청된 게시글이 일치하는지 확인
+            if (!parent.getPost().getId().equals(postId)) {
+                throw new IllegalArgumentException("원댓글의 게시글이 일치하지 않습니다.");
+            }
+            
+            // 이미 대댓글인 경우 대댓글에 대댓글 작성 방지
+            if (parent.isReply()) {
+                throw new IllegalArgumentException("대댓글에는 답글을 작성할 수 없습니다.");
+            }
+        }
+
         // 댓글 작성
         CommunityComment comment = CommunityComment.builder()
                 .post(post)
                 .user(user)
                 .content(dto.getContent())
+                .parent(parent)
                 .build();
         commentRepository.save(comment);
 
-        // 댓글 수 업데이트
-        postRepository.incrementCommentCount(postId);
+        // 댓글 수 업데이트 (최상위 댓글인 경우에만)
+        if (parent == null) {
+            postRepository.incrementCommentCount(postId);
+        }
 
+        // 알림 대상자 결정 (게시글 작성자 또는 부모 댓글 작성자)
+        User notificationTarget = parent != null ? parent.getUser() : post.getUser();
+
+        // 알림 발송
         /// TODO : 타입별 공통 형태 메서드 구현 필요
-        if (!post.getUser().getId().equals(user.getId())) {
-            // 푸시 알림 이벤트 발행
+        if (!notificationTarget.getId().equals(user.getId())) {
             notificationEventPublisher.publish(
-                    post.getUser().getId(),
-                    user.getNickname() + "님이 댓글을 남겼습니다",
+                    notificationTarget.getId(),
+                    user.getNickname() + "님이 " + (parent != null ? "답글" : "댓글") + "을 남겼습니다",
                     dto.getContent(),
                     NotificationType.COMMENT,
                     postId
             );
         }
         
-        return CommentResponseDTO.builder()
-                .id(comment.getId())
-                .content(comment.getContent())
-                .nickName(user.getNickname())
-                .career(user.getCareer())
-                .userRole(user.getRole())
-                .createdAt(comment.getCreatedAt())
-                .status(comment.getStatus())
-                .build();
+        return CommentResponseDTO.fromEntity(comment);
     }
 
-    /// 게시글의 댓글 목록 조회
-    public Page<CommentResponseDTO> getComments(Long postId, Pageable pageable) {
-        return commentRepository.findCommentDTOsByPostId(postId, pageable);
+    /// 게시글의 최상위 댓글 목록 조회 (대댓글 제외)
+    public Page<CommentResponseDTO> getOriginalComments(Long postId, Pageable pageable) {
+        return commentRepository.findOriginalCommentsByPostId(postId, pageable);
+    }
+    
+    /// 특정 댓글의 대댓글 목록 조회
+    public List<CommentResponseDTO> getReplies(Long commentId) {
+        return commentRepository.findRepliesByParentId(commentId);
+    }
+    
+    /// 게시글의 모든 댓글과 대댓글 목록 조회 (계층 구조로 정렬)
+    public Page<CommentResponseDTO> getAllCommentsWithReplies(Long postId, Pageable pageable) {
+        return commentRepository.findAllCommentsWithRepliesByPostId(postId, pageable);
     }
 }

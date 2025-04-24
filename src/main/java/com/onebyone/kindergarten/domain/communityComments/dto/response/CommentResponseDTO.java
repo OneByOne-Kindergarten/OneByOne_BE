@@ -14,16 +14,27 @@ import lombok.Getter;
 @Builder
 public class CommentResponseDTO {
     private Long id;
+    
     private String content;
+    
     private String nickName;
-    private String career;    // 경력 정보 (예: "5년 3개월")
+    
+    private String career;
+    
     private UserRole userRole;
+
     private LocalDateTime createdAt;
+    
     private ReportStatus status;
+    
+    private Long parentId;
+    
+    private boolean isReply;
 
     public CommentResponseDTO(Long id, String content, String nickName,
                             String career, UserRole userRole, 
-                            LocalDateTime createdAt, ReportStatus status) {
+                            LocalDateTime createdAt, ReportStatus status,
+                            Long parentId, boolean isReply) {
         this.id = id;
         this.content = content;
         this.nickName = nickName;
@@ -31,6 +42,8 @@ public class CommentResponseDTO {
         this.userRole = userRole;
         this.createdAt = createdAt;
         this.status = status;
+        this.parentId = parentId;
+        this.isReply = isReply;
     }
 
     public static CommentResponseDTO fromEntity(CommunityComment comment) {
@@ -44,6 +57,8 @@ public class CommentResponseDTO {
                 .userRole(user.getRole())
                 .createdAt(comment.getCreatedAt())
                 .status(comment.getStatus())
+                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
+                .isReply(comment.isReply())
                 .build();
     }
 } 
