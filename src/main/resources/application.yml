@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/kindergarten?createDatabaseIfNotExist=true&serverTimezone=UTC
-    username: root
-    password: 12345678
+    url: jdbc:mysql://43.201.114.78:3306/kindergarten?createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: wngns
+    password: wldnjstlf2660!
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,8 +21,16 @@ spring:
       initialize-schema: always
 
 oauth:
-  secret-key: 7cdba1313f2ffad101e4b06e2c4381e5
-  url:
-    auth: https://kauth.kakao.com
-    api: https://kapi.kakao.com
-    redirect-uri: http://ec2-43-201-114-78.ap-northeast-2.compute.amazonaws.com:8080/users/kakao/callback
+  kakao:
+    secret-key: 7cdba1313f2ffad101e4b06e2c4381e5
+    url:
+      auth: https://kauth.kakao.com
+      api: https://kapi.kakao.com
+      redirect-uri: http://ec2-43-201-114-78.ap-northeast-2.compute.amazonaws.com:8080/users/kakao/callback
+  naver:
+    client-id: vF7hkIbizLoKIKhLQHMW
+    client-secret: eSvMQJ6J_b
+    url:
+      redirect-uri: http://ec2-43-201-114-78.ap-northeast-2.compute.amazonaws.com:8080/users/kakao/callback
+      auth: https://nid.naver.com
+      api: https://openapi.naver.com

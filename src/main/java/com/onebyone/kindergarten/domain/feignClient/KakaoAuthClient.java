@@ -7,7 +7,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "kakaoAuthClient", url = "${oauth.url.auth}")
+@FeignClient(name = "kakaoAuthClient", url = "${oauth.kakao.url.auth}")
 public interface KakaoAuthClient {
     @PostMapping(value = "/oauth/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     KakaoTokenResponse getAccessToken(@RequestBody MultiValueMap<String, String> request);

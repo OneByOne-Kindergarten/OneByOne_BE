@@ -1,5 +1,6 @@
 package com.onebyone.kindergarten.domain.user.controller;
 
+import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
 import com.onebyone.kindergarten.domain.facade.UserFacade;
 import com.onebyone.kindergarten.domain.user.dto.request.*;
 import com.onebyone.kindergarten.domain.user.dto.response.GetUserResponseDTO;
@@ -17,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import javax.security.auth.login.AccountNotFoundException;
 
 @Tag(name = "User API", description = "유저 API")
 @RestController
@@ -109,6 +108,25 @@ public class UserApiController {
             @RequestParam(name = "code") String code
     ) {
         return userFacade.kakaoLogin(code);
+    }
+
+    @Operation(summary = "유저-09 네이버 소셜 로그인", description = "카카오 소셜로그인을 진행합니다")
+    @GetMapping("/naver/callback")
+    public SignInResponseDTO getNaverAuthorizationCode(
+            @RequestParam(name = "code") String code,
+            @RequestParam(name = "state") String state
+    ) {
+        return userFacade.naverLogin(code, state);
+    }
+
+    @Operation(summary = "유저-010 작성한 리뷰 조회", description = "작성한 카테고리 리뷰를 조회합니다.")
+    @GetMapping("/user/community-comments")
+    public PageCommunityCommentsResponseDTO getWroteMyCommunityComments(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return userFacade.getWroteMyCommunityComments(userDetails.getUsername(), page, size);
     }
 
 //  TODO: 방식 협의 됐을 때

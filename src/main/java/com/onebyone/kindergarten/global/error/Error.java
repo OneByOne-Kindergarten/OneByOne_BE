@@ -37,7 +37,8 @@ public enum Error {
     INVALID_TOKEN_MALFORMED("구조가 잘못된 토큰입니다."),
     INVALID_TOKEN_SIGNATURE("서명이 올바르지 않은 토큰입니다."),
     INVALID_TOKEN_ILLEGAL("잘못 생성된 토큰입니다."),
-    NOTIFICATION_ERROR("알림 전송 중 오류가 발생했습니다.");
+    NOTIFICATION_ERROR("알림 전송 중 오류가 발생했습니다."),
+    ENTITY_NOT_FOUND_EXCEPTION("유치원을 찾을 수 없습니다.");
     private final String message;
 
     Error(String message) {

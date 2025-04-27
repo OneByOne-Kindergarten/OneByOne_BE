@@ -11,7 +11,6 @@ public class SignUpRequestDTO {
     private String email;
     private String password;
     private UserProvider provider;
-    private Long providerId = null;
     private String nickname;
     private UserRole role;
     private String profileImageUrl;
@@ -31,7 +30,6 @@ public class SignUpRequestDTO {
                 .email(email)
                 .password(encodedPassword)
                 .provider(provider)
-                .providerId(providerId)
                 .nickname(nickname)
                 .role(role)
                 .profileImageUrl(profileImageUrl)

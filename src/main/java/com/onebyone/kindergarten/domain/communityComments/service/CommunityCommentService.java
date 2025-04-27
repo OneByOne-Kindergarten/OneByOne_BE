@@ -1,7 +1,9 @@
 package com.onebyone.kindergarten.domain.communityComments.service;
 
+import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,5 +105,19 @@ public class CommunityCommentService {
     /// 게시글의 모든 댓글과 대댓글 목록 조회 (계층 구조로 정렬)
     public Page<CommentResponseDTO> getAllCommentsWithReplies(Long postId, Pageable pageable) {
         return commentRepository.findAllCommentsWithRepliesByPostId(postId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public PageCommunityCommentsResponseDTO getWroteMyCommunityComments(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<CommentResponseDTO> commentsPage = commentRepository.findByUserId(userId, pageable)
+                .map(CommentResponseDTO::fromEntity);
+
+        PageCommunityCommentsResponseDTO response = new PageCommunityCommentsResponseDTO();
+        response.setContent(commentsPage.getContent());
+        response.setTotalPages(commentsPage.getTotalPages());
+
+        return response;
     }
 }
