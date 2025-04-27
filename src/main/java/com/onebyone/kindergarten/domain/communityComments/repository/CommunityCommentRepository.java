@@ -48,4 +48,6 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
             "c.createdAt ASC")
     Page<CommentResponseDTO> findAllCommentsWithRepliesByPostId(@Param("postId") Long postId, Pageable pageable);
 
+
+    Page<CommunityComment> findByUserId(Long userId, Pageable pageable);
 }

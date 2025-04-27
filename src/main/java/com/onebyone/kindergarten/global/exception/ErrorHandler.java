@@ -222,6 +222,13 @@ public class ErrorHandler {
                 .build();
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleEntityNotFoundException(EntityNotFoundException e) {
+        log.error("EntityNotFoundException 발생: {}", e.getMessage(), e);
+        return buildError(Error.ENTITY_NOT_FOUND_EXCEPTION);
+    }
+
     private ErrorResponse buildError(Error error) {
         ErrorResponse retError = ErrorResponse.builder()
                 .message(error.getMessage())

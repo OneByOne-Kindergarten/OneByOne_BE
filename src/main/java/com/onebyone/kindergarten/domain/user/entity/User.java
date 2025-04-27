@@ -5,15 +5,15 @@ import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity(name = "user")
 @Getter
+@Builder
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +31,11 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserProvider provider; // 제공자 - 일반, 구글, 애플
 
-    @Column(name = "provider_id")
-    private Long providerId;  // 소셜 로그인 회사 당 할당받는 유저 pk
+    @Column(name = "kakao_id")
+    private Long kakaoProviderId;  // 카카오 로그인 회사 당 할당받는 유저 pk
+
+    @Column(name = "naver_id")
+    private String naverProviderId;  // 카카오 로그인 회사 당 할당받는 유저 pk
 
     @Column(nullable = false)
     private String nickname; // 닉네임 - 랜덤 생성
@@ -53,18 +56,30 @@ public class User extends BaseEntity {
     @JoinColumn(name = "kindergarten_id")
     private Kindergarten Kindergarten;
 
-    @Builder
-    public User(String email, String password, String fcmToken, UserProvider provider, Long providerId, String nickname, UserRole role, String profileImageUrl, String career) {
-        this.email = email;
-        this.password = password;
-        this.fcmToken = fcmToken;
-        this.provider = provider;
-        this.providerId = providerId;
-        this.nickname = nickname;
-        this.role = role;
-        this.profileImageUrl = profileImageUrl;
-        this.status = UserStatus.ACTIVE;
-        this.career = career;
+    public static User registerKakao(String email, String password, Long kakaoProviderId, String nickname, UserRole role, String profileImageUrl) {
+        return User.builder()
+                .email(email)
+                .password(password)
+                .provider(UserProvider.KAKAO)
+                .kakaoProviderId(kakaoProviderId)
+                .nickname(nickname)
+                .role(role)
+                .profileImageUrl(profileImageUrl)
+                .status(UserStatus.ACTIVE)
+                .build();
+    }
+
+    public static User registerNaver(String email, String password, String naverProviderId, String nickname, UserRole role, String profileImageUrl) {
+        return User.builder()
+                .email(email)
+                .password(password)
+                .provider(UserProvider.NAVER)
+                .naverProviderId(naverProviderId)
+                .nickname(nickname)
+                .role(role)
+                .profileImageUrl(profileImageUrl)
+                .status(UserStatus.ACTIVE)
+                .build();
     }
 
     public void changeNickname(String nickname) {

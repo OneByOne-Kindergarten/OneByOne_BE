@@ -6,8 +6,8 @@ import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserPasswordReque
 import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.KakaoUserResponse;
+import com.onebyone.kindergarten.domain.user.dto.response.NaverUserResponse;
 import com.onebyone.kindergarten.domain.user.entity.User;
-import com.onebyone.kindergarten.domain.user.entity.UserProvider;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
@@ -126,19 +126,27 @@ public class UserService{
 
         String dummyPassword = encodePassword("kakao_" + userResponse.getId());
 
-        User user = User.builder()
-                .email(email)
-                .password(dummyPassword)  // 엔티티 구조상 임의로 생성
-                .nickname(nickname)
-                .role(UserRole.GENERAL)
-                .profileImageUrl(userResponse.getKakao_account().getProfile().getProfile_image_url())
-                .provider(UserProvider.KAKAO)
-                .providerId(userResponse.getId())
-                .build();
+        User user = User.registerKakao(email, dummyPassword, userResponse.getId(), nickname, UserRole.GENERAL, userResponse.getKakao_account().getProfile().getProfile_image_url());
 
         userRepository.save(user);
 
         return user.getEmail();
     }
 
+    @Transactional
+    public String signUpByNaver(NaverUserResponse userResponse) {
+        String email = userResponse.getResponse().getEmail();
+
+        if (isExistedEmail(email)) {
+            return email;
+        }
+
+        String dummyPassword = encodePassword("kakao_" + userResponse.getResponse().getId());
+
+        User user = User.registerNaver(email, dummyPassword, userResponse.getResponse().getId(), userResponse.getResponse().getNickname(), UserRole.GENERAL, userResponse.getResponse().getProfile_image());
+
+        userRepository.save(user);
+
+        return user.getEmail();
+    }
 }
