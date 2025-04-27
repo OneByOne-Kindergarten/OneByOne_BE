@@ -31,6 +31,6 @@ oauth:
     client-id: vF7hkIbizLoKIKhLQHMW
     client-secret: eSvMQJ6J_b
     url:
-      redirect-uri: http://ec2-43-201-114-78.ap-northeast-2.compute.amazonaws.com:8080/users/kakao/callback
+      redirect-uri: http://ec2-43-201-114-78.ap-northeast-2.compute.amazonaws.com:8080/users/naver/callback
       auth: https://nid.naver.com
       api: https://openapi.naver.com
