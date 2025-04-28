@@ -9,11 +9,9 @@ import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotAdminReadEx
 import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotAdminWriteException;
 import com.onebyone.kindergarten.domain.inquires.exception.InquiryNotFoundException;
 import com.onebyone.kindergarten.domain.inquires.repository.InquiryRepository;
-import com.onebyone.kindergarten.domain.pushNotification.enums.NotificationType;
-import com.onebyone.kindergarten.domain.pushNotification.event.PushNotificationEventPublisher;
+import com.onebyone.kindergarten.domain.pushNotification.service.NotificationTemplateService;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
-import com.onebyone.kindergarten.domain.user.exception.UnauthorizedException;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +26,7 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final UserService userService;
-    private final PushNotificationEventPublisher notificationEventPublisher;
+    private final NotificationTemplateService notificationTemplateService;
 
     /// 문의 생성
     @Transactional
@@ -123,12 +121,10 @@ public class InquiryService {
         // 답변 등록
         inquiry.answerInquiry(dto.getAnswer());
 
-        /// TODO : 타입별 공통 형태 메서드 구현 필요
-        notificationEventPublisher.publish(
+        // 알림 발송
+        notificationTemplateService.sendInquiryAnswerNotification(
                 inquiry.getUser().getId(),
-                "문의하신 내용에 답변이 등록되었습니다",
                 inquiry.getTitle(),
-                NotificationType.SYSTEM,
                 inquiry.getId()
         );
 

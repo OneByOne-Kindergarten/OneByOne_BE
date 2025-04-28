@@ -14,8 +14,7 @@ import com.onebyone.kindergarten.domain.communityComments.dto.response.CommentRe
 import com.onebyone.kindergarten.domain.communityComments.entity.CommunityComment;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityPost;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
-import com.onebyone.kindergarten.domain.pushNotification.enums.NotificationType;
-import com.onebyone.kindergarten.domain.pushNotification.event.PushNotificationEventPublisher;
+import com.onebyone.kindergarten.domain.pushNotification.service.NotificationTemplateService;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 
@@ -29,7 +28,7 @@ public class CommunityCommentService {
     private final CommunityCommentRepository commentRepository;
     private final CommunityRepository postRepository;
     private final UserService userService;
-    private final PushNotificationEventPublisher notificationEventPublisher;
+    private final NotificationTemplateService notificationTemplateService;
 
     /// 댓글 작성 (원댓글 또는 대댓글)
     @Transactional
@@ -78,16 +77,13 @@ public class CommunityCommentService {
         User notificationTarget = parent != null ? parent.getUser() : post.getUser();
 
         // 알림 발송
-        /// TODO : 타입별 공통 형태 메서드 구현 필요
-        if (!notificationTarget.getId().equals(user.getId())) {
-            notificationEventPublisher.publish(
-                    notificationTarget.getId(),
-                    user.getNickname() + "님이 " + (parent != null ? "답글" : "댓글") + "을 남겼습니다",
-                    dto.getContent(),
-                    NotificationType.COMMENT,
-                    postId
-            );
-        }
+        notificationTemplateService.sendCommentNotification(
+                notificationTarget.getId(), 
+                user, 
+                dto.getContent(), 
+                parent != null, 
+                postId
+        );
         
         return CommentResponseDTO.fromEntity(comment);
     }
