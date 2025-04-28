@@ -32,7 +32,7 @@ public class NotificationTemplateService {
         if (!targetUserId.equals(actionUser.getId())) {
             String emoji = isReply ? "💬" : "✏️";
             String title = (isReply ? "답글 알림" : "댓글 알림");
-            String message = emoji + " " + actionUser.getNickname() + "님이 " + (isReply ? "답글" : "댓글") + "을 남겼습니다.\n" + (isReply ? "👀답글을 바로 확인해보세요!" : "👀새로운 댓글을 확인해보세요!");
+            String message = emoji + " " + actionUser.getNickname() + "님이 " + (isReply ? "답글" : "댓글") + "을 남겼습니다.\n" + (isReply ? "👀 답글을 바로 확인해보세요!" : "👀 새로운 댓글을 확인해보세요!");
             
             notificationEventPublisher.publish(
                     targetUserId,
@@ -74,7 +74,7 @@ public class NotificationTemplateService {
     public void sendLikeNotification(Long targetUserId, User actionUser, String contentTitle, Long targetId) {
         if (!targetUserId.equals(actionUser.getId())) {
             String title = "좋아요 알림";
-            String message = "❤️ " + actionUser.getNickname() + "님이 회원님의 게시글을 좋아합니다\n" + "👀지금 바로 확인해보세요!";
+            String message = "❤️ " + actionUser.getNickname() + "님이 회원님의 게시글을 좋아합니다\n" + "👀 지금 바로 확인해보세요!";
             
             notificationEventPublisher.publish(
                     targetUserId,
