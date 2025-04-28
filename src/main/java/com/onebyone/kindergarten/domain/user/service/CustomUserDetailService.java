@@ -23,7 +23,6 @@ public class CustomUserDetailService implements UserDetailsService{
         return org.springframework.security.core.userdetails.User.builder()
                 .username(email)
                 .password(user.getPassword())
-                /// TODO : 주훈님 확인 부탁드려요!! 이렇게 써도 되는거죠?
                 .roles(
                         user.getRole() == UserRole.ADMIN ? "ADMIN" : "USER"
                 )

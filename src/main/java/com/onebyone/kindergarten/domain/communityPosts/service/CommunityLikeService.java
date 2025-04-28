@@ -6,6 +6,7 @@ import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityPost;
 import com.onebyone.kindergarten.domain.communityPosts.exception.PostNotFoundException;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityLikeRepository;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
+import com.onebyone.kindergarten.domain.pushNotification.service.NotificationTemplateService;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class CommunityLikeService {
     private final CommunityLikeRepository communityLikeRepository;
     private final CommunityRepository communityRepository;
     private final UserService userService;
+    private final NotificationTemplateService notificationTemplateService;
 
     /// 게시글 좋아요 상태 조회 및 좋아요 수 조회
     public CommunityLikeResponseDTO getLikeInfo(Long postId, String email) {
@@ -35,7 +37,6 @@ public class CommunityLikeService {
     /// 게시글 좋아요/좋아요 취소 토글
     @Transactional
     public CommunityLikeResponseDTO toggleLike(Long postId, String email) {
-
         // 사용자 조회
         User user = userService.getUserByEmail(email);
 
@@ -58,6 +59,17 @@ public class CommunityLikeService {
                             .build();
                     communityLikeRepository.save(newLike);
                     communityRepository.updateLikeCount(postId, 1);
+
+                    // 알림 발송 - 본인 글이 아닌 경우
+                    if (!post.getUser().getId().equals(user.getId())) {
+                        notificationTemplateService.sendLikeNotification(
+                                post.getUser().getId(),
+                                user,
+                                post.getTitle(),
+                                post.getId()
+                        );
+                    }
+                    
                     return new CommunityLikeResponseDTO(true, post.getLikeCount() + 1);
                 });
     }

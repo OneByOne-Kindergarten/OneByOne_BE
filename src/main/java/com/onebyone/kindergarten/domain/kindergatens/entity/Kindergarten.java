@@ -76,7 +76,6 @@ public class Kindergarten extends BaseEntity {
     @Column(name = "special_pupil_count", nullable = false)
     private Integer specialPupilCount;
 
-    /// TODO : 이후 위도+경도 추가 마이그레이션 작업 필요
     private Double latitude; // 위도
     private Double longitude; // 경도
 

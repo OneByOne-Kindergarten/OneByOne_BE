@@ -12,6 +12,7 @@ import com.onebyone.kindergarten.domain.kindergartenWorkReview.repository.Kinder
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.repository.KindergartenWorkReviewRepository;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenService;
+import com.onebyone.kindergarten.domain.pushNotification.service.NotificationTemplateService;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReviewStatus;
@@ -32,7 +33,9 @@ public class KindergartenWorkReviewService {
     private final KindergartenService kindergartenService;
     private final KindergartenWorkReviewRepository workReviewRepository;
     private final KindergartenWorkReviewLikeHistoryRepository workReviewLikeHistoryRepository;
+    private final NotificationTemplateService notificationTemplateService;
 
+    @Transactional
     public Kindergarten createWorkReview(CreateWorkReviewRequestDTO request, String email) {
         User user = userService.getUserByEmail(email);
         Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
@@ -66,6 +69,7 @@ public class KindergartenWorkReviewService {
         return kindergarten;
     }
 
+    @Transactional
     public Kindergarten modifyWorkReview(ModifyWorkReviewRequestDTO request, String email) {
         User user = userService.getUserByEmail(email);
         Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
@@ -91,9 +95,11 @@ public class KindergartenWorkReviewService {
         Optional<KindergartenWorkReviewLikeHistory> existingLike = workReviewLikeHistoryRepository.findByUserAndWorkReview(user, review);
 
         if (existingLike.isPresent()) {
+            // 좋아요 취소
             workReviewLikeHistoryRepository.delete(existingLike.get());
             review.minusLikeCount();
         } else {
+            // 좋아요 추가
             KindergartenWorkReviewLikeHistory newLike = KindergartenWorkReviewLikeHistory.builder()
                     .user(user)
                     .workReview(review)
@@ -101,6 +107,16 @@ public class KindergartenWorkReviewService {
 
             workReviewLikeHistoryRepository.save(newLike);
             review.plusLikeCount();
+            
+            // 알림 발송 - 본인 글이 아닌 경우
+            if (!review.getUser().getId().equals(user.getId())) {
+                notificationTemplateService.sendLikeNotification(
+                        review.getUser().getId(),
+                        user,
+                        review.getOneLineComment(),
+                        review.getId()
+                );
+            }
         }
 
         workReviewRepository.save(review);

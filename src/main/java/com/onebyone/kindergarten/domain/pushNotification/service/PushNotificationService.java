@@ -1,9 +1,7 @@
 package com.onebyone.kindergarten.domain.pushNotification.service;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import com.onebyone.kindergarten.domain.pushNotification.dto.PushNotificationRequestDTO;
 import com.onebyone.kindergarten.domain.pushNotification.dto.PushNotificationResponseDTO;
 import com.onebyone.kindergarten.domain.pushNotification.entity.PushNotification;
@@ -91,6 +89,7 @@ public class PushNotificationService {
         // 개별 메시지 목록 생성
         List<Message> messages = new ArrayList<>();
         for (PushNotification notification : validNotifications) {
+
             // 추가 데이터 설정
             Map<String, String> data = new HashMap<>();
             data.put("type", notification.getType().name());
@@ -98,15 +97,38 @@ public class PushNotificationService {
                 data.put("targetId", notification.getTargetId().toString());
             }
 
+            ApsAlert alert = ApsAlert.builder()
+                    .setTitle(notification.getTitle())
+                    .setBody(notification.getMessage())
+                    .build();
+
+            Aps aps = Aps.builder()
+                    .setAlert(alert)
+                    .setSound("default")
+                    ///.setBadge()
+                    .build();
+
             // 개별 메시지 생성 - 알림 엔티티에 저장된 FCM 토큰 사용
             Message message = Message.builder()
                     .setToken(notification.getFcmToken())
                     .setNotification(Notification.builder()
                             .setTitle(notification.getTitle())
                             .setBody(notification.getMessage())
+                            ///.setImage("이미지 URL")
                             .build())
                     .putAllData(data)
-                    /// TODO : AOS, IOS Config 추가 필요
+                    .setApnsConfig(
+                            ApnsConfig.builder()
+                                    .setAps(aps)
+                                    .build()
+                    )
+                    .setAndroidConfig(AndroidConfig.builder()
+                            .setPriority(AndroidConfig.Priority.HIGH)
+                            .setNotification(AndroidNotification.builder()
+                                    .setTitle(notification.getTitle())
+                                    .setBody(notification.getMessage())
+                                    .build())
+                            .build())
                     .build();
 
             messages.add(message);
