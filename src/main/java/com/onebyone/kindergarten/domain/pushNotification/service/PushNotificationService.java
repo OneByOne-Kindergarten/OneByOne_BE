@@ -54,6 +54,10 @@ public class PushNotificationService {
                 .targetId(requestDTO.getTargetId())
                 .isRead(false)
                 .isSent(false)
+
+                /// 그룹화
+                .groupKey(requestDTO.getGroupKey())
+                .groupCount(requestDTO.getGroupCount() != null ? requestDTO.getGroupCount() : 1)
                 .build();
 
         pushNotificationRepository.save(notification);

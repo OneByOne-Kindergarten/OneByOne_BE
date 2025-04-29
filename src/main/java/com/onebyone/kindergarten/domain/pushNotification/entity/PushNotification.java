@@ -41,6 +41,10 @@ public class PushNotification extends BaseEntity {
     
     private Long targetId; // 알림 클릭 시 이동할 대상의 ID
     
+    /// 그룹화
+    private String groupKey; // 동일한 그룹의 알림 식별 키
+    private Integer groupCount = 1; // 그룹화된 알림 개수
+    
     /// 알림 읽음 처리
     public void markAsRead() {
         this.isRead = true;
@@ -49,5 +53,15 @@ public class PushNotification extends BaseEntity {
     /// 알림 전송 처리
     public void markAsSent() {
         this.isSent = true;
+    }
+    
+    /// 그룹 카운트 증가
+    public void increaseGroupCount() {
+        this.groupCount++;
+    }
+    
+    /// 그룹 메시지 업데이트
+    public void updateGroupMessage(String newMessage) {
+        this.message = newMessage;
     }
 }
