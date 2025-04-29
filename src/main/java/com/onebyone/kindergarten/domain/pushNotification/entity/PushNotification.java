@@ -35,14 +35,18 @@ public class PushNotification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NotificationType type; // 알림 타입 - 리뷰, 댓글, 좋아요, 시스템
 
+    @Builder.Default
     private Boolean isRead = false; // 읽음 여부
 
+    @Builder.Default
     private Boolean isSent = false; // 전송 여부
     
     private Long targetId; // 알림 클릭 시 이동할 대상의 ID
     
     /// 그룹화
     private String groupKey; // 동일한 그룹의 알림 식별 키
+    
+    @Builder.Default
     private Integer groupCount = 1; // 그룹화된 알림 개수
     
     /// 알림 읽음 처리
