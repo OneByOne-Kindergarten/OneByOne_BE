@@ -29,6 +29,8 @@ public class PushNotificationEventListener {
                     .message(event.getMessage())
                     .type(event.getType())
                     .targetId(event.getTargetId())
+                    .groupKey(event.getGroupKey())
+                    .groupCount(event.getGroupCount())
                     .build();
             pushNotificationService.savePushNotification(requestDTO);
             log.info("푸시 알림 이벤트 처리 완료: userId={}, title={}", event.getUserId(), event.getTitle());

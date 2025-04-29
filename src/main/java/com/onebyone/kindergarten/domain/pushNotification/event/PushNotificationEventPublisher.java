@@ -15,9 +15,9 @@ public class PushNotificationEventPublisher {
     private final ApplicationEventPublisher eventPublisher;
 
     /// 푸시 알림 이벤트 발행 메소드
-    public void publish(Long userId, String title, String message, NotificationType type, Long targetId) {
-        log.debug("푸시 알림 이벤트 발행: userId={}, title={}", userId, title);
-        PushNotificationEvent event = new PushNotificationEvent(userId, title, message, type, targetId);
+    public void publish(PushNotificationEvent event) {
+        log.debug("푸시 알림 이벤트 발행: userId={}, title={}, groupKey={}",
+                event.getUserId(), event.getTitle(), event.getGroupKey());
         eventPublisher.publishEvent(event);
     }
 } 

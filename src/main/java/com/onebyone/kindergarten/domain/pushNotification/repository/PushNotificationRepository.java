@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PushNotificationRepository extends JpaRepository<PushNotification, Long> {
@@ -26,4 +27,7 @@ public interface PushNotificationRepository extends JpaRepository<PushNotificati
     // 특정 시간 이전에 생성된 미전송 알림 조회
     @Query("SELECT p FROM push_notification p WHERE p.isSent = false AND p.createdAt <= :cursorTime ORDER BY p.createdAt ASC")
     List<PushNotification> findUnsentNotificationsBeforeTime(@Param("cursorTime") LocalDateTime cursorTime);
+    
+    // 그룹 키로 가장 최근 알림 찾기
+    Optional<PushNotification> findFirstByUserIdAndGroupKeyOrderByCreatedAtDesc(Long userId, String groupKey);
 } 

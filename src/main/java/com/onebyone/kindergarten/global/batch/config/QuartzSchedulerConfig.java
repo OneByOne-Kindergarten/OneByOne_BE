@@ -52,8 +52,8 @@ public class QuartzSchedulerConfig {
     }
 
     /// 15분마다 실행되는 크론 표현식 (0, 15, 30, 45분)
+    /// TODO : 테스트를 위해 현재 3분으로 사용 추후 20분으로 변경 필요
     public CronScheduleBuilder pushNotificationCronScheduler() {
-        // 15분마다 실행 (0, 15, 30, 45분)
-        return CronScheduleBuilder.cronSchedule("0 0/1 * * * ?");
+        return CronScheduleBuilder.cronSchedule("0 0/3 * * * ?");
     }
 }
