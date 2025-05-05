@@ -50,10 +50,10 @@ public class KindergartenWorkReview extends BaseEntity {
     @Column(name = "work_life_balance_score", nullable = false)
     private Integer workLifeBalanceScore; // 워라벨 점수
 
-    @Column(name = "work_envoronment_comment", nullable = false)
+    @Column(name = "work_environment_comment", nullable = false)
     private String workEnvironmentComment; // 분위기 평가
 
-    @Column(name = "work_envoronment_score", nullable = false)
+    @Column(name = "work_environment_score", nullable = false)
     private Integer workEnvironmentScore; // 분위기 점수
 
     @Column(name = "manager_comment", nullable = false)
