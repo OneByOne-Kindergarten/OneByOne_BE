@@ -107,11 +107,11 @@ public class KindergartenInternshipReviewService {
         kindergartenInternshipReviewRepository.save(review);
     }
 
-    public InternshipReviewPagedResponseDTO getReviews(int page, int size) {
+    public InternshipReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<KindergartenInternshipReview> reviews =
-                kindergartenInternshipReviewRepository.findByStatus(ReviewStatus.ACCEPTED, pageable);
+                kindergartenInternshipReviewRepository.findByKindergartenIdAndStatus(kindergartenId, ReviewStatus.ACCEPTED, pageable);
 
         List<InternshipReviewDTO> dtoList = reviews.getContent().stream()
                 .map(InternshipReviewDTO::fromEntity)
