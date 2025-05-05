@@ -15,5 +15,5 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
 
     List<KindergartenWorkReview> findByKindergartenAndStatus(Kindergarten kindergarten, ReviewStatus status);
 
-    Page<KindergartenWorkReview> findByStatus(ReviewStatus reviewStatus, Pageable pageable);
+    Page<KindergartenWorkReview> findByKindergartenIdAndStatus(Long kindergartenId, ReviewStatus reviewStatus, Pageable pageable);
 }

@@ -48,11 +48,12 @@ public class KindergartenInternshipReviewController {
     }
 
     @Operation(summary = "실습리뷰-04 리뷰 페이징 조회", description = "리뷰 페이징 조회")
-    @GetMapping("/reviews")
+    @GetMapping("/reviews/{kindergartenId}")
     public InternshipReviewPagedResponseDTO getReviews(
+            @PathVariable("kindergartenId") Long kindergartenId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return kindergartenInternshipReviewService.getReviews(page, size);
+        return kindergartenInternshipReviewService.getReviews(kindergartenId, page, size);
     }
 }
