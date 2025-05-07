@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // h2-console 사용을 위한 설정
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/h2-console/**", "/users/sign-up", "/users/sign-in","/swagger-ui/**", "/users/reissue", "/users/kakao/callback", "/users/naver/callback",
+                        .requestMatchers("/", "/h2-console/**", "/users/sign-up", "/users/sign-in","/swagger-ui/**", "/users/reissue", "/users/kakao/callback", "/users/naver/callback", "/kindergarten/*/simple",
                                 "/v3/api-docs/**",
                                 "/community/**",
                                 "/swagger-resources/**",

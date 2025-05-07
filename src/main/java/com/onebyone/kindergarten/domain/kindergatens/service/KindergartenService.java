@@ -1,6 +1,7 @@
 package com.onebyone.kindergarten.domain.kindergatens.service;
 
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
+import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSimpleDTO;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.kindergatens.entity.KindergartenInternshipReviewAggregate;
 import com.onebyone.kindergarten.domain.kindergatens.entity.KindergartenWorkReviewAggregate;
@@ -124,4 +125,8 @@ public class KindergartenService {
                 .build();
     }
 
+    public KindergartenSimpleDTO getSimpleKindergarten(Long id) {
+        return kindergartenRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("유치원을 찾을 수 없습니다. ID: " + id)).toSimpleDTO();
+    }
 }
