@@ -1,7 +1,7 @@
 package com.onebyone.kindergarten.domain.kindergatens.controller;
 
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
-import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
+import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSimpleDTO;
 import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenService;
 import com.onebyone.kindergarten.global.common.ResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,6 +66,12 @@ public class KindergartenController {
                         radiusKm
                 )
         );
+    }
+
+    @GetMapping("/{id}/simple")
+    @Operation(summary = "유치원 이름 조회", description = "유치원 이름을 가져옵니다")
+    public KindergartenSimpleDTO getSimpleKindergarten(@PathVariable Long id) {
+        return kindergartenService.getSimpleKindergarten(id);
     }
 
 }

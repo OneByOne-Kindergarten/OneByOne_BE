@@ -3,6 +3,7 @@ package com.onebyone.kindergarten.domain.kindergatens.entity;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
+import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSimpleDTO;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -120,5 +121,12 @@ public class Kindergarten extends BaseEntity {
 
     public void updateWorkReviewAggregate(KindergartenWorkReviewAggregate kindergartenWorkReviewAggregate) {
         this.kindergartenWorkReviewAggregate = kindergartenWorkReviewAggregate;
+    }
+
+    public KindergartenSimpleDTO toSimpleDTO() {
+        KindergartenSimpleDTO dto = new KindergartenSimpleDTO();
+        dto.setKindergartenId(this.id);
+        dto.setName(this.name);
+        return dto;
     }
 }

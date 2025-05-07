@@ -1,7 +1,6 @@
 package com.onebyone.kindergarten.domain.kindergartenWorkReview.dto;
 
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSimpleDTO;
 import com.onebyone.kindergarten.domain.user.dto.SimpleUserDTO;
 import lombok.Data;
 
@@ -9,7 +8,6 @@ import lombok.Data;
 public class WorkReviewDTO {
     private Long workReviewId;
     private SimpleUserDTO user;
-    private KindergartenSimpleDTO kindergarten;
     private Integer workYear;
     private String oneLineComment;
     private String benefitAndSalaryComment;
@@ -33,11 +31,6 @@ public class WorkReviewDTO {
         userDTO.setUserId(review.getUser().getId());
         userDTO.setNickname(review.getUser().getNickname());
         dto.setUser(userDTO);
-
-        KindergartenSimpleDTO kindergartenDTO = new KindergartenSimpleDTO();
-        kindergartenDTO.setKindergartenId(review.getKindergarten().getId());
-        kindergartenDTO.setName(review.getKindergarten().getName());
-        dto.setKindergarten(kindergartenDTO);
 
         dto.setWorkYear(review.getWorkYear());
         dto.setOneLineComment(review.getOneLineComment());
