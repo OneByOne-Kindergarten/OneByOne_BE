@@ -32,6 +32,9 @@ public class KindergartenInternshipReview extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ReviewStatus status = ReviewStatus.ACCEPTED;
 
+    @Column(name = "work_type", nullable = false, columnDefinition = "varchar(255) default ''")
+    private String workType; // 근무 형태
+
     @Column(name = "one_line_comment", nullable = false)
     private String oneLineComment; // 한 줄 평가
 

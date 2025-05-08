@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class ModifyWorkReviewRequestDTO {
     private Long kindergartenId;
+    private String workType;
     private Long workReviewId;
     private String oneLineComment;
     private String benefitAndSalaryComment;

@@ -1,8 +1,8 @@
 package com.onebyone.kindergarten.domain.kindergartenWorkReview.dto;
 
-import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
 import com.onebyone.kindergarten.domain.user.dto.SimpleUserDTO;
 import lombok.Data;
+import java.time.LocalDateTime;
 
 @Data
 public class WorkReviewDTO {
@@ -22,31 +22,38 @@ public class WorkReviewDTO {
     private Integer customerScore;
     private Integer likeCount;
     private Integer shareCount;
+    private LocalDateTime createdAt;
+    private String workType;
 
-    public static WorkReviewDTO fromEntity(KindergartenWorkReview review) {
-        WorkReviewDTO dto = new WorkReviewDTO();
-        dto.setWorkReviewId(review.getId());
-
-        SimpleUserDTO userDTO = new SimpleUserDTO();
-        userDTO.setUserId(review.getUser().getId());
-        userDTO.setNickname(review.getUser().getNickname());
-        dto.setUser(userDTO);
-
-        dto.setWorkYear(review.getWorkYear());
-        dto.setOneLineComment(review.getOneLineComment());
-        dto.setBenefitAndSalaryComment(review.getBenefitAndSalaryComment());
-        dto.setBenefitAndSalaryScore(review.getBenefitAndSalaryScore());
-        dto.setWorkLifeBalanceComment(review.getWorkLifeBalanceComment());
-        dto.setWorkLifeBalanceScore(review.getWorkLifeBalanceScore());
-        dto.setWorkEnvironmentComment(review.getWorkEnvironmentComment());
-        dto.setWorkEnvironmentScore(review.getWorkEnvironmentScore());
-        dto.setManagerComment(review.getManagerComment());
-        dto.setManagerScore(review.getManagerScore());
-        dto.setCustomerComment(review.getCustomerComment());
-        dto.setCustomerScore(review.getCustomerScore());
-        dto.setLikeCount(review.getLikeCount());
-        dto.setShareCount(review.getShareCount());
-
-        return dto;
+    // JPQL 쿼리를 위한 생성자
+    public WorkReviewDTO(
+        Long workReviewId, Long userId, String nickname,
+        Integer workYear, String oneLineComment,
+        String benefitAndSalaryComment, Integer benefitAndSalaryScore,
+        String workLifeBalanceComment, Integer workLifeBalanceScore,
+        String workEnvironmentComment, Integer workEnvironmentScore,
+        String managerComment, Integer managerScore,
+        String customerComment, Integer customerScore,
+        Integer likeCount, Integer shareCount,
+        LocalDateTime createdAt, String workType
+    ) {
+        this.workReviewId = workReviewId;
+        this.user = new SimpleUserDTO(userId, nickname);
+        this.workYear = workYear;
+        this.oneLineComment = oneLineComment;
+        this.benefitAndSalaryComment = benefitAndSalaryComment;
+        this.benefitAndSalaryScore = benefitAndSalaryScore;
+        this.workLifeBalanceComment = workLifeBalanceComment;
+        this.workLifeBalanceScore = workLifeBalanceScore;
+        this.workEnvironmentComment = workEnvironmentComment;
+        this.workEnvironmentScore = workEnvironmentScore;
+        this.managerComment = managerComment;
+        this.managerScore = managerScore;
+        this.customerComment = customerComment;
+        this.customerScore = customerScore;
+        this.likeCount = likeCount;
+        this.shareCount = shareCount;
+        this.createdAt = createdAt;
+        this.workType = workType;
     }
 }

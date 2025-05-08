@@ -20,10 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -47,6 +47,7 @@ public class KindergartenInternshipReviewService {
         KindergartenInternshipReview review = KindergartenInternshipReview.builder()
                 .user(user)
                 .kindergarten(kindergarten)
+                .workType(request.getWorkType())
                 .oneLineComment(request.getOneLineComment())
                 .workEnvironmentComment(request.getWorkEnvironmentComment())
                 .workEnvironmentScore(request.getWorkEnvironmentScore())
@@ -107,20 +108,28 @@ public class KindergartenInternshipReviewService {
         kindergartenInternshipReviewRepository.save(review);
     }
 
-    public InternshipReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public InternshipReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, InternshipReviewPagedResponseDTO.SortType sortType) {
+        Pageable pageable;
 
-        Page<KindergartenInternshipReview> reviews =
-                kindergartenInternshipReviewRepository.findByKindergartenIdAndStatus(kindergartenId, ReviewStatus.ACCEPTED, pageable);
+        switch (sortType) {
+            case POPULAR:
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount", "createdAt"));
+                break;
+            case LATEST:
+            default:
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+                break;
+        }
 
-        List<InternshipReviewDTO> dtoList = reviews.getContent().stream()
-                .map(InternshipReviewDTO::fromEntity)
-                .toList();
+        Page<InternshipReviewDTO> reviewPage = kindergartenInternshipReviewRepository.findReviewsWithUserInfo(
+            kindergartenId, 
+            ReviewStatus.ACCEPTED, 
+            pageable
+        );
 
-        InternshipReviewPagedResponseDTO response = new InternshipReviewPagedResponseDTO();
-        response.setContent(dtoList);
-        response.setTotalPages(reviews.getTotalPages());
-
-        return response;
+        return InternshipReviewPagedResponseDTO.builder()
+            .content(reviewPage.getContent())
+            .totalPages(reviewPage.getTotalPages())
+            .build();
     }
 }
