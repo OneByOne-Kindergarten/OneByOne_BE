@@ -32,6 +32,9 @@ public class KindergartenWorkReview extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ReviewStatus status = ReviewStatus.ACCEPTED;
 
+    @Column(name = "work_type", nullable = false, columnDefinition = "varchar(255) default ''")
+    private String workType; // 근무 형태
+
     @Column(name = "work_year", nullable = false)
     private Integer workYear; // 근무/실습 년수
 
@@ -76,6 +79,7 @@ public class KindergartenWorkReview extends BaseEntity {
 
     public void updateReview(ModifyWorkReviewRequestDTO request) {
         this.oneLineComment = request.getOneLineComment();
+        this.workType = request.getWorkType();
         this.benefitAndSalaryComment = request.getBenefitAndSalaryComment();
         this.benefitAndSalaryScore = request.getBenefitAndSalaryScore();
         this.workLifeBalanceComment = request.getWorkLifeBalanceComment();

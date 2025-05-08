@@ -47,13 +47,14 @@ public class KindergartenWorkReviewController {
         kindergartenWorkReviewService.likeWorkReview(id, userDetails.getUsername());
     }
 
-    @Operation(summary = "근무리뷰-04 리뷰 페이징 조회", description = "리뷰 페이징 조회")
+    @Operation(summary = "근무리뷰-04 리뷰 페이징 조회", description = "리뷰 페이징 조회 (정렬: LATEST-최신순, POPULAR-인기순)")
     @GetMapping("/reviews/{kindergartenId}")
     public WorkReviewPagedResponseDTO getReviews(
             @PathVariable long kindergartenId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "LATEST") WorkReviewPagedResponseDTO.SortType sortType
     ) {
-        return kindergartenWorkReviewService.getReviews(kindergartenId, page, size);
+        return kindergartenWorkReviewService.getReviews(kindergartenId, page, size, sortType);
     }
 }

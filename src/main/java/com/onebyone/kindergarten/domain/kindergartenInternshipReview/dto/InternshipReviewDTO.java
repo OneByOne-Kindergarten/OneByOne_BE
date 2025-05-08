@@ -1,8 +1,8 @@
 package com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto;
-
-import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
 import com.onebyone.kindergarten.domain.user.dto.SimpleUserDTO;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class InternshipReviewDTO {
@@ -17,26 +17,29 @@ public class InternshipReviewDTO {
     private Integer instructionTeacherScore;
     private Integer likeCount;
     private Integer shareCount;
+    private LocalDateTime createdAt;
+    private String workType;
 
-    public static InternshipReviewDTO fromEntity(KindergartenInternshipReview review) {
-        InternshipReviewDTO dto = new InternshipReviewDTO();
-        dto.setInternshipReviewId(review.getId());
-
-        SimpleUserDTO userDTO = new SimpleUserDTO();
-        userDTO.setUserId(review.getUser().getId());
-        userDTO.setNickname(review.getUser().getNickname());
-        dto.setUser(userDTO);
-
-        dto.setOneLineComment(review.getOneLineComment());
-        dto.setWorkEnvironmentComment(review.getWorkEnvironmentComment());
-        dto.setWorkEnvironmentScore(review.getWorkEnvironmentScore());
-        dto.setLearningSupportComment(review.getLearningSupportComment());
-        dto.setLearningSupportScore(review.getLearningSupportScore());
-        dto.setInstructionTeacherComment(review.getInstructionTeacherComment());
-        dto.setInstructionTeacherScore(review.getInstructionTeacherScore());
-        dto.setLikeCount(review.getLikeCount());
-        dto.setShareCount(review.getShareCount());
-
-        return dto;
+    // JPQL 쿼리를 위한 생성자
+    public InternshipReviewDTO(
+            Long internshipReviewId, Long userId, String nickname,
+            String oneLineComment, String workEnvironmentComment,
+            Integer workEnvironmentScore, String learningSupportComment,
+            Integer learningSupportScore, String instructionTeacherComment,
+            Integer instructionTeacherScore, Integer likeCount,
+            Integer shareCount, LocalDateTime createdAt
+    ) {
+        this.internshipReviewId = internshipReviewId;
+        this.user = new SimpleUserDTO(userId, nickname);
+        this.oneLineComment = oneLineComment;
+        this.workEnvironmentComment = workEnvironmentComment;
+        this.workEnvironmentScore = workEnvironmentScore;
+        this.learningSupportComment = learningSupportComment;
+        this.learningSupportScore = learningSupportScore;
+        this.instructionTeacherComment = instructionTeacherComment;
+        this.instructionTeacherScore = instructionTeacherScore;
+        this.likeCount = likeCount;
+        this.shareCount = shareCount;
+        this.createdAt = createdAt;
     }
 }

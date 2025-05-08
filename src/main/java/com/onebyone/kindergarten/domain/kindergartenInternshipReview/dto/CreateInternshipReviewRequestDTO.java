@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class CreateInternshipReviewRequestDTO {
     private Long kindergartenId;
+    private String workType;
     private String oneLineComment;
     private String instructionTeacherComment;
     private Integer instructionTeacherScore;

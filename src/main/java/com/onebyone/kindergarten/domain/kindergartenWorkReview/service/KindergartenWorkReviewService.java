@@ -20,10 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,6 +48,7 @@ public class KindergartenWorkReviewService {
         KindergartenWorkReview review = KindergartenWorkReview.builder()
                 .user(user)
                 .kindergarten(kindergarten)
+                .workType(request.getWorkType())
                 .workYear(request.getWorkYear())
                 .oneLineComment(request.getOneLineComment())
                 .benefitAndSalaryComment(request.getBenefitAndSalaryComment())
@@ -122,18 +123,28 @@ public class KindergartenWorkReviewService {
         workReviewRepository.save(review);
     }
 
-    public WorkReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<KindergartenWorkReview> reviews = workReviewRepository.findByKindergartenIdAndStatus(kindergartenId, ReviewStatus.ACCEPTED, pageable);
+    public WorkReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, WorkReviewPagedResponseDTO.SortType sortType) {
+        Pageable pageable;
 
-        List<WorkReviewDTO> dtoList = reviews.getContent().stream()
-                .map(WorkReviewDTO::fromEntity)
-                .toList();
+        switch (sortType) {
+            case POPULAR:
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount", "createdAt"));
+                break;
+            case LATEST:
+            default:
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+                break;
+        }
 
-        WorkReviewPagedResponseDTO response = new WorkReviewPagedResponseDTO();
-        response.setContent(dtoList);
-        response.setTotalPages(reviews.getTotalPages());
+        Page<WorkReviewDTO> reviewPage = workReviewRepository.findReviewsWithUserInfo(
+            kindergartenId, 
+            ReviewStatus.ACCEPTED, 
+            pageable
+        );
 
-        return response;
+        return WorkReviewPagedResponseDTO.builder()
+            .content(reviewPage.getContent())
+            .totalPages(reviewPage.getTotalPages())
+            .build();
     }
 }
