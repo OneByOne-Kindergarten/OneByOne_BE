@@ -41,3 +41,6 @@ out/
 
 # Firebase Key
 src/main/resources/OnebyoneFirebaseKey.json
+
+# yml
+src/main/resources/application.yml
