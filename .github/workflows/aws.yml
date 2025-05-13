@@ -24,11 +24,6 @@ jobs:
       - name: Create application.yml
         run: mkdir -p ./src/main/resources && echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
 
-      - name: Write Firebase config file
-        shell: bash
-        run: |
-          printf "%s" "${{ secrets.FIREBASE }}" > ./src/main/resources/OnebyoneFirebaseKey.json
-
       - name: Build JAR
         run: ./gradlew clean build
 
