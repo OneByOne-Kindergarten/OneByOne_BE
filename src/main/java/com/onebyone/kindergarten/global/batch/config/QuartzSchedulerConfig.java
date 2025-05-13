@@ -1,5 +1,7 @@
 package com.onebyone.kindergarten.global.batch.config;
+
 import com.onebyone.kindergarten.global.batch.job.PushNotificationJob;
+import com.onebyone.kindergarten.global.batch.job.TopPostsCacheRefreshJob;
 import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,8 +34,8 @@ public class QuartzSchedulerConfig {
     @Bean
     public JobDetail pushNotificationJobDetail() {
         return JobBuilder.newJob(
-                PushNotificationJob.class
-        ).storeDurably()
+                        PushNotificationJob.class
+                ).storeDurably()
                 .withIdentity("pushNotificationJob")
                 .withDescription("푸시 알림 발송 작업")
                 .build();
@@ -55,5 +57,33 @@ public class QuartzSchedulerConfig {
     /// TODO : 테스트를 위해 현재 3분으로 사용 추후 20분으로 변경 필요
     public CronScheduleBuilder pushNotificationCronScheduler() {
         return CronScheduleBuilder.cronSchedule("0 0/3 * * * ?");
+    }
+
+    /// 인기 게시글 캐시 갱신 Job 설정
+    @Bean
+    public JobDetail topPostsCacheRefreshJobDetail() {
+        return JobBuilder.newJob(
+                        TopPostsCacheRefreshJob.class
+                ).storeDurably()
+                .withIdentity("topPostsCacheRefreshJob")
+                .withDescription("인기 게시글 캐시 갱신 작업")
+                .build();
+    }
+
+    /// 인기 게시글 캐시 갱신 Trigger 설정 (매일 새벽 6시에 실행)
+    @Bean
+    public Trigger topPostsCacheRefreshTrigger() {
+        return TriggerBuilder.newTrigger()
+                .forJob(topPostsCacheRefreshJobDetail())
+                .withIdentity("topPostsCacheRefreshTrigger")
+                .withDescription("매일 새벽 6시에 인기 게시글 캐시 갱신")
+                .startNow()
+                .withSchedule(topPostsCacheRefreshCronScheduler())
+                .build();
+    }
+
+    /// 매일 새벽 6시에 실행되는 크론 표현식
+    public CronScheduleBuilder topPostsCacheRefreshCronScheduler() {
+        return CronScheduleBuilder.cronSchedule("0 0 6 * * ?");
     }
 }

@@ -149,4 +149,10 @@ public class UserService{
 
         return user.getEmail();
     }
+
+    @Transactional
+    public void updateHomeShortcut(String email, HomeShortcutsDto homeShortcutsDto) {
+        User user = findUser(email);
+        user.updateHomeShortcut(homeShortcutsDto.toJson());
+    }
 }

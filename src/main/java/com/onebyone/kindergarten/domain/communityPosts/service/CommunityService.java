@@ -11,7 +11,10 @@ import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityCateg
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
+import com.onebyone.kindergarten.global.config.CacheConfig;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -78,10 +81,16 @@ public class CommunityService {
     }
 
     /// 인기 게시글 TOP 10 조회
+    @Cacheable(value = CacheConfig.TOP_POSTS_CACHE)
     public List<CommunityPostResponseDTO> getTopPosts() {
         return communityRepository.findTop10WithUserOrderByLikeCountDescViewCountDesc()
                 .stream()
                 .map(communityPostMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    /// 인기 게시글 캐시 갱신
+    @CacheEvict(value = CacheConfig.TOP_POSTS_CACHE, allEntries = true)
+    public void refreshTopPostsCache() {}
+
 }

@@ -2,11 +2,13 @@ package com.onebyone.kindergarten.domain.user.controller;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
 import com.onebyone.kindergarten.domain.facade.UserFacade;
+import com.onebyone.kindergarten.domain.user.dto.HomeShortcutsDto;
 import com.onebyone.kindergarten.domain.user.dto.request.*;
 import com.onebyone.kindergarten.domain.user.dto.response.GetUserResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.ReIssueResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.SignInResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.SignUpResponseDTO;
+import com.onebyone.kindergarten.domain.user.dto.response.UpdateHomeShortcutsResponseDTO;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.jwt.JwtProvider;
 import com.onebyone.kindergarten.global.jwt.exception.InvalidTokenException;
@@ -127,6 +129,15 @@ public class UserApiController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return userFacade.getWroteMyCommunityComments(userDetails.getUsername(), page, size);
+    }
+
+    @Operation(summary = "유저-11 홈 바로가기 정보 업데이트", description = "사용자의 홈 바로가기 정보를 업데이트합니다.")
+    @PutMapping("/shortcuts")
+    public UpdateHomeShortcutsResponseDTO updateHomeShortcut(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody HomeShortcutsDto request) {
+        userService.updateHomeShortcut(userDetails.getUsername(), request);
+        return UpdateHomeShortcutsResponseDTO.success();
     }
 
 //  TODO: 방식 협의 됐을 때

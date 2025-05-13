@@ -52,6 +52,9 @@ public class User extends BaseEntity {
     @Column(name = "career")
     private String career; // 커리어
 
+    @Column(name = "home_shortcut", columnDefinition = "TEXT")
+    private String homeShortcut; // 홈 바로가기 정보 (JSON 형태로 저장)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "kindergarten_id")
     private Kindergarten Kindergarten;
@@ -105,6 +108,10 @@ public class User extends BaseEntity {
 
     public void updateCareer(String career) {
         this.career = career;
+    }
+
+    public void updateHomeShortcut(String homeShortcutJson) {
+        this.homeShortcut = homeShortcutJson;
     }
 }
 

@@ -14,15 +14,22 @@ public class UserDTO {
     private String role;
     private String career;
     private KindergartenDTO kindergarten;
+    private HomeShortcutsDto.Response homeShortcut;
 
     public static UserDTO from(User user) {
+
+        HomeShortcutsDto homeShortcutsDto = user.getHomeShortcut() != null ?
+                HomeShortcutsDto.fromJson(user.getHomeShortcut()) :
+                new HomeShortcutsDto();
+                
         return new UserDTO(
                 user.getId(),
                 user.getNickname(),
                 user.getProfileImageUrl(),
                 user.getRole().name(),
                 user.getCareer(),
-                user.getKindergarten() != null ? KindergartenDTO.from(user.getKindergarten()) : null
+                user.getKindergarten() != null ? KindergartenDTO.from(user.getKindergarten()) : null,
+                HomeShortcutsDto.Response.from(homeShortcutsDto)
         );
     }
 }
