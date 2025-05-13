@@ -27,8 +27,14 @@ jobs:
       - name: Build JAR
         run: ./gradlew clean build
 
+      - name: Debug build/libs
+        run: ls -al ./build/libs
+
       - name: Copy JAR to Docker context
-        run: cp build/libs/*.jar docker/app/app.jar
+        run: cp ./build/libs/*.jar ./docker/app/app.jar
+
+      - name: Debug docker/app
+        run: ls -al ./docker/app
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
