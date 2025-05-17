@@ -21,11 +21,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Create application.yml
-        run: mkdir -p ./src/main/resources && echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
+      - name: Create application.yml and application-dev.yml
+        run: |
+          mkdir -p ./src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_DEV_YML }}" > ./src/main/resources/application-dev.yml
+
 
       - name: Build JAR
-        run: ./gradlew clean build
+        run: ./gradlew clean build -x test -Dspring.profiles.active=dev
 
       - name: Debug build/libs
         run: ls -al ./build/libs
@@ -54,4 +58,4 @@ jobs:
             sudo docker stop kindergarten || true
             sudo docker rm kindergarten || true
             sudo docker pull ${{ secrets.DOCKER_HUB }}/kindergarten:latest
-            sudo docker run -d --name kindergarten -p 8080:8080 ${{ secrets.DOCKER_HUB }}/kindergarten:latest
+            sudo docker run -d --name kindergarten -p 8080:8080 -v /home/ubuntu/logs:/home/ubuntu/logs ${{ secrets.DOCKER_HUB }}/kindergarten:latest

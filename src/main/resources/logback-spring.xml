@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 콘솔 출력 공통 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%thread] %highlight(%-5level) %cyan(%logger{15})[%line] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 로컬 프로파일용 로그 설정 -->
+    <springProfile name="local">
+        <property name="LOGS_PATH" value="./log" />
+    </springProfile>
+
+    <!-- 개발 서버 프로파일용 로그 설정 -->
+    <springProfile name="dev">
+        <property name="LOGS_PATH" value="/home/ubuntu/logs" />
+    </springProfile>
+
+    <!-- 롤링 파일 설정 (공통) -->
+    <appender name="DAILY_ROLLING_FILE_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_PATH}/application-logging.log</file>
+
+        <encoder>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35}[%line] - %msg%n</pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_PATH}/application-logging-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 로그 레벨 설정 -->
+    <logger name="com.test.project" level="DEBUG">
+        <appender-ref ref="DAILY_ROLLING_FILE_APPENDER" />
+    </logger>
+
+    <logger name="org.springframework.web.client" level="TRACE">
+        <appender-ref ref="DAILY_ROLLING_FILE_APPENDER" />
+    </logger>
+
+    <!-- 루트 로거 설정 -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DAILY_ROLLING_FILE_APPENDER"/>
+    </root>
+
+</configuration>
