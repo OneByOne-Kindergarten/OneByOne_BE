@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -41,5 +42,14 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "JOIN FETCH r.reporter " +
             "WHERE r.id = :id")
     Optional<Report> findByIdWithReporter(@Param("id") Long id);
+
+    @Query("SELECT COUNT(r) FROM Report r WHERE r.status = 'PENDING'")
+    long countByStatusPending();
+
+    Long countByStatus(ReportStatus status);
+
+    List<Report> findAllByOrderByCreatedAtDesc();
+
+    List<Report> findAllByStatusOrderByCreatedAtDesc(ReportStatus status);
 
 }

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>신고 상세 - OneByOne 관리자</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4">신고 상세 정보</h2>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>신고 ID:</strong></div>
+                    <div class="col-md-9" th:text="${report.id}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>신고 유형:</strong></div>
+                    <div class="col-md-9" th:text="${report.type}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>신고자:</strong></div>
+                    <div class="col-md-9" th:text="${report.reporterName}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>신고 대상:</strong></div>
+                    <div class="col-md-9" th:text="${report.targetName}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>상태:</strong></div>
+                    <div class="col-md-9">
+                        <span class="badge"
+                              th:classappend="${report.status == 'PENDING' ? 'bg-warning' :
+                                              report.status == 'IN_PROGRESS' ? 'bg-info' : 'bg-success'}"
+                              th:text="${report.status == 'PENDING' ? '대기중' :
+                                       report.status == 'IN_PROGRESS' ? '처리중' : '처리완료'}">
+                        </span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>신고일:</strong></div>
+                    <div class="col-md-9" th:text="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>신고 내용:</strong></div>
+                    <div class="col-md-9" th:text="${report.content}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <form th:action="@{/admin/reports/{id}/status(id=${report.id})}" method="post" class="d-inline">
+                <input type="hidden" name="currentStatus" th:value="${param.status}">
+                <select name="status" class="form-select d-inline-block w-auto me-2">
+                    <option value="PENDING" th:selected="${report.status == 'PENDING'}">대기중</option>
+                    <option value="IN_PROGRESS" th:selected="${report.status == 'IN_PROGRESS'}">처리중</option>
+                    <option value="COMPLETED" th:selected="${report.status == 'COMPLETED'}">처리완료</option>
+                </select>
+                <button type="submit" class="btn btn-primary">상태 변경</button>
+            </form>
+            <a th:href="@{/admin/dashboard(activeTab='reports', status=${param.status})}" 
+               class="btn btn-secondary ms-2">목록으로</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

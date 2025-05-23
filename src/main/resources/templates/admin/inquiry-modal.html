@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="inquiry-modal-content">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">제목</dt>
+            <dd class="col-sm-9" th:text="${inquiry.title}"></dd>
+
+            <dt class="col-sm-3">문의자</dt>
+            <dd class="col-sm-9" th:text="${inquiry.userName}"></dd>
+
+            <dt class="col-sm-3">문의 내용</dt>
+            <dd class="col-sm-9" th:text="${inquiry.content}"></dd>
+
+            <dt class="col-sm-3">문의일</dt>
+            <dd class="col-sm-9" th:text="${#temporals.format(inquiry.createdAt, 'yyyy-MM-dd HH:mm')}"></dd>
+
+            <dt class="col-sm-3">상태</dt>
+            <dd class="col-sm-9">
+                <span class="badge"
+                      th:classappend="${inquiry.status == 'PENDING' ? 'bg-warning' :
+                                      inquiry.status == 'ANSWERED' ? 'bg-info' : 'bg-success'}"
+                      th:text="${inquiry.status == 'PENDING' ? '대기중' :
+                               inquiry.status == 'ANSWERED' ? '답변완료' : '마감'}">
+                </span>
+            </dd>
+
+            <dt class="col-sm-3" th:if="${inquiry.answer != null}">답변 내용</dt>
+            <dd class="col-sm-9" th:if="${inquiry.answer != null}" th:text="${inquiry.answer}"></dd>
+        </dl>
+
+        <div class="mt-4" th:if="${inquiry.status == 'PENDING'}">
+            <form th:action="@{/admin/inquiries/{id}/answer(id=${inquiry.id})}" method="post">
+                <div class="mb-3">
+                    <label for="answer" class="form-label">답변 작성</label>
+                    <textarea class="form-control" id="answer" name="answer" rows="3" required></textarea>
+                </div>
+                <input type="hidden" name="currentStatus" th:value="${param.status}">
+                <button type="submit" class="btn btn-primary">답변 등록</button>
+            </form>
+        </div>
+
+        <div class="mt-4" th:if="${inquiry.status == 'ANSWERED'}">
+            <form th:action="@{/admin/inquiries/{id}/close(id=${inquiry.id})}" method="post" class="d-inline-block">
+                <input type="hidden" name="currentStatus" th:value="${param.status}">
+                <button type="submit" class="btn btn-success">문의 마감</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 

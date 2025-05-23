@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 상세 - OneByOne 관리자</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4">문의 상세 정보</h2>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>문의 ID:</strong></div>
+                    <div class="col-md-9" th:text="${inquiry.id}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>제목:</strong></div>
+                    <div class="col-md-9" th:text="${inquiry.title}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>문의자:</strong></div>
+                    <div class="col-md-9" th:text="${inquiry.userName}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>상태:</strong></div>
+                    <div class="col-md-9">
+                        <span class="badge"
+                              th:classappend="${inquiry.status == 'PENDING' ? 'bg-warning' :
+                                              inquiry.status == 'ANSWERED' ? 'bg-info' : 'bg-success'}"
+                              th:text="${inquiry.status == 'PENDING' ? '대기중' :
+                                       inquiry.status == 'ANSWERED' ? '답변완료' : '마감'}">
+                        </span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>문의일:</strong></div>
+                    <div class="col-md-9" th:text="${#temporals.format(inquiry.createdAt, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3"><strong>문의 내용:</strong></div>
+                    <div class="col-md-9" th:text="${inquiry.content}"></div>
+                </div>
+                <div class="row mb-3" th:if="${inquiry.answer != null}">
+                    <div class="col-md-3"><strong>답변:</strong></div>
+                    <div class="col-md-9" th:text="${inquiry.answer}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <form th:if="${inquiry.status == 'PENDING'}" 
+                  th:action="@{/admin/inquiries/{id}/answer(id=${inquiry.id})}" 
+                  method="post" 
+                  class="mb-3">
+                <input type="hidden" name="currentStatus" th:value="${param.status}">
+                <div class="form-group">
+                    <label for="answer" class="form-label">답변 작성</label>
+                    <textarea name="answer" id="answer" class="form-control mb-2" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">답변 등록</button>
+            </form>
+
+            <form th:if="${inquiry.status == 'ANSWERED'}" 
+                  th:action="@{/admin/inquiries/{id}/close(id=${inquiry.id})}" 
+                  method="post" 
+                  class="d-inline">
+                <input type="hidden" name="currentStatus" th:value="${param.status}">
+                <button type="submit" class="btn btn-warning">문의 마감</button>
+            </form>
+
+            <a th:href="@{/admin/dashboard(activeTab='inquiries', status=${param.status})}" 
+               class="btn btn-secondary ms-2">목록으로</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

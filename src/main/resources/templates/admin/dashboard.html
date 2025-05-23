@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneByOne 관리자 대시보드</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .nav-tabs .nav-link {
+            color: #495057;
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .table th {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container">
+            <a class="navbar-brand">OneByOne 관리자</a>
+            <form th:action="@{/admin/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">로그아웃</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 알림 메시지 -->
+        <div th:if="${message}" class="alert alert-success" role="alert">
+            <span th:text="${message}">성공 메시지</span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <span th:text="${error}">에러 메시지</span>
+        </div>
+
+        <!-- 대시보드 요약 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">대기 중인 신고</h5>
+                        <p class="card-text" th:text="${pendingReports}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">대기 중인 문의</h5>
+                        <p class="card-text" th:text="${pendingInquiries}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" th:classappend="${activeTab == 'reports' ? 'active' : ''}"
+                   th:href="@{/admin/dashboard(activeTab='reports', status=${reportStatus})}">
+                    신고 관리
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" th:classappend="${activeTab == 'inquiries' ? 'active' : ''}"
+                   th:href="@{/admin/dashboard(activeTab='inquiries', status=${inquiryStatus})}">
+                    문의 관리
+                </a>
+            </li>
+        </ul>
+
+        <!-- 탭 컨텐츠 -->
+        <div class="tab-content mt-3">
+            <!-- 신고 관리 탭 -->
+            <div class="tab-pane fade" th:classappend="${activeTab == 'reports' ? 'show active' : ''}" id="reports" role="tabpanel">
+                <div class="mb-3">
+                    <form th:action="@{/admin/dashboard}" method="get" class="d-inline">
+                        <input type="hidden" name="activeTab" value="reports">
+                        <select class="form-select" style="width: auto;" name="status" onchange="this.form.submit()">
+                            <option value="ALL" th:selected="${reportStatus == 'ALL'}">전체</option>
+                            <option value="PENDING" th:selected="${reportStatus == 'PENDING'}">대기중</option>
+                            <option value="IN_PROGRESS" th:selected="${reportStatus == 'IN_PROGRESS'}">처리중</option>
+                            <option value="COMPLETED" th:selected="${reportStatus == 'COMPLETED'}">처리완료</option>
+                        </select>
+                    </form>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>유형</th>
+                            <th>신고자</th>
+                            <th>대상</th>
+                            <th>상태</th>
+                            <th>신고일</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="report : ${reports}">
+                            <td th:text="${report.id}"></td>
+                            <td th:text="${report.type}"></td>
+                            <td th:text="${report.reporterName}"></td>
+                            <td th:text="${report.targetName}"></td>
+                            <td>
+                                <span class="badge status-badge"
+                                      th:classappend="${report.status == 'PENDING' ? 'bg-warning' :
+                                                      report.status == 'IN_PROGRESS' ? 'bg-info' : 'bg-success'}"
+                                      th:text="${report.status == 'PENDING' ? '대기중' :
+                                               report.status == 'IN_PROGRESS' ? '처리중' : '처리완료'}">
+                                </span>
+                            </td>
+                            <td th:text="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td>
+                                <a th:href="@{/admin/reports/{id}(id=${report.id})}" 
+                                   class="btn btn-sm btn-outline-primary">상세보기</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 문의 관리 탭 -->
+            <div class="tab-pane fade" th:classappend="${activeTab == 'inquiries' ? 'show active' : ''}" id="inquiries" role="tabpanel">
+                <div class="mb-3">
+                    <form th:action="@{/admin/dashboard}" method="get" class="d-inline">
+                        <input type="hidden" name="activeTab" value="inquiries">
+                        <select class="form-select" style="width: auto;" name="status" onchange="this.form.submit()">
+                            <option value="ALL" th:selected="${inquiryStatus == 'ALL'}">전체</option>
+                            <option value="PENDING" th:selected="${inquiryStatus == 'PENDING'}">대기중</option>
+                            <option value="ANSWERED" th:selected="${inquiryStatus == 'ANSWERED'}">답변완료</option>
+                            <option value="CLOSED" th:selected="${inquiryStatus == 'CLOSED'}">마감</option>
+                        </select>
+                    </form>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>제목</th>
+                            <th>문의자</th>
+                            <th>상태</th>
+                            <th>문의일</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="inquiry : ${inquiries}">
+                            <td th:text="${inquiry.id}"></td>
+                            <td th:text="${inquiry.title}"></td>
+                            <td th:text="${inquiry.userName}"></td>
+                            <td>
+                                <span class="badge status-badge"
+                                      th:classappend="${inquiry.status == 'PENDING' ? 'bg-warning' :
+                                                      inquiry.status == 'ANSWERED' ? 'bg-info' : 'bg-success'}"
+                                      th:text="${inquiry.status == 'PENDING' ? '대기중' :
+                                               inquiry.status == 'ANSWERED' ? '답변완료' : '마감'}">
+                                </span>
+                            </td>
+                            <td th:text="${#temporals.format(inquiry.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td>
+                                <a th:href="@{/admin/inquiries/{id}(id=${inquiry.id})}" 
+                                   class="btn btn-sm btn-outline-primary">상세보기</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

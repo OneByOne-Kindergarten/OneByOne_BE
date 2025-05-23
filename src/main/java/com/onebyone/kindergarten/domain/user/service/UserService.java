@@ -155,4 +155,19 @@ public class UserService{
         User user = findUser(email);
         user.updateHomeShortcut(homeShortcutsDto.toJson());
     }
+
+    /// 관리자 로그인
+    public String signInAdmin(String email, String password) {
+        // 사용자 조회
+        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+
+        // 비밀번호 확인
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
+        }
+
+        // 토큰 발급
+        return user.getEmail();
+    }
 }

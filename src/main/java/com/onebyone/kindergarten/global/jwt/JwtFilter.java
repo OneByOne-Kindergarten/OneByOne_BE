@@ -12,6 +12,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 
 @Component
@@ -19,8 +20,20 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private static final String[] EXCLUDED_PATHS = {
+        "/admin/",
+        "/users/reissue",
+        "/favicon.ico"
+    };
 
 //    private final RedisService redisService;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return Arrays.stream(EXCLUDED_PATHS)
+                .anyMatch(path::startsWith);
+    }
 
     @Override
     protected void doFilterInternal(

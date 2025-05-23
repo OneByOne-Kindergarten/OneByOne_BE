@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -45,4 +46,14 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
            "JOIN FETCH i.user " +
            "WHERE i.id = :id")
     Optional<Inquiry> findByIdWithUser(@Param("id") Long id);
+
+    @Query("SELECT COUNT(i) FROM Inquiry i WHERE i.status = 'PENDING'")
+    long countByStatusPending();
+
+    Long countByStatus(InquiryStatus status);
+
+    List<Inquiry> findAllByOrderByCreatedAtDesc();
+
+    List<Inquiry> findAllByStatusOrderByCreatedAtDesc(InquiryStatus status);
+
 }

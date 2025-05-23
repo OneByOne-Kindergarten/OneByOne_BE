@@ -22,6 +22,7 @@ import com.onebyone.kindergarten.domain.reports.exception.ReportNotFoundExceptio
 import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -89,8 +90,8 @@ public class ReportService {
 
         // 신고 목록 조회
         return reportRepository.findAllDtosByCondition(
-                searchDTO.getStatus(),
-                searchDTO.getTargetType(),
+                searchDTO != null ? searchDTO.getStatus() : null,
+                searchDTO != null ? searchDTO.getTargetType() : null,
                 pageable
         );
     }
@@ -133,5 +134,33 @@ public class ReportService {
                     .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 댓글입니다."));
             case REVIEW -> throw new InvalidReportTargetException("리뷰 처리는 아직 구현되지 않았습니다.");
         }
+    }
+
+    /// 대기 중인 신고 수 조회 (관리자)
+    public long countPendingReports() {
+        return reportRepository.countByStatusPending();
+    }
+
+    public Long countByStatus(String status) {
+        return reportRepository.countByStatus(ReportStatus.valueOf(status));
+    }
+
+    public List<Report> findAllByOrderByCreatedAtDesc() {
+        return reportRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    public List<Report> findAllByStatusOrderByCreatedAtDesc(String status) {
+        return reportRepository.findAllByStatusOrderByCreatedAtDesc(ReportStatus.valueOf(status));
+    }
+
+    public Report findById(Long id) {
+        return reportRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("신고를 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public void updateStatus(Long id, String status) {
+        Report report = findById(id);
+        report.updateStatus(ReportStatus.valueOf(status));
     }
 }

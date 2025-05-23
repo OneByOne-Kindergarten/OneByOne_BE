@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="report-modal-content">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">신고 유형</dt>
+            <dd class="col-sm-9" th:text="${report.type}"></dd>
+
+            <dt class="col-sm-3">신고자</dt>
+            <dd class="col-sm-9" th:text="${report.reporterName}"></dd>
+
+            <dt class="col-sm-3">신고 대상</dt>
+            <dd class="col-sm-9" th:text="${report.targetName}"></dd>
+
+            <dt class="col-sm-3">신고 내용</dt>
+            <dd class="col-sm-9" th:text="${report.content}"></dd>
+
+            <dt class="col-sm-3">신고일</dt>
+            <dd class="col-sm-9" th:text="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm')}"></dd>
+
+            <dt class="col-sm-3">상태</dt>
+            <dd class="col-sm-9">
+                <span class="badge"
+                      th:classappend="${report.status == 'PENDING' ? 'bg-warning' :
+                                      report.status == 'IN_PROGRESS' ? 'bg-info' : 'bg-success'}"
+                      th:text="${report.status == 'PENDING' ? '대기중' :
+                               report.status == 'IN_PROGRESS' ? '처리중' : '완료'}">
+                </span>
+            </dd>
+        </dl>
+
+        <div class="mt-4" th:if="${report.status != 'COMPLETED'}">
+            <form th:action="@{/admin/reports/{id}/status(id=${report.id})}" method="post" class="d-inline-block">
+                <input type="hidden" name="status" value="IN_PROGRESS">
+                <input type="hidden" name="currentStatus" th:value="${param.status}">
+                <button type="submit" class="btn btn-warning btn-sm me-2"
+                        th:if="${report.status == 'PENDING'}">처리중으로 변경</button>
+            </form>
+            <form th:action="@{/admin/reports/{id}/status(id=${report.id})}" method="post" class="d-inline-block">
+                <input type="hidden" name="status" value="COMPLETED">
+                <input type="hidden" name="currentStatus" th:value="${param.status}">
+                <button type="submit" class="btn btn-success btn-sm">처리완료</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 

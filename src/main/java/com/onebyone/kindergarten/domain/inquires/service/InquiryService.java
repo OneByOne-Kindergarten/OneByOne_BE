@@ -19,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -151,5 +153,39 @@ public class InquiryService {
         inquiry.closeInquiry();
 
         return InquiryResponseDTO.fromEntity(inquiry);
+    }
+
+    /// 처리 대기중인 문의 수 조회
+    public long countPendingInquiries() {
+        return inquiryRepository.countByStatusPending();
+    }
+
+    public Long countByStatus(String status) {
+        return inquiryRepository.countByStatus(InquiryStatus.valueOf(status));
+    }
+
+    public List<Inquiry> findAllByOrderByCreatedAtDesc() {
+        return inquiryRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    public List<Inquiry> findAllByStatusOrderByCreatedAtDesc(String status) {
+        return inquiryRepository.findAllByStatusOrderByCreatedAtDesc(InquiryStatus.valueOf(status));
+    }
+
+    public Inquiry findById(Long id) {
+        return inquiryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("문의를 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public void submitAnswer(Long id, AnswerInquiryRequestDTO requestDTO) {
+        Inquiry inquiry = findById(id);
+        inquiry.answerInquiry(requestDTO.getAnswer());
+    }
+
+    @Transactional
+    public void close(Long id) {
+        Inquiry inquiry = findById(id);
+        inquiry.closeInquiry();
     }
 }

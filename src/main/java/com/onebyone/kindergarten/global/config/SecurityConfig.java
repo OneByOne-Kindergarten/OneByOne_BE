@@ -12,7 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.http.HttpMethod;
 
 
 @Configuration
@@ -35,15 +34,42 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // h2-console 사용을 위한 설정
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/h2-console/**", "/users/sign-up", "/users/sign-in","/swagger-ui/**", "/users/reissue", "/users/kakao/callback", "/users/naver/callback", "/kindergarten/*/simple",
+                        .requestMatchers("/", "/h2-console/**", "/users/sign-up", "/users/sign-in","/swagger-ui/**", 
+                                "/users/reissue", "/users/kakao/callback", "/users/naver/callback", 
+                                "/kindergarten/*/simple",
                                 "/v3/api-docs/**",
                                 "/community/**",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/notice/**")
+                                "/notice/**",
+                                "/admin/css/**",
+                                "/admin/js/**",
+                                "/admin/images/**",
+                                "/favicon.ico",
+                                "/static/**",
+                                "/admin/login",
+                                "/admin/login/**").permitAll()
+                        // 관리자 API는 ADMIN 권한 필요
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // 나머지 요청은 인증된 사용자만 접근 가능
+                        .anyRequest().authenticated()
+                )
+
+                .formLogin(form -> form
+                        .loginPage("/admin/login")
+                        .loginProcessingUrl("/admin/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/admin/dashboard", true)
+                        .failureUrl("/admin/login?error=true")
                         .permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 전용 API
-                        .anyRequest().authenticated() // 나머지 요청은 인증된 사용자만 접근 가능
+                )
+
+                .logout(logout -> logout
+                        .logoutUrl("/admin/logout")
+                        .logoutSuccessUrl("/admin/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                 )
 
                 .exceptionHandling(ex -> ex
@@ -52,7 +78,7 @@ public class SecurityConfig {
                 )
 
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 X
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 세션 관리 정책 설정
                 )
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JwtFilter 추가
