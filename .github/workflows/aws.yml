@@ -29,7 +29,7 @@ jobs:
       - name: Build JAR
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            ./gradlew clean build -x test -Dspring.profiles.active=prod
+            ./gradlew clean build -x test -Dspring.profiles.active=production
           else
             ./gradlew clean build -x test -Dspring.profiles.active=dev
           fi
@@ -62,7 +62,7 @@ jobs:
             sudo docker stop kindergarten || true
             sudo docker rm kindergarten || true
             sudo docker pull ${{ secrets.DOCKER_HUB }}/kindergarten:latest
-            sudo docker run -d --name kindergarten -p 8080:8080 -v /home/ubuntu/logs:/home/ubuntu/logs ${{ secrets.DOCKER_HUB }}/kindergarten:latest
+            sudo docker run -d --name kindergarten -p 8080:8080 -v /home/ubuntu/logs:/home/ubuntu/logs -e SPRING_PROFILES_ACTIVE=production ${{ secrets.DOCKER_HUB }}/kindergarten:latest
 
       - name: Deploy to Dev Server
         if: github.ref == 'refs/heads/develop'
@@ -75,4 +75,4 @@ jobs:
             sudo docker stop kindergarten || true
             sudo docker rm kindergarten || true
             sudo docker pull ${{ secrets.DOCKER_HUB }}/kindergarten:dev
-            sudo docker run -d --name kindergarten -p 8080:8080 -v /home/ubuntu/logs:/home/ubuntu/logs ${{ secrets.DOCKER_HUB }}/kindergarten:dev
+            sudo docker run -d --name kindergarten -p 8080:8080 -v /home/ubuntu/logs:/home/ubuntu/logs -e SPRING_PROFILES_ACTIVE=dev ${{ secrets.DOCKER_HUB }}/kindergarten:dev
