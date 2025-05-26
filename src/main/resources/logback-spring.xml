@@ -18,6 +18,10 @@
         <property name="LOGS_PATH" value="/home/ubuntu/logs" />
     </springProfile>
 
+    <springProfile name="production">
+        <property name="LOGS_PATH" value="/home/ubuntu/logs" />
+    </springProfile>
+
     <!-- 롤링 파일 설정 (공통) -->
     <appender name="DAILY_ROLLING_FILE_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS_PATH}/application-logging.log</file>
