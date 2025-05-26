@@ -29,7 +29,7 @@ jobs:
       - name: Build JAR
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            ./gradlew clean build -x test -Dspring.profiles.active=prod
+            ./gradlew clean build -x test -Dspring.profiles.active=production
           else
             ./gradlew clean build -x test -Dspring.profiles.active=dev
           fi
