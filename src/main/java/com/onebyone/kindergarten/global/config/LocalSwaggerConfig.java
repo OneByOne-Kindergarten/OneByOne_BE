@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Profile;
                 @SecurityRequirement(name = "JWT Authentication")
         },
         servers = {
-                @Server(url = "https://api.onebyone.live")
+                @Server(url = "http://localhost:8080")
         }
 )
 @SecurityScheme(
@@ -34,8 +34,8 @@ import org.springframework.context.annotation.Profile;
         bearerFormat = "JWT"
 )
 @Configuration
-@Profile("production")
+@Profile({"local", "dev"})
 @RequiredArgsConstructor
-public class SwaggerConfig {
+public class LocalSwaggerConfig {
 
 }
