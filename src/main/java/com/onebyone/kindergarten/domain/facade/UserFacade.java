@@ -67,6 +67,7 @@ public class UserFacade {
         params.add("grant_type", "authorization_code");
         params.add("client_id", kakaoApiKey);
         params.add("redirect_uri", kakaoRedirectUrl);
+        params.add("code", code);
 
         KakaoTokenResponse tokenResponse = kakaoAuthClient.getAccessToken(params);
         String kakaoAccessToken = tokenResponse.getAccess_token();
