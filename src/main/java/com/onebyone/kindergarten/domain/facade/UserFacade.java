@@ -6,13 +6,16 @@ import com.onebyone.kindergarten.domain.feignClient.KakaoApiClient;
 import com.onebyone.kindergarten.domain.feignClient.KakaoAuthClient;
 import com.onebyone.kindergarten.domain.feignClient.NaverApiClient;
 import com.onebyone.kindergarten.domain.feignClient.NaverAuthClient;
+import com.onebyone.kindergarten.domain.provider.EmailProvider;
 import com.onebyone.kindergarten.domain.user.dto.UserDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.*;
 import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.jwt.JwtProvider;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -28,6 +31,7 @@ public class UserFacade {
     private final KakaoAuthClient kakaoAuthClient;
     private final NaverAuthClient naverAuthClient;
     private final NaverApiClient naverApiClient;
+    private final EmailProvider emailProvider;
     @Value("${oauth.kakao.secret-key}")
     private String kakaoApiKey;
     @Value("${oauth.kakao.url.redirect-uri}")
@@ -37,8 +41,7 @@ public class UserFacade {
     @Value("${oauth.naver.client-secret}")
     private String naverClientSecret;
 
-
-    public SignUpResponseDTO signUp(SignUpRequestDTO request){
+    public SignUpResponseDTO signUp(SignUpRequestDTO request) {
         String email = userService.signUp(request);
 
         String accessToken = jwtProvider.generateAccessToken(email);
@@ -109,5 +112,40 @@ public class UserFacade {
     public PageCommunityCommentsResponseDTO getWroteMyCommunityComments(String username, int page, int size) {
         UserDTO user = userService.getUser(username);
         return communityCommentService.getWroteMyCommunityComments(user.getUserId(), page, size);
+    }
+
+    @Transactional
+    public boolean emailCertification(String email) {
+        String number = createNumber();
+        boolean isSaved = userService.saveCertification(email, number);
+        if (isSaved) {
+            boolean isSended = emailProvider.sendCertifivationMail(email, number);
+            if (isSended) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String createNumber() {
+        Random random = new Random();
+        StringBuffer key = new StringBuffer();
+
+        for (int i = 0; i < 8; i++) {
+            int idx = random.nextInt(3);
+
+            switch (idx) {
+                case 0:
+                    key.append((char) (random.nextInt(26) + 97));
+                    break;
+                case 1:
+                    key.append((char) (random.nextInt(26) + 65));
+                    break;
+                case 2:
+                    key.append(random.nextInt(9));
+                    break;
+            }
+        }
+        return key.toString();
     }
 }

@@ -32,10 +32,10 @@ public class User extends BaseEntity {
     private UserProvider provider; // 제공자 - 일반, 구글, 애플
 
     @Column(name = "kakao_id")
-    private Long kakaoProviderId;  // 카카오 로그인 회사 당 할당받는 유저 pk
+    private Long kakaoProviderId; // 카카오 로그인 회사 당 할당받는 유저 pk
 
     @Column(name = "naver_id")
-    private String naverProviderId;  // 카카오 로그인 회사 당 할당받는 유저 pk
+    private String naverProviderId; // 카카오 로그인 회사 당 할당받는 유저 pk
 
     @Column(nullable = false)
     private String nickname; // 닉네임 - 랜덤 생성
@@ -59,7 +59,8 @@ public class User extends BaseEntity {
     @JoinColumn(name = "kindergarten_id")
     private Kindergarten Kindergarten;
 
-    public static User registerKakao(String email, String password, Long kakaoProviderId, String nickname, UserRole role, String profileImageUrl) {
+    public static User registerKakao(String email, String password, Long kakaoProviderId, String nickname,
+            UserRole role, String profileImageUrl) {
         return User.builder()
                 .email(email)
                 .password(password)
@@ -72,7 +73,8 @@ public class User extends BaseEntity {
                 .build();
     }
 
-    public static User registerNaver(String email, String password, String naverProviderId, String nickname, UserRole role, String profileImageUrl) {
+    public static User registerNaver(String email, String password, String naverProviderId, String nickname,
+            UserRole role, String profileImageUrl) {
         return User.builder()
                 .email(email)
                 .password(password)
@@ -113,5 +115,8 @@ public class User extends BaseEntity {
     public void updateHomeShortcut(String homeShortcutJson) {
         this.homeShortcut = homeShortcutJson;
     }
-}
 
+    public void updateUserRole(UserRole role) {
+        this.role = role;
+    }
+}
