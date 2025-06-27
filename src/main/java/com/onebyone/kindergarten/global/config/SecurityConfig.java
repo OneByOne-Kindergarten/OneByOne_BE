@@ -66,6 +66,7 @@ public class SecurityConfig {
                                                                 "/users/sign-in", "/swagger-ui/**", "/users/reissue",
                                                                 "/users/kakao/callback", "/users/naver/callback",
                                                                 "/kindergarten/*/simple", "/users/email-certification",
+                                                                "/users/check-email-certification",
                                                                 "/v3/api-docs/**",
                                                                 "/community/**",
                                                                 "/swagger-resources/**",
