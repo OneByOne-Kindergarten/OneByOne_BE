@@ -24,6 +24,7 @@ import com.onebyone.kindergarten.global.error.Error;
 import com.onebyone.kindergarten.global.error.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,7 +61,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // 기본적으로 500 처리
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // 기본적으로 500 처리
     public ErrorResponse handleAllExceptions(Exception e) {
         log.error("알 수 없는 예외 발생: {}", e.getMessage(), e);
         return buildError(Error.INTERNAL_SERVER_ERROR);
@@ -227,6 +228,12 @@ public class ErrorHandler {
     protected ErrorResponse handleEntityNotFoundException(EntityNotFoundException e) {
         log.error("EntityNotFoundException 발생: {}", e.getMessage(), e);
         return buildError(Error.ENTITY_NOT_FOUND_EXCEPTION);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ErrorResponse handleEnumParseError(HttpMessageNotReadableException e) {
+        log.error("HttpMessageNotRedableException 발생: {}", e.getMessage(), e);
+        return buildError(Error.HTTP_MESSAGE_NOT_REDABLE_EXCEPTION);
     }
 
     private ErrorResponse buildError(Error error) {

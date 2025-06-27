@@ -1,18 +1,22 @@
 package com.onebyone.kindergarten.domain.user.service;
 
 import com.onebyone.kindergarten.domain.user.dto.*;
+import com.onebyone.kindergarten.domain.user.dto.request.CheckEmailCertificationRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserNicknameRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserPasswordRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.UpdateUserRoleRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.KakaoUserResponse;
 import com.onebyone.kindergarten.domain.user.dto.response.NaverUserResponse;
+import com.onebyone.kindergarten.domain.user.entity.EmailCertification;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
 import com.onebyone.kindergarten.domain.user.exception.PasswordMismatchException;
+import com.onebyone.kindergarten.domain.user.repository.EmailCertificationRepository;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,9 +27,10 @@ import javax.security.auth.login.AccountNotFoundException;
 
 @Service
 @RequiredArgsConstructor
-public class UserService{
+public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final EmailCertificationRepository emailCertificationRepository;
 
     @Transactional
     public String signUp(SignUpRequestDTO request) {
@@ -90,7 +95,8 @@ public class UserService{
     }
 
     private User findUser(String email) {
-        return userRepository.findByEmailAndDeletedAtIsNull(email).orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다"));
+        return userRepository.findByEmailAndDeletedAtIsNull(email)
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다"));
     }
 
     @Transactional
@@ -110,15 +116,17 @@ public class UserService{
     }
 
     public UserDTO getUser(String email) {
-        return UserDTO.from(userRepository.findUserWithKindergarten(email).orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다")));
+        return UserDTO.from(userRepository.findUserWithKindergarten(email)
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다")));
     }
 
     @Transactional
     public String signUpByKakao(KakaoUserResponse userResponse) {
         String email = userResponse.getKakao_account().getEmail();
 
-        String nickname = userResponse.getKakao_account().getProfile() != null ?
-                userResponse.getKakao_account().getProfile().getNickname() : "카카오_" + userResponse.getId();
+        String nickname = userResponse.getKakao_account().getProfile() != null
+                ? userResponse.getKakao_account().getProfile().getNickname()
+                : "카카오_" + userResponse.getId();
 
         if (isExistedEmail(email)) {
             return email;
@@ -126,7 +134,8 @@ public class UserService{
 
         String dummyPassword = encodePassword("kakao_" + userResponse.getId());
 
-        User user = User.registerKakao(email, dummyPassword, userResponse.getId(), nickname, UserRole.GENERAL, userResponse.getKakao_account().getProfile().getProfile_image_url());
+        User user = User.registerKakao(email, dummyPassword, userResponse.getId(), nickname, UserRole.GENERAL,
+                userResponse.getKakao_account().getProfile().getProfile_image_url());
 
         userRepository.save(user);
 
@@ -143,7 +152,9 @@ public class UserService{
 
         String dummyPassword = encodePassword("kakao_" + userResponse.getResponse().getId());
 
-        User user = User.registerNaver(email, dummyPassword, userResponse.getResponse().getId(), userResponse.getResponse().getNickname(), UserRole.GENERAL, userResponse.getResponse().getProfile_image());
+        User user = User.registerNaver(email, dummyPassword, userResponse.getResponse().getId(),
+                userResponse.getResponse().getNickname(), UserRole.GENERAL,
+                userResponse.getResponse().getProfile_image());
 
         userRepository.save(user);
 
@@ -154,5 +165,35 @@ public class UserService{
     public void updateHomeShortcut(String email, HomeShortcutsDto homeShortcutsDto) {
         User user = findUser(email);
         user.updateHomeShortcut(homeShortcutsDto.toJson());
+    }
+
+    @Transactional
+    public boolean saveCertification(String email, String certification) {
+        EmailCertification emailCert = EmailCertification.builder()
+                .email(email)
+                .certification(certification)
+                .build();
+
+        EmailCertification saved = emailCertificationRepository.save(emailCert);
+        return saved != null;
+    }
+
+    public boolean checkEmailCertification(CheckEmailCertificationRequestDTO request) {
+        EmailCertification emailCertification = emailCertificationRepository
+                .findById(request.getEmail())
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+
+        if (emailCertification.getCertification().equals(request.getCertification())) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    @Transactional
+    public void updateUserRole(String email, UpdateUserRoleRequestDTO request) {
+        User user = findUser(email);
+        user.updateUserRole(request.getRole());
     }
 }
