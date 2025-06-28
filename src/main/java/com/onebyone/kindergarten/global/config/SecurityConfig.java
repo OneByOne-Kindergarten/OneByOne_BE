@@ -64,7 +64,7 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers("/", "/h2-console/**", "/users/sign-up",
                                                                 "/users/sign-in", "/swagger-ui/**", "/users/reissue",
-                                                                "/users/kakao/callback", "/users/naver/callback",
+                                                                "/users/kakao/callback", "/users/naver/callback", "/users/apple/callback",
                                                                 "/kindergarten/*/simple", "/users/email-certification",
                                                                 "/users/check-email-certification",
                                                                 "/v3/api-docs/**",

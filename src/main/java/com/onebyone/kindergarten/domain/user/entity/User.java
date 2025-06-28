@@ -35,7 +35,10 @@ public class User extends BaseEntity {
     private Long kakaoProviderId; // 카카오 로그인 회사 당 할당받는 유저 pk
 
     @Column(name = "naver_id")
-    private String naverProviderId; // 카카오 로그인 회사 당 할당받는 유저 pk
+    private String naverProviderId; // 네이버 로그인 회사 당 할당받는 유저 pk
+
+    @Column(name = "apple_id")
+    private String appleProviderId; // 애플 로그인 고유 사용자 ID
 
     @Column(nullable = false)
     private String nickname; // 닉네임 - 랜덤 생성
@@ -83,6 +86,19 @@ public class User extends BaseEntity {
                 .nickname(nickname)
                 .role(role)
                 .profileImageUrl(profileImageUrl)
+                .status(UserStatus.ACTIVE)
+                .build();
+    }
+
+    public static User registerApple(String email, String password, String appleProviderId, String nickname,
+            UserRole role) {
+        return User.builder()
+                .email(email)
+                .password(password)
+                .provider(UserProvider.APPLE)
+                .appleProviderId(appleProviderId)
+                .nickname(nickname)
+                .role(role)
                 .status(UserStatus.ACTIVE)
                 .build();
     }
