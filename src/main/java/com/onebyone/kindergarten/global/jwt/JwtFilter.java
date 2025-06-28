@@ -39,6 +39,13 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (requestURI.startsWith("/users/kakao/callback") || 
+            requestURI.startsWith("/users/naver/callback") || 
+            requestURI.startsWith("/users/apple/callback")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String jwt = resolveToken(request);
 
         if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {
