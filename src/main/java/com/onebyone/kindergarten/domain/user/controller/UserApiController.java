@@ -106,12 +106,19 @@ public class UserApiController {
         return userFacade.kakaoLogin(code);
     }
 
-    @Operation(summary = "유저-09 네이버 소셜 로그인", description = "카카오 소셜로그인을 진행합니다")
+    @Operation(summary = "유저-09 네이버 소셜 로그인", description = "네이버 소셜로그인을 진행합니다")
     @GetMapping("/naver/callback")
     public SignInResponseDTO getNaverAuthorizationCode(
             @RequestParam(name = "code") String code,
             @RequestParam(name = "state") String state) {
         return userFacade.naverLogin(code, state);
+    }
+
+    @Operation(summary = "유저-10 애플 소셜 로그인", description = "애플 소셜로그인을 진행합니다")
+    @PostMapping("/apple/callback")
+    public SignInResponseDTO appleLogin(
+            @RequestParam(name = "id_token") String idToken) {
+        return userFacade.appleLogin(idToken);
     }
 
     @Operation(summary = "유저-010 작성한 리뷰 조회", description = "작성한 카테고리 리뷰를 조회합니다.")

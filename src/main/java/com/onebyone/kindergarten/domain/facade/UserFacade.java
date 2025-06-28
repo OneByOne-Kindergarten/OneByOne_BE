@@ -8,6 +8,8 @@ import com.onebyone.kindergarten.domain.feignClient.NaverApiClient;
 import com.onebyone.kindergarten.domain.feignClient.NaverAuthClient;
 import com.onebyone.kindergarten.domain.provider.EmailProvider;
 import com.onebyone.kindergarten.domain.user.dto.UserDTO;
+import com.onebyone.kindergarten.domain.user.dto.response.AppleUserResponse;
+import com.onebyone.kindergarten.domain.user.service.AppleAuthService;
 import com.onebyone.kindergarten.domain.user.dto.response.*;
 import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
@@ -31,6 +33,7 @@ public class UserFacade {
     private final KakaoAuthClient kakaoAuthClient;
     private final NaverAuthClient naverAuthClient;
     private final NaverApiClient naverApiClient;
+    private final AppleAuthService appleAuthService;
     private final EmailProvider emailProvider;
     @Value("${oauth.kakao.secret-key}")
     private String kakaoApiKey;
@@ -99,6 +102,20 @@ public class UserFacade {
 
         NaverUserResponse userResponse = naverApiClient.getUserInfo("Bearer " + response.getAccess_token());
         String email = userService.signUpByNaver(userResponse);
+
+        String accessToken = jwtProvider.generateAccessToken(email);
+        String refreshToken = jwtProvider.generateRefreshToken(email);
+
+        return SignInResponseDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public SignInResponseDTO appleLogin(String idToken) {
+        // Apple ID Token 검증 및 사용자 정보 추출
+        AppleUserResponse userResponse = appleAuthService.verifyIdToken(idToken);
+        String email = userService.signUpByApple(userResponse);
 
         String accessToken = jwtProvider.generateAccessToken(email);
         String refreshToken = jwtProvider.generateRefreshToken(email);
