@@ -11,31 +11,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@OpenAPIDefinition(
-        info = @Info(
-                title = "원바원 API",
-                description = "원바원 API 명세서입니다.",
-                version = "v1"
-        ),
-        security = {
+@OpenAPIDefinition(info = @Info(title = "원바원 API", description = "운영 환경 원바원 API 명세서입니다.", version = "v1"), security = {
                 @SecurityRequirement(name = "JWT Authentication")
-        },
-        servers = {
+}, servers = {
                 @Server(url = "https://api.onebyone.live")
-        }
-)
-@SecurityScheme(
-        name = "JWT Authentication",
-        type = SecuritySchemeType.HTTP,
-        description = "JWT 인증을 위한 헤더. Bearer Authentication",
-        paramName = "Authorization",
-        in = SecuritySchemeIn.HEADER,
-        scheme = "bearer",
-        bearerFormat = "JWT"
-)
+})
+@SecurityScheme(name = "JWT Authentication", type = SecuritySchemeType.HTTP, description = "JWT 인증을 위한 헤더. Bearer Authentication", paramName = "Authorization", in = SecuritySchemeIn.HEADER, scheme = "bearer", bearerFormat = "JWT")
 @Configuration
 @Profile("production")
 @RequiredArgsConstructor
-public class SwaggerConfig {
+public class ProductionSwaggerConfig {
 
 }

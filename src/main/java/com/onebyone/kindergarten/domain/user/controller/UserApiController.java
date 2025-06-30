@@ -201,9 +201,17 @@ public class UserApiController {
     @PostMapping("/role")
     public ResponseEntity<String> updateUserRole(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody @Valid UpdateUserRoleRequestDTO request) {
+            @RequestBody UpdateUserRoleRequestDTO request) {
         userService.updateUserRole(userDetails.getUsername(), request);
         return ResponseEntity.ok("권한이 변경되었습니다.");
+    }
+
+    @Operation(summary = "유저-15 비밀번호 재설정", description = "유저의 비밀번호를 임시 비밀번호로 변경합니다.")
+    @PatchMapping("/temporary-password")
+    public ResponseEntity<String> updateTemporaryPassword(
+            @RequestBody UpdateTemporaryPasswordRequestDTO request) {
+        userFacade.updateTemporaryPassword(request.getEmail());
+        return ResponseEntity.ok("임시 비밀번호 변경이 완료되었습니다.");
     }
 
     // TODO: 방식 협의 됐을 때
@@ -212,12 +220,4 @@ public class UserApiController {
     // public void changeEmail(){
     //
     // }
-
-    // TODO: 방식 협의 됐을 때
-    // @Operation(summary = "바밀번호 재설정", description = "비밀번호 재설정")
-    // @PostMapping("/email")
-    // public void changeEmail(){
-    //
-    // }
-
 }

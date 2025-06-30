@@ -64,8 +64,10 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers("/", "/h2-console/**", "/users/sign-up",
                                                                 "/users/sign-in", "/swagger-ui/**", "/users/reissue",
-                                                                "/users/kakao/callback", "/users/naver/callback", "/users/apple/callback",
+                                                                "/users/kakao/callback", "/users/naver/callback",
+                                                                "/users/apple/callback",
                                                                 "/kindergarten/*/simple", "/users/email-certification",
+                                                                "/users/temporary-password",
                                                                 "/users/check-email-certification",
                                                                 "/v3/api-docs/**",
                                                                 "/community/**",
@@ -76,7 +78,6 @@ public class SecurityConfig {
                                                 .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 전용 API
                                                 .anyRequest().authenticated() // 나머지 요청은 인증된 사용자만 접근 가능
                                 )
-
                                 .exceptionHandling(ex -> ex
                                                 .authenticationEntryPoint(jwtEntryPoint) // 인증 실패 시 처리
                                                 .accessDeniedHandler(jwtAccessDeniedHandler) // 인가 실패 시 처리

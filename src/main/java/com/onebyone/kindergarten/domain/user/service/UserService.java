@@ -166,18 +166,20 @@ public class UserService {
     public String signUpByApple(AppleUserResponse userResponse) {
         String appleUserId = userResponse.getSub();
         String providedEmail = userResponse.getEmail();
-        
+
         // 이메일 숨기기 처리: 시스템 이메일 생성
         String systemEmail;
         if (providedEmail != null && providedEmail.endsWith("@privaterelay.appleid.com")) {
             // 익명 이메일인 경우 시스템 이메일 생성
-            systemEmail = "apple_user_" + appleUserId.substring(0, Math.min(appleUserId.length(), 10)) + "@kindergarten.system";
+            systemEmail = "apple_user_" + appleUserId.substring(0, Math.min(appleUserId.length(), 10))
+                    + "@kindergarten.system";
         } else if (providedEmail != null) {
             // 실제 이메일인 경우 그대로 사용
             systemEmail = providedEmail;
         } else {
             // 이메일이 없는 경우 시스템 이메일 생성
-            systemEmail = "apple_user_" + appleUserId.substring(0, Math.min(appleUserId.length(), 10)) + "@kindergarten.system";
+            systemEmail = "apple_user_" + appleUserId.substring(0, Math.min(appleUserId.length(), 10))
+                    + "@kindergarten.system";
         }
 
         if (isExistedEmail(systemEmail)) {
@@ -185,7 +187,8 @@ public class UserService {
         }
 
         String dummyPassword = encodePassword("apple_" + appleUserId);
-        String nickname = userResponse.getName() != null ? userResponse.getName() : "애플_사용자_" + appleUserId.substring(0, 8);
+        String nickname = userResponse.getName() != null ? userResponse.getName()
+                : "애플_사용자_" + appleUserId.substring(0, 8);
 
         User user = User.registerApple(systemEmail, dummyPassword, appleUserId, nickname, UserRole.GENERAL);
 
@@ -228,5 +231,10 @@ public class UserService {
     public void updateUserRole(String email, UpdateUserRoleRequestDTO request) {
         User user = findUser(email);
         user.updateUserRole(request.getRole());
+    }
+
+    public void updateTemporaryPassword(String email, String number) {
+        User user = findUser(email);
+        user.changePassword(passwordEncoder.encode(number));
     }
 }
