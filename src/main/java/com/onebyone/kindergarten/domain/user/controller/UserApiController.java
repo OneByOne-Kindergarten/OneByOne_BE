@@ -198,7 +198,7 @@ public class UserApiController {
     }
 
     @Operation(summary = "유저-14 유저 역할 변경", description = "사용자의 역할(교사, 예비교사) 수정합니다.")
-    @PostMapping("/shortcuts")
+    @PostMapping("/role")
     public ResponseEntity<String> updateUserRole(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid UpdateUserRoleRequestDTO request) {
