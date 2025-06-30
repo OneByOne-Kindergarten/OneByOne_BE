@@ -210,8 +210,14 @@ public class UserApiController {
     @PatchMapping("/temporary-password")
     public ResponseEntity<String> updateTemporaryPassword(
             @RequestBody UpdateTemporaryPasswordRequestDTO request) {
-        userFacade.updateTemporaryPassword(request.getEmail());
-        return ResponseEntity.ok("임시 비밀번호 변경이 완료되었습니다.");
+        boolean isSended = userFacade.updateTemporaryPassword(request.getEmail());
+
+        if (isSended) {
+            return ResponseEntity.ok("임시 비밀번호 변경이 완료되었습니다.");
+        } else {
+            return ResponseEntity.status(HttpStatus.SC_BAD_REQUEST)
+                    .body("임시 비밀번호 변경이 실패했습니다.");
+        }
     }
 
     // TODO: 방식 협의 됐을 때

@@ -153,9 +153,10 @@ public class UserFacade {
     }
 
     @Transactional
-    public void updateTemporaryPassword(String email) {
+    public boolean updateTemporaryPassword(String email) {
         String number = createNumber();
         userService.updateTemporaryPassword(email, number);
+        return emailProvider.sendTemporaryPasswordMail(email, number);
     }
 
     public String createNumber() {
