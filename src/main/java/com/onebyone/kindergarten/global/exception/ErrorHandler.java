@@ -17,6 +17,7 @@ import com.onebyone.kindergarten.domain.reports.exception.InvalidReportStatusExc
 import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException;
 import com.onebyone.kindergarten.domain.reports.exception.ReportNotFoundException;
 import com.onebyone.kindergarten.domain.sample.exception.SampleException;
+import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
 import com.onebyone.kindergarten.domain.user.exception.PasswordMismatchException;
@@ -234,6 +235,12 @@ public class ErrorHandler {
     public ErrorResponse handleEnumParseError(HttpMessageNotReadableException e) {
         log.error("HttpMessageNotRedableException 발생: {}", e.getMessage(), e);
         return buildError(Error.HTTP_MESSAGE_NOT_REDABLE_EXCEPTION);
+    }
+
+    @ExceptionHandler(EmailDuplicationException.class)
+    public ErrorResponse handleEmailDuplicationError(EmailDuplicationException e) {
+        log.error("EmailDuplicationException 발생: {}", e.getMessage(), e);
+        return buildError(Error.Email_DUPLICATION_EXCEPTION);
     }
 
     private ErrorResponse buildError(Error error) {
