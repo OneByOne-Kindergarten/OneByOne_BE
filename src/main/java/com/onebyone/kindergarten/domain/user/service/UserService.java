@@ -16,6 +16,7 @@ import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
+import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailExceptionByTemporaryPassword;
 import com.onebyone.kindergarten.domain.user.exception.PasswordMismatchException;
 import com.onebyone.kindergarten.domain.user.repository.EmailCertificationRepository;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
@@ -241,6 +242,6 @@ public class UserService {
     public void checkEmailCertificationByTemporaryPassword(String email) {
         emailCertificationRepository
                 .findById(email)
-                .orElseThrow(() -> new NotFoundEmailException("이메일 검증이 완료되지 않았습니다."));
+                .orElseThrow(() -> new NotFoundEmailExceptionByTemporaryPassword("이메일 검증이 완료되지 않았습니다."));
     }
 }

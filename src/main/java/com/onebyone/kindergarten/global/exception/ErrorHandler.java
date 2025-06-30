@@ -20,6 +20,7 @@ import com.onebyone.kindergarten.domain.sample.exception.SampleException;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
+import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailExceptionByTemporaryPassword;
 import com.onebyone.kindergarten.domain.user.exception.PasswordMismatchException;
 import com.onebyone.kindergarten.global.error.Error;
 import com.onebyone.kindergarten.global.error.ErrorResponse;
@@ -240,7 +241,13 @@ public class ErrorHandler {
     @ExceptionHandler(EmailDuplicationException.class)
     public ErrorResponse handleEmailDuplicationError(EmailDuplicationException e) {
         log.error("EmailDuplicationException 발생: {}", e.getMessage(), e);
-        return buildError(Error.Email_DUPLICATION_EXCEPTION);
+        return buildError(Error.EMAIL_DUPLICATION_EXCEPTION);
+    }
+
+    @ExceptionHandler(NotFoundEmailExceptionByTemporaryPassword.class)
+    public ErrorResponse handleNotFoundEmailExceptionByTemporaryPasswordError(NotFoundEmailExceptionByTemporaryPassword e) {
+        log.error("NotFoundEmailExceptionByTemporaryPassword 발생: {}", e.getMessage(), e);
+        return buildError(Error.NOT_FOUND_EXCEPTION_BY_TEMPORARY_PASSWORD_EXCEPTION);
     }
 
     private ErrorResponse buildError(Error error) {
