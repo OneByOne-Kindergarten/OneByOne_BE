@@ -18,4 +18,10 @@ public class EmailCertification {
     private String email;
 
     private String certification;
+
+    private boolean isCertificated;
+
+    public void completeCertification() {
+        this.isCertificated = true;
+    }
 }

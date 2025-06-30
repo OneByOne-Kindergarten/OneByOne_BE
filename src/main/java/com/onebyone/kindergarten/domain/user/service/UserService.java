@@ -209,6 +209,7 @@ public class UserService {
         EmailCertification emailCert = EmailCertification.builder()
                 .email(email)
                 .certification(certification)
+                .isCertificated(false)
                 .build();
 
         EmailCertification saved = emailCertificationRepository.save(emailCert);
@@ -221,6 +222,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
 
         if (emailCertification.getCertification().equals(request.getCertification())) {
+            emailCertification.completeCertification();
             return true;
         } else {
             return false;
@@ -240,8 +242,12 @@ public class UserService {
     }
 
     public void checkEmailCertificationByTemporaryPassword(String email) {
-        emailCertificationRepository
+        EmailCertification emailCertification = emailCertificationRepository
                 .findById(email)
-                .orElseThrow(() -> new NotFoundEmailExceptionByTemporaryPassword("이메일 검증이 완료되지 않았습니다."));
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+
+        if (!emailCertification.isCertificated()) {
+            throw new NotFoundEmailExceptionByTemporaryPassword("이메일이 검증되지 않았습니다.");
+        }
     }
 }
