@@ -15,6 +15,7 @@ import com.onebyone.kindergarten.global.jwt.exception.InvalidTokenException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpStatus;
@@ -22,6 +23,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Tag(name = "User API", description = "유저 API")
 @RestController
@@ -116,9 +121,34 @@ public class UserApiController {
 
     @Operation(summary = "유저-10 애플 소셜 로그인", description = "애플 소셜로그인을 진행합니다")
     @PostMapping("/apple/callback")
-    public SignInResponseDTO appleLogin(
-            @RequestParam(name = "id_token") String idToken) {
-        return userFacade.appleLogin(idToken);
+    public void appleCallback(
+            @RequestParam("id_token") String idToken,
+            @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "state", required = false) String state,
+            HttpServletResponse response) throws IOException {
+
+        try {
+            /// 애플 로그인 처리
+            SignInResponseDTO loginResponse = userFacade.appleLogin(idToken);
+
+            /// 프론트엔드로 리다이렉트 (성공)
+            String frontendUrl = "https://one-by-one-fe.vercel.app/users/apple/callback";
+            String redirectUrl = String.format("%s?access_token=%s&refresh_token=%s",
+                    frontendUrl,
+                    loginResponse.getAccessToken(),
+                    loginResponse.getRefreshToken());
+
+            response.sendRedirect(redirectUrl);
+
+        } catch (Exception e) {
+            /// 프론트엔드로 리다이렉트 (에러)
+            String frontendUrl = "https://one-by-one-fe.vercel.app/users/apple/callback";
+            String redirectUrl = String.format("%s?error=login_failed&message=%s",
+                    frontendUrl,
+                    URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8));
+
+            response.sendRedirect(redirectUrl);
+        }
     }
 
     @Operation(summary = "유저-010 작성한 리뷰 조회", description = "작성한 카테고리 리뷰를 조회합니다.")
