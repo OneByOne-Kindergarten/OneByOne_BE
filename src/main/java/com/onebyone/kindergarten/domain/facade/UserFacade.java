@@ -22,9 +22,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserFacade {
     private final UserService userService;
     private final CommunityCommentService communityCommentService;
@@ -74,6 +76,12 @@ public class UserFacade {
         params.add("client_id", kakaoApiKey);
         params.add("redirect_uri", kakaoRedirectUrl);
         params.add("code", code);
+
+        log.info("=== 카카오 토큰 요청 파라미터 ===");
+        log.info("client_id: {}", kakaoApiKey);
+        log.info("redirect_uri: {}", kakaoRedirectUrl);
+        log.info("code: {}", code);
+        log.info("============================");
 
         KakaoTokenResponse tokenResponse = kakaoAuthClient.getAccessToken(params);
         String kakaoAccessToken = tokenResponse.getAccess_token();
