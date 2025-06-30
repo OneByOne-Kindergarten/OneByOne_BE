@@ -152,6 +152,13 @@ public class UserFacade {
         return false;
     }
 
+    @Transactional
+    public boolean updateTemporaryPassword(String email) {
+        String number = createNumber();
+        userService.updateTemporaryPassword(email, number);
+        return emailProvider.sendTemporaryPasswordMail(email, number);
+    }
+
     public String createNumber() {
         Random random = new Random();
         StringBuffer key = new StringBuffer();
