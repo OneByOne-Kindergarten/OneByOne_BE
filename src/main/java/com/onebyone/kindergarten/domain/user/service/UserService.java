@@ -216,6 +216,7 @@ public class UserService {
         return saved != null;
     }
 
+    @Transactional
     public boolean checkEmailCertification(CheckEmailCertificationRequestDTO request) {
         EmailCertification emailCertification = emailCertificationRepository
                 .findById(request.getEmail())
@@ -223,6 +224,7 @@ public class UserService {
 
         if (emailCertification.getCertification().equals(request.getCertification())) {
             emailCertification.completeCertification();
+            emailCertificationRepository.save(emailCertification);
             return true;
         } else {
             return false;
