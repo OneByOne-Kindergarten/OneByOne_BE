@@ -237,4 +237,10 @@ public class UserService {
         User user = findUser(email);
         user.changePassword(passwordEncoder.encode(number));
     }
+
+    public void checkEmailCertificationByTemporaryPassword(String email) {
+        emailCertificationRepository
+                .findById(email)
+                .orElseThrow(() -> new NotFoundEmailException("이메일 검증이 완료되지 않았습니다."));
+    }
 }
