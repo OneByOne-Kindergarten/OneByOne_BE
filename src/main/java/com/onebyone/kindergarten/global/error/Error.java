@@ -40,7 +40,8 @@ public enum Error {
     NOTIFICATION_ERROR("알림 전송 중 오류가 발생했습니다."),
     ENTITY_NOT_FOUND_EXCEPTION("유치원을 찾을 수 없습니다."),
     HTTP_MESSAGE_NOT_REDABLE_EXCEPTION("잘못된 요청 형식입니다."),
-    Email_DUPLICATION_EXCEPTION("이메일이 중복 되었습니다.");
+    EMAIL_DUPLICATION_EXCEPTION("이메일이 중복 되었습니다."),
+    NOT_FOUND_EXCEPTION_BY_TEMPORARY_PASSWORD_EXCEPTION("이메일이 인증되지 않았습니다.");
 
     private final String message;
 

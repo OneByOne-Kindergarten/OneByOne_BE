@@ -16,6 +16,7 @@ import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
+import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailExceptionByTemporaryPassword;
 import com.onebyone.kindergarten.domain.user.exception.PasswordMismatchException;
 import com.onebyone.kindergarten.domain.user.repository.EmailCertificationRepository;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
@@ -208,18 +209,22 @@ public class UserService {
         EmailCertification emailCert = EmailCertification.builder()
                 .email(email)
                 .certification(certification)
+                .isCertificated(false)
                 .build();
 
         EmailCertification saved = emailCertificationRepository.save(emailCert);
         return saved != null;
     }
 
+    @Transactional
     public boolean checkEmailCertification(CheckEmailCertificationRequestDTO request) {
         EmailCertification emailCertification = emailCertificationRepository
                 .findById(request.getEmail())
                 .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
 
         if (emailCertification.getCertification().equals(request.getCertification())) {
+            emailCertification.completeCertification();
+            emailCertificationRepository.save(emailCertification);
             return true;
         } else {
             return false;
@@ -236,5 +241,15 @@ public class UserService {
     public void updateTemporaryPassword(String email, String number) {
         User user = findUser(email);
         user.changePassword(passwordEncoder.encode(number));
+    }
+
+    public void checkEmailCertificationByTemporaryPassword(String email) {
+        EmailCertification emailCertification = emailCertificationRepository
+                .findById(email)
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+
+        if (!emailCertification.isCertificated()) {
+            throw new NotFoundEmailExceptionByTemporaryPassword("이메일이 검증되지 않았습니다.");
+        }
     }
 }

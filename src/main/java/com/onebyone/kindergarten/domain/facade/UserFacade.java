@@ -8,7 +8,6 @@ import com.onebyone.kindergarten.domain.feignClient.NaverApiClient;
 import com.onebyone.kindergarten.domain.feignClient.NaverAuthClient;
 import com.onebyone.kindergarten.domain.provider.EmailProvider;
 import com.onebyone.kindergarten.domain.user.dto.UserDTO;
-import com.onebyone.kindergarten.domain.user.dto.response.AppleUserResponse;
 import com.onebyone.kindergarten.domain.user.service.AppleAuthService;
 import com.onebyone.kindergarten.domain.user.dto.response.*;
 import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
@@ -155,6 +154,7 @@ public class UserFacade {
     @Transactional
     public boolean updateTemporaryPassword(String email) {
         String number = createNumber();
+        userService.checkEmailCertificationByTemporaryPassword(email);
         userService.updateTemporaryPassword(email, number);
         return emailProvider.sendTemporaryPasswordMail(email, number);
     }
