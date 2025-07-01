@@ -24,8 +24,8 @@ public interface PushNotificationRepository extends JpaRepository<PushNotificati
     
     long countByUserAndIsReadFalse(User user);
     
-    // 특정 시간 이전에 생성된 미전송 알림 조회
-    @Query("SELECT p FROM push_notification p WHERE p.isSent = false AND p.createdAt <= :cursorTime ORDER BY p.createdAt ASC")
+    // 특정 시간 이전에 생성된 미전송 알림 조회 (FCM 토큰이 있는 것만 조회)
+    @Query("SELECT p FROM push_notification p WHERE p.isSent = false AND p.createdAt <= :cursorTime AND p.fcmToken IS NOT NULL AND p.fcmToken <> '' ORDER BY p.createdAt ASC")
     List<PushNotification> findUnsentNotificationsBeforeTime(@Param("cursorTime") LocalDateTime cursorTime);
     
     // 그룹 키로 가장 최근 알림 찾기
