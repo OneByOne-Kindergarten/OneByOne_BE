@@ -69,30 +69,20 @@ public class PushNotificationService {
 
         // 알림이 비어있거나 null인 경우 처리
         if (notifications == null || notifications.isEmpty()) {
+            log.info("전송할 알림이 없습니다.");
             return;
         }
-
-        // FCM 토큰이 있는 알림만 필터링
-        List<PushNotification> validNotifications = new ArrayList<>();
-
-        for (PushNotification notification : notifications) {
-            // 각 알림에 직접 저장된 FCM 토큰 사용
-            if (notification.getFcmToken() != null && !notification.getFcmToken().isEmpty()) {
-                validNotifications.add(notification);
-            } else {
-                log.warn("FCM 토큰이 없어 알림을 전송할 수 없습니다. notificationId: {}, userId: {}",
-                        notification.getId(), notification.getUser().getId());
-            }
-        }
-
-        if (validNotifications.isEmpty()) {
-            log.info("전송할 수 있는 FCM 토큰이 없습니다.");
-            return;
-        }
-
         // 개별 메시지 목록 생성
         List<Message> messages = new ArrayList<>();
-        for (PushNotification notification : validNotifications) {
+        List<PushNotification> validNotifications = new ArrayList<>();
+        
+        for (PushNotification notification : notifications) {
+            if (notification.getFcmToken() == null || notification.getFcmToken().isEmpty()) {
+                log.warn("FCM 토큰이 없는 알림 발견 (ID: {}), 건너뛰기", notification.getId());
+                continue;
+            }
+            
+            validNotifications.add(notification);
 
             // 추가 데이터 설정
             Map<String, String> data = new HashMap<>();
@@ -136,6 +126,12 @@ public class PushNotificationService {
                     .build();
 
             messages.add(message);
+        }
+        
+        // 실제 전송할 메시지가 없는 경우 종료
+        if (messages.isEmpty()) {
+            log.info("실제 전송할 수 있는 메시지가 없습니다.");
+            return;
         }
 
         // 비동기 메시지 전송을 위한 Future 목록

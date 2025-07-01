@@ -39,6 +39,16 @@ public class CommunityController {
         return ResponseDto.success(communityService.createPost(request, userDetails.getUsername()));
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "커뮤니티 게시글 삭제", description = "게시글을 삭제합니다. 본인이 작성한 게시글만 삭제할 수 있습니다.")
+    public ResponseDto<String> deletePost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        communityService.deletePost(id, userDetails.getUsername());
+        return ResponseDto.success("게시글이 삭제되었습니다.");
+    }
+
     @GetMapping()
     @Operation(summary = "커뮤니티 게시글 목록 조회", description = "게시글 목록을 조회하고 검색합니다.")
     public PageResponseDTO<CommunityPostResponseDTO> getPosts(

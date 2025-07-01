@@ -19,7 +19,7 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
     @Query("SELECT p FROM CommunityPost p " +
            "JOIN FETCH p.user " +
            "JOIN FETCH p.communityCategory " +
-           "WHERE p.id = :id")
+           "WHERE p.id = :id AND p.deletedAt IS NULL")
     Optional<CommunityPost> findByIdWithUser(@Param("id") Long id);
 
     @Modifying
@@ -31,6 +31,7 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
     @Query("SELECT p FROM CommunityPost p " +
            "JOIN FETCH p.user " +
            "JOIN FETCH p.communityCategory " +
+           "WHERE p.deletedAt IS NULL " +
            "ORDER BY p.likeCount DESC, p.viewCount DESC " +
            "LIMIT 10")
     List<CommunityPost> findTop10WithUserOrderByLikeCountDescViewCountDesc();
@@ -39,7 +40,8 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
             SELECT p FROM CommunityPost p 
             JOIN FETCH p.user u 
             JOIN FETCH p.communityCategory c 
-            WHERE (:#{#search.title} IS NULL OR p.title LIKE %:#{#search.title}%) 
+            WHERE p.deletedAt IS NULL
+            AND (:#{#search.title} IS NULL OR p.title LIKE %:#{#search.title}%) 
             AND (:#{#search.content} IS NULL OR p.content LIKE %:#{#search.content}%) 
             AND (:#{#search.category} IS NULL OR p.category = :#{#search.category}) 
             AND (:#{#search.categoryName} IS NULL OR c.categoryName LIKE %:#{#search.categoryName}%) 
@@ -56,4 +58,8 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
     @Modifying
     @Query("UPDATE CommunityPost p SET p.commentCount = p.commentCount + 1 WHERE p.id = :postId")
     void incrementCommentCount(@Param("postId") Long postId);
+
+    @Modifying
+    @Query("UPDATE CommunityPost p SET p.commentCount = p.commentCount - :count WHERE p.id = :postId")
+    void decrementCommentCount(@Param("postId") Long postId, @Param("count") int count);
 }

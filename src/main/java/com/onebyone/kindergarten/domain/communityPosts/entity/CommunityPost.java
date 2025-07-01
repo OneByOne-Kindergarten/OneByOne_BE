@@ -74,4 +74,9 @@ public class CommunityPost extends BaseEntity {
     public void updateStatus(ReportStatus status) {
         this.status = status;
     }
+
+    /// 게시물 소프트 삭제
+    public void markAsDeleted() {
+        this.deletedAt = java.time.LocalDateTime.now();
+    }
 }
