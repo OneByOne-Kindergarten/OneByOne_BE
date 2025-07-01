@@ -79,9 +79,6 @@ public class PushNotificationService {
             // 각 알림에 직접 저장된 FCM 토큰 사용
             if (notification.getFcmToken() != null && !notification.getFcmToken().isEmpty()) {
                 validNotifications.add(notification);
-            } else {
-                log.warn("FCM 토큰이 없어 알림을 전송할 수 없습니다. notificationId: {}, userId: {}",
-                        notification.getId(), notification.getUser().getId());
             }
         }
 

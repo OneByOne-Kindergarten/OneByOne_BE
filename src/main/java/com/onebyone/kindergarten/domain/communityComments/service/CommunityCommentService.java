@@ -45,7 +45,7 @@ public class CommunityCommentService {
         
         // 대댓글인 경우 부모 댓글 조회
         if (dto.getParentId() != null) {
-            parent = commentRepository.findById(dto.getParentId())
+            parent = commentRepository.findByIdWithUser(dto.getParentId())
                     .orElseThrow(() -> new IllegalArgumentException("원댓글을 찾을 수 없습니다."));
             
             // 부모 댓글의 게시글과 요청된 게시글이 일치하는지 확인
@@ -56,6 +56,11 @@ public class CommunityCommentService {
             // 이미 대댓글인 경우 대댓글에 대댓글 작성 방지
             if (parent.isReply()) {
                 throw new IllegalArgumentException("대댓글에는 답글을 작성할 수 없습니다.");
+            }
+            
+            // 삭제된 댓글에는 대댓글 작성 불가
+            if (parent.getDeletedAt() != null) {
+                throw new IllegalArgumentException("삭제된 댓글에는 답글을 작성할 수 없습니다.");
             }
         }
 
@@ -76,14 +81,16 @@ public class CommunityCommentService {
         // 알림 대상자 결정 (게시글 작성자 또는 부모 댓글 작성자)
         User notificationTarget = parent != null ? parent.getUser() : post.getUser();
 
-        // 알림 발송
-        notificationTemplateService.sendCommentNotification(
-                notificationTarget.getId(), 
-                user, 
-                dto.getContent(), 
-                parent != null, 
-                postId
-        );
+        // 알림 발송 - 게시글이 삭제되지 않은 경우에만
+        if (post.getDeletedAt() == null) {
+            notificationTemplateService.sendCommentNotification(
+                    notificationTarget.getId(), 
+                    user, 
+                    dto.getContent(), 
+                    parent != null, 
+                    postId
+            );
+        }
         
         return CommentResponseDTO.fromEntity(comment);
     }
@@ -115,5 +122,34 @@ public class CommunityCommentService {
         response.setTotalPages(commentsPage.getTotalPages());
 
         return response;
+    }
+
+    /// 댓글 삭제 (소프트 삭제)
+    @Transactional
+    public void deleteComment(Long commentId, String email) {
+        // 댓글 조회 (작성자 정보 포함)
+        CommunityComment comment = commentRepository.findByIdWithUser(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+        
+        // 작성자 확인
+        if (!comment.getUser().getEmail().equals(email)) {
+            throw new com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException();
+        }
+
+        Long postId = comment.getPost().getId();
+        boolean isOriginalComment = comment.getParent() == null;
+        
+        // 댓글 소프트 삭제 (deletedAt 설정)
+        comment.markAsDeleted();
+        
+        // 대댓글이 있는 원댓글인 경우 대댓글들도 함께 삭제
+        if (isOriginalComment) {
+            commentRepository.updateRepliesDeletedAt(commentId);
+        }
+        
+        // 원댓글이었다면 게시글의 댓글 수 감소
+        if (isOriginalComment) {
+            postRepository.decrementCommentCount(postId, 1);
+        }
     }
 }

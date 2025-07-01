@@ -53,4 +53,9 @@ public class CommunityComment extends BaseEntity {
     public boolean isReply() {
         return this.parent != null;
     }
+
+    /// 댓글 소프트 삭제
+    public void markAsDeleted() {
+        this.deletedAt = java.time.LocalDateTime.now();
+    }
 }

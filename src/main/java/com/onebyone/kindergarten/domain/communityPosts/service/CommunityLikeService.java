@@ -60,8 +60,9 @@ public class CommunityLikeService {
                     communityLikeRepository.save(newLike);
                     communityRepository.updateLikeCount(postId, 1);
 
-                    // 알림 발송 - 본인 글이 아닌 경우
-                    if (!post.getUser().getId().equals(user.getId())) {
+                    // 알림 발송 - 본인 글이 아니고 삭제된 게시글이 아닌 경우
+                    if (!post.getUser().getId().equals(user.getId()) && 
+                        post.getDeletedAt() == null) {
                         notificationTemplateService.sendLikeNotification(
                                 post.getUser().getId(),
                                 user,

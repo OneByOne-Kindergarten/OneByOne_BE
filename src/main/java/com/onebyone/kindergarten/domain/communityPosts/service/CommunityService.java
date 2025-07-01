@@ -93,4 +93,24 @@ public class CommunityService {
     @CacheEvict(value = CacheConfig.TOP_POSTS_CACHE, allEntries = true)
     public void refreshTopPostsCache() {}
 
+    /// 게시글 삭제 (소프트 삭제)
+    @Transactional
+    public void deletePost(Long postId, String email) {
+
+        // 게시글 조회 (작성자 정보 포함)
+        CommunityPost post = communityRepository.findByIdWithUser(postId)
+                .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
+        
+        // 작성자 확인
+        if (!post.getUser().getEmail().equals(email)) {
+            throw new com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException();
+        }
+        
+        // 게시글 소프트 삭제 (deletedAt 설정)
+        post.markAsDeleted();
+        
+        // 인기 게시글 캐시 갱신
+        refreshTopPostsCache();
+    }
+
 }

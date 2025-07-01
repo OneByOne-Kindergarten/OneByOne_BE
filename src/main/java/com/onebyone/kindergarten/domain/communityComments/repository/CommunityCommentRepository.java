@@ -3,6 +3,7 @@ package com.onebyone.kindergarten.domain.communityComments.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,6 +12,7 @@ import com.onebyone.kindergarten.domain.communityComments.entity.CommunityCommen
 import com.onebyone.kindergarten.domain.communityComments.dto.response.CommentResponseDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CommunityCommentRepository extends JpaRepository<CommunityComment, Long> {
@@ -21,7 +23,7 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
             "null, false) " +
             "FROM community_comment c " +
             "JOIN c.user u " +
-            "WHERE c.post.id = :postId AND c.parent IS NULL " +
+            "WHERE c.post.id = :postId AND c.parent IS NULL AND c.deletedAt IS NULL " +
             "ORDER BY c.createdAt DESC")
     Page<CommentResponseDTO> findOriginalCommentsByPostId(@Param("postId") Long postId, Pageable pageable);
 
@@ -31,7 +33,7 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
             "c.parent.id, true) " +
             "FROM community_comment c " +
             "JOIN c.user u " +
-            "WHERE c.parent.id = :parentId " +
+            "WHERE c.parent.id = :parentId AND c.deletedAt IS NULL " +
             "ORDER BY c.createdAt ASC")
     List<CommentResponseDTO> findRepliesByParentId(@Param("parentId") Long parentId);
 
@@ -42,12 +44,20 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
             "FROM community_comment c " +
             "JOIN c.user u " +
             "LEFT JOIN c.parent p " +
-            "WHERE c.post.id = :postId " +
+            "WHERE c.post.id = :postId AND c.deletedAt IS NULL " +
             "ORDER BY COALESCE(p.createdAt, c.createdAt) DESC, " +
             "CASE WHEN c.parent IS NULL THEN 0 ELSE 1 END, " +
             "c.createdAt ASC")
     Page<CommentResponseDTO> findAllCommentsWithRepliesByPostId(@Param("postId") Long postId, Pageable pageable);
 
 
-    Page<CommunityComment> findByUserId(Long userId, Pageable pageable);
+    @Query("SELECT c FROM community_comment c WHERE c.user.id = :userId AND c.deletedAt IS NULL")
+    Page<CommunityComment> findByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT c FROM community_comment c JOIN FETCH c.user WHERE c.id = :id AND c.deletedAt IS NULL")
+    Optional<CommunityComment> findByIdWithUser(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE community_comment c SET c.deletedAt = CURRENT_TIMESTAMP WHERE c.parent.id = :parentId")
+    void updateRepliesDeletedAt(@Param("parentId") Long parentId);
 }
