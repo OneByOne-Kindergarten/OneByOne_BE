@@ -14,6 +14,10 @@ import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.jwt.JwtProvider;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewPagedResponseDTO;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.service.KindergartenInternshipReviewService;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.service.KindergartenWorkReviewService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import java.util.Random;
@@ -29,6 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 public class UserFacade {
     private final UserService userService;
     private final CommunityCommentService communityCommentService;
+    private final KindergartenInternshipReviewService kindergartenInternshipReviewService;
+    private final KindergartenWorkReviewService kindergartenWorkReviewService;
     private final JwtProvider jwtProvider;
     private final KakaoApiClient kakaoApiClient;
     private final KakaoAuthClient kakaoAuthClient;
@@ -136,6 +142,16 @@ public class UserFacade {
     public PageCommunityCommentsResponseDTO getWroteMyCommunityComments(String username, int page, int size) {
         UserDTO user = userService.getUser(username);
         return communityCommentService.getWroteMyCommunityComments(user.getUserId(), page, size);
+    }
+
+    /// 내가 작성한 실습 리뷰 조회
+    public InternshipReviewPagedResponseDTO getMyInternshipReviews(String username, int page, int size) {
+        return kindergartenInternshipReviewService.getMyReviews(username, page, size);
+    }
+
+    /// 내가 작성한 근무 리뷰 조회
+    public WorkReviewPagedResponseDTO getMyWorkReviews(String username, int page, int size) {
+        return kindergartenWorkReviewService.getMyReviews(username, page, size);
     }
 
     @Transactional
