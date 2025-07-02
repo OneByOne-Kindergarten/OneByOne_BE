@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 public class WorkReviewDTO {
     private Long workReviewId;
     private SimpleUserDTO user;
+    private Long kindergartenId;
+    private String kindergartenName;
     private Integer workYear;
     private String oneLineComment;
     private String benefitAndSalaryComment;
@@ -25,10 +27,10 @@ public class WorkReviewDTO {
     private LocalDateTime createdAt;
     private String workType;
 
-    // JPQL 쿼리를 위한 생성자
+    // JPQL 쿼리를 위한 생성자 (유치원 ID와 이름 포함)
     public WorkReviewDTO(
         Long workReviewId, Long userId, String nickname,
-        Integer workYear, String oneLineComment,
+        Long kindergartenId, String kindergartenName, Integer workYear, String oneLineComment,
         String benefitAndSalaryComment, Integer benefitAndSalaryScore,
         String workLifeBalanceComment, Integer workLifeBalanceScore,
         String workEnvironmentComment, Integer workEnvironmentScore,
@@ -39,6 +41,8 @@ public class WorkReviewDTO {
     ) {
         this.workReviewId = workReviewId;
         this.user = new SimpleUserDTO(userId, nickname);
+        this.kindergartenId = kindergartenId;
+        this.kindergartenName = kindergartenName;
         this.workYear = workYear;
         this.oneLineComment = oneLineComment;
         this.benefitAndSalaryComment = benefitAndSalaryComment;

@@ -132,4 +132,21 @@ public class KindergartenInternshipReviewService {
             .totalPages(reviewPage.getTotalPages())
             .build();
     }
+
+    /// 내가 작성한 실습 리뷰 조회
+    public InternshipReviewPagedResponseDTO getMyReviews(String email, int page, int size) {
+        User user = userService.getUserByEmail(email);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<InternshipReviewDTO> reviewPage = kindergartenInternshipReviewRepository.findMyReviews(
+            user.getId(),
+            ReviewStatus.ACCEPTED,
+            pageable
+        );
+
+        return InternshipReviewPagedResponseDTO.builder()
+            .content(reviewPage.getContent())
+            .totalPages(reviewPage.getTotalPages())
+            .build();
+    }
 }

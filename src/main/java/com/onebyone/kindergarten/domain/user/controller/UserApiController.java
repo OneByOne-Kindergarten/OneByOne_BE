@@ -2,6 +2,8 @@ package com.onebyone.kindergarten.domain.user.controller;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
 import com.onebyone.kindergarten.domain.facade.UserFacade;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewPagedResponseDTO;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.HomeShortcutsDto;
 import com.onebyone.kindergarten.domain.user.dto.request.*;
 import com.onebyone.kindergarten.domain.user.dto.response.GetUserResponseDTO;
@@ -151,7 +153,7 @@ public class UserApiController {
         }
     }
 
-    @Operation(summary = "유저-010 작성한 리뷰 조회", description = "작성한 카테고리 리뷰를 조회합니다.")
+    @Operation(summary = "유저-010 작성한 댓글 조회", description = "작성한 댓글을 조회합니다.")
     @GetMapping("/user/community-comments")
     public PageCommunityCommentsResponseDTO getWroteMyCommunityComments(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -220,10 +222,21 @@ public class UserApiController {
         }
     }
 
-    // TODO: 방식 협의 됐을 때
-    // @Operation(summary = "이메일 찾기", description = "이메일 찾기")
-    // @PostMapping("/email")
-    // public void changeEmail(){
-    //
-    // }
+    @Operation(summary = "유저-016 내가 작성한 실습 리뷰 조회", description = "내가 작성한 실습 리뷰를 조회합니다.")
+    @GetMapping("/user/internship-reviews")
+    public InternshipReviewPagedResponseDTO getMyInternshipReviews(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return userFacade.getMyInternshipReviews(userDetails.getUsername(), page, size);
+    }
+
+    @Operation(summary = "유저-017 내가 작성한 근무 리뷰 조회", description = "내가 작성한 근무 리뷰를 조회합니다.")
+    @GetMapping("/user/work-reviews")
+    public WorkReviewPagedResponseDTO getMyWorkReviews(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return userFacade.getMyWorkReviews(userDetails.getUsername(), page, size);
+    }
 }
