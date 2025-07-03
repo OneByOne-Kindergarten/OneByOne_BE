@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.security.auth.login.AccountNotFoundException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +57,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public boolean isExistedEmail(String email) {
-        return userRepository.existsByEmail(email);
+        return userRepository.findByEmailAndDeletedAtIsNull(email).isPresent();
     }
 
     private String encodePassword(String password) {
@@ -65,23 +66,51 @@ public class UserService {
 
     @Transactional
     public String signIn(SignInRequestDTO request) {
-        User user = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+        // 먼저 활성 사용자 확인
+        Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail());
+        if (activeUser.isPresent()) {
+            User user = activeUser.get();
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+            }
+            
+            if (request.getFcmToken() != null) {
+                user.updateFcmToken(request.getFcmToken());
+            }
+            
+            return user.getEmail();
+        }
+        
+        // 탈퇴된 사용자 확인 및 복구
+        Optional<User> deletedUser = userRepository.findByEmailAndDeletedAtIsNotNull(request.getEmail());
+        if (deletedUser.isPresent()) {
+            User user = deletedUser.get();
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+            }
+            
+            // 계정 복구
+            user.restore();
+            
+            if (request.getFcmToken() != null) {
+                user.updateFcmToken(request.getFcmToken());
+            }
+            
+            return user.getEmail();
         }
 
-        if (request.getFcmToken() != null) {
-            user.updateFcmToken(request.getFcmToken());
-        }
-
-        return user.getEmail();
+        throw new NotFoundEmailException("이메일이 존재하지 않습니다.");
     }
 
     @Transactional
     public void changeNickname(String email, ModifyUserNicknameRequestDTO request) {
         User user = findUser(email);
+        
+        // 현재 닉네임과 동일한지 확인
+        if (user.getNickname().equals(request.getNewNickname())) {
+            return; // 동일한 닉네임이면 변경하지 않음
+        }
+        
         user.changeNickname(request.getNewNickname());
     }
 
@@ -130,10 +159,27 @@ public class UserService {
                 ? userResponse.getKakao_account().getProfile().getNickname()
                 : "카카오_" + userResponse.getId();
 
-        if (isExistedEmail(email)) {
+        // 활성 사용자 확인
+        Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(email);
+        if (activeUser.isPresent()) {
             return email;
         }
 
+        // 탈퇴된 사용자 확인 및 복구
+        Optional<User> deletedUser = userRepository.findByEmailAndDeletedAtIsNotNull(email);
+        if (deletedUser.isPresent()) {
+            User user = deletedUser.get();
+            user.restore();
+            
+            // 소셜 로그인 정보 업데이트
+            if (userResponse.getKakao_account().getProfile() != null) {
+                user.updateProfileImageUrl(userResponse.getKakao_account().getProfile().getProfile_image_url());
+            }
+            
+            return user.getEmail();
+        }
+
+        // 새로운 사용자 생성
         String dummyPassword = encodePassword("kakao_" + userResponse.getId());
 
         User user = User.registerKakao(email, dummyPassword, userResponse.getId(), nickname, UserRole.GENERAL,
@@ -148,10 +194,27 @@ public class UserService {
     public String signUpByNaver(NaverUserResponse userResponse) {
         String email = userResponse.getResponse().getEmail();
 
-        if (isExistedEmail(email)) {
+        // 활성 사용자 확인
+        Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(email);
+        if (activeUser.isPresent()) {
             return email;
         }
 
+        // 탈퇴된 사용자 확인 및 복구
+        Optional<User> deletedUser = userRepository.findByEmailAndDeletedAtIsNotNull(email);
+        if (deletedUser.isPresent()) {
+            User user = deletedUser.get();
+            user.restore();
+            
+            // 소셜 로그인 정보 업데이트
+            if (userResponse.getResponse().getProfile_image() != null) {
+                user.updateProfileImageUrl(userResponse.getResponse().getProfile_image());
+            }
+            
+            return user.getEmail();
+        }
+
+        // 새로운 사용자 생성
         String dummyPassword = encodePassword("naver_" + userResponse.getResponse().getId());
 
         User user = User.registerNaver(email, dummyPassword, userResponse.getResponse().getId(),
@@ -183,10 +246,21 @@ public class UserService {
                     + "@kindergarten.system";
         }
 
-        if (isExistedEmail(systemEmail)) {
+        // 활성 사용자 확인
+        Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(systemEmail);
+        if (activeUser.isPresent()) {
             return systemEmail;
         }
 
+        // 탈퇴된 사용자 확인 및 복구
+        Optional<User> deletedUser = userRepository.findByEmailAndDeletedAtIsNotNull(systemEmail);
+        if (deletedUser.isPresent()) {
+            User user = deletedUser.get();
+            user.restore();
+            return user.getEmail();
+        }
+
+        // 새로운 사용자 생성
         String dummyPassword = encodePassword("apple_" + appleUserId);
         String nickname = userResponse.getName() != null ? userResponse.getName()
                 : "애플_사용자_" + appleUserId.substring(0, 8);
