@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM user u LEFT JOIN FETCH u.Kindergarten WHERE u.email = :email AND u.deletedAt IS NULL")
     Optional<User> findUserWithKindergarten(@Param("email") String email);
+
+    Optional<User> findByEmailAndDeletedAtIsNotNull(String email);
 }

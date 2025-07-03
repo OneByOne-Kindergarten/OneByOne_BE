@@ -62,6 +62,9 @@ public class User extends BaseEntity {
     @JoinColumn(name = "kindergarten_id")
     private Kindergarten Kindergarten;
 
+    @Column(name = "previous_deleted_at")
+    private LocalDateTime previousDeletedAt;
+
     public static User registerKakao(String email, String password, Long kakaoProviderId, String nickname,
             UserRole role, String profileImageUrl) {
         return User.builder()
@@ -114,6 +117,20 @@ public class User extends BaseEntity {
     public void withdraw() {
         this.status = UserStatus.DELETED;
         this.deletedAt = LocalDateTime.now();
+        /// 랜덤 6자리 숫자 생성
+        String randomNum = String.format("%06d", (int)(Math.random() * 1000000));
+        this.nickname = "D_" + randomNum;
+        /// 개인정보 마스킹
+        this.profileImageUrl = null;
+        this.homeShortcut = null;
+        this.fcmToken = null;
+    }
+
+    /// 현재 deletedAt 값을 previousDeletedAt에 저장
+    public void restore() {
+        this.previousDeletedAt = this.deletedAt;
+        this.status = UserStatus.ACTIVE;
+        this.deletedAt = null;
     }
 
     public void updateFcmToken(String fcmToken) {
@@ -134,5 +151,13 @@ public class User extends BaseEntity {
 
     public void updateUserRole(UserRole role) {
         this.role = role;
+    }
+
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public boolean isRestoredUser() {
+        return this.previousDeletedAt != null;
     }
 }

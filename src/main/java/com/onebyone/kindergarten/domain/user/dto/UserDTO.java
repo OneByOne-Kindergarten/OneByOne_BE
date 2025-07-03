@@ -5,6 +5,8 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 public class UserDTO {
@@ -15,9 +17,10 @@ public class UserDTO {
     private String career;
     private KindergartenDTO kindergarten;
     private HomeShortcutsDto.Response homeShortcut;
+    private boolean isRestoredUser;
+    private LocalDateTime previousDeletedAt;
 
     public static UserDTO from(User user) {
-
         HomeShortcutsDto homeShortcutsDto = user.getHomeShortcut() != null ?
                 HomeShortcutsDto.fromJson(user.getHomeShortcut()) :
                 new HomeShortcutsDto();
@@ -29,7 +32,9 @@ public class UserDTO {
                 user.getRole().name(),
                 user.getCareer(),
                 user.getKindergarten() != null ? KindergartenDTO.from(user.getKindergarten()) : null,
-                HomeShortcutsDto.Response.from(homeShortcutsDto)
+                HomeShortcutsDto.Response.from(homeShortcutsDto),
+                user.isRestoredUser(),
+                user.getPreviousDeletedAt()
         );
     }
 }
