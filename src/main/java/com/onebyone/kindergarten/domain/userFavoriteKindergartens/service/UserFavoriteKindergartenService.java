@@ -55,7 +55,10 @@ public class UserFavoriteKindergartenService {
         User user = userService.getUserByEmail(email);
 
         // 즐겨찾기 목록 조회
-        return favoriteRepository.findDtosByUser(user);
+        List<UserFavoriteKindergarten> favorites = favoriteRepository.findByUser(user);
+        return favorites.stream()
+                .map(favorite -> KindergartenResponseDTO.from(favorite.getKindergarten()))
+                .toList();
     }
 
     /// 즐겨찾기 상태 확인
