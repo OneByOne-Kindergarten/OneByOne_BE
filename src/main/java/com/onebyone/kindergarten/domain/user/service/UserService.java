@@ -181,9 +181,13 @@ public class UserService {
 
         // 새로운 사용자 생성
         String dummyPassword = encodePassword("kakao_" + userResponse.getId());
+        // 프로필 이미지 업데이트
+        String profileImageUrl = userResponse.getKakao_account().getProfile() != null 
+            ? userResponse.getKakao_account().getProfile().getProfile_image_url() 
+            : null;
 
         User user = User.registerKakao(email, dummyPassword, userResponse.getId(), nickname, UserRole.GENERAL,
-                userResponse.getKakao_account().getProfile().getProfile_image_url());
+                profileImageUrl);
 
         userRepository.save(user);
 

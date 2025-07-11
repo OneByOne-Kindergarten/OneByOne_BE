@@ -82,7 +82,7 @@ public class KindergartenService {
 
     /// 유치원 상세 조회
     public KindergartenResponseDTO findById(Long id) {
-        Kindergarten kindergarten = kindergartenRepository.findById(id)
+        Kindergarten kindergarten = kindergartenRepository.findWithReviewsById(id)
                 .orElseThrow(() -> new EntityNotFoundException("유치원을 찾을 수 없습니다. ID: " + id));
         return KindergartenResponseDTO.from(kindergarten);
     }
@@ -94,7 +94,10 @@ public class KindergartenService {
             double longitude,
             double radiusKm
     ) {
-        return kindergartenRepository.findNearbyKindergartens(latitude, longitude, radiusKm);
+        List<Kindergarten> nearbyKindergartens = kindergartenRepository.findNearbyKindergartenEntities(latitude, longitude, radiusKm);
+        return nearbyKindergartens.stream()
+                .map(KindergartenResponseDTO::from)
+                .toList();
     }
 
     public Kindergarten getKindergartenById(Long id) {
