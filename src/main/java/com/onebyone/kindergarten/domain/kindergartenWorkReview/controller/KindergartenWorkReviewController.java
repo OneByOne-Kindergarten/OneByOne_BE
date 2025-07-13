@@ -4,6 +4,7 @@ import com.onebyone.kindergarten.domain.facade.KindergartenFacade;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.CreateWorkReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.ModifyWorkReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.enums.WorkReviewStarRatingType;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.service.KindergartenWorkReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,8 +54,10 @@ public class KindergartenWorkReviewController {
             @PathVariable long kindergartenId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "LATEST") WorkReviewPagedResponseDTO.SortType sortType
+            @RequestParam(defaultValue = "LATEST") WorkReviewPagedResponseDTO.SortType sortType,
+            @RequestParam(defaultValue = "ALL") WorkReviewStarRatingType internshipReviewStarRatingType,
+            @RequestParam(defaultValue = "0") int starRating
     ) {
-        return kindergartenWorkReviewService.getReviews(kindergartenId, page, size, sortType);
+        return kindergartenWorkReviewService.getReviews(kindergartenId, page, size, sortType, internshipReviewStarRatingType, starRating);
     }
 }

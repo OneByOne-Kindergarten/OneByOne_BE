@@ -57,4 +57,64 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
         @Param("reviewStatus") ReviewStatus reviewStatus,
         Pageable pageable
     );
+
+    @Query("SELECT new com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewDTO(" +
+            "r.id, u.id, u.nickname, k.id, k.name, r.oneLineComment, " +
+            "r.workEnvironmentComment, r.workEnvironmentScore, " +
+            "r.learningSupportComment, r.learningSupportScore, " +
+            "r.instructionTeacherComment, r.instructionTeacherScore, " +
+            "r.likeCount, r.shareCount, r.createdAt) " +
+            "FROM kindergarten_internship_review r " +
+            "JOIN r.user u " +
+            "JOIN r.kindergarten k " +
+            "WHERE r.kindergarten.id = :kindergartenId " +
+            "AND r.status = :reviewStatus " +
+            "AND r.workEnvironmentScore = :score " +
+            "AND r.deletedAt IS NULL")
+    Page<InternshipReviewDTO> findByWorkEnvironmentScore(
+            @Param("kindergartenId") Long kindergartenId,
+            @Param("reviewStatus") ReviewStatus reviewStatus,
+            @Param("score") Integer score,
+            Pageable pageable
+    );
+
+    @Query("SELECT new com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewDTO(" +
+            "r.id, u.id, u.nickname, k.id, k.name, r.oneLineComment, " +
+            "r.workEnvironmentComment, r.workEnvironmentScore, " +
+            "r.learningSupportComment, r.learningSupportScore, " +
+            "r.instructionTeacherComment, r.instructionTeacherScore, " +
+            "r.likeCount, r.shareCount, r.createdAt) " +
+            "FROM kindergarten_internship_review r " +
+            "JOIN r.user u " +
+            "JOIN r.kindergarten k " +
+            "WHERE r.kindergarten.id = :kindergartenId " +
+            "AND r.status = :reviewStatus " +
+            "AND r.learningSupportScore = :score " +
+            "AND r.deletedAt IS NULL")
+    Page<InternshipReviewDTO> findByLearningSupportScore(
+            @Param("kindergartenId") Long kindergartenId,
+            @Param("reviewStatus") ReviewStatus reviewStatus,
+            @Param("score") Integer score,
+            Pageable pageable
+    );
+
+    @Query("SELECT new com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewDTO(" +
+            "r.id, u.id, u.nickname, k.id, k.name, r.oneLineComment, " +
+            "r.workEnvironmentComment, r.workEnvironmentScore, " +
+            "r.learningSupportComment, r.learningSupportScore, " +
+            "r.instructionTeacherComment, r.instructionTeacherScore, " +
+            "r.likeCount, r.shareCount, r.createdAt) " +
+            "FROM kindergarten_internship_review r " +
+            "JOIN r.user u " +
+            "JOIN r.kindergarten k " +
+            "WHERE r.kindergarten.id = :kindergartenId " +
+            "AND r.status = :reviewStatus " +
+            "AND r.instructionTeacherScore = :score " +
+            "AND r.deletedAt IS NULL")
+    Page<InternshipReviewDTO> findByInstructionTeacherScore(
+            @Param("kindergartenId") Long kindergartenId,
+            @Param("reviewStatus") ReviewStatus reviewStatus,
+            @Param("score") Integer score,
+            Pageable pageable
+    );
 }
