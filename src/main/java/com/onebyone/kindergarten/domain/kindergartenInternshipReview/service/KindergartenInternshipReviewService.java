@@ -6,6 +6,7 @@ import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.CreateI
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.ModifyInternshipReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReviewLikeHistory;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.enums.InternshipReviewStarRatingType;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.exception.AlreadyExistInternshipReviewException;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.exception.NotFoundInternshipReviewException;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.repository.KindergartenInternshipReviewLikeHistoryRepository;
@@ -15,8 +16,10 @@ import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenService
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReviewStatus;
+import com.onebyone.kindergarten.global.exception.IllegalArgumentStarRatingException;
 import com.onebyone.kindergarten.global.exception.IncorrectUserException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +36,7 @@ public class KindergartenInternshipReviewService {
     private final KindergartenService kindergartenService;
     private final KindergartenInternshipReviewRepository kindergartenInternshipReviewRepository;
     private final KindergartenInternshipReviewLikeHistoryRepository kindergartenInternshipReviewLikeHistoryRepository;
+    private final JdbcTemplateAutoConfiguration jdbcTemplateAutoConfiguration;
 
     public Kindergarten createInternshipReview(CreateInternshipReviewRequestDTO request, String email) {
         User user = userService.getUserByEmail(email);
@@ -108,7 +112,11 @@ public class KindergartenInternshipReviewService {
         kindergartenInternshipReviewRepository.save(review);
     }
 
-    public InternshipReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, InternshipReviewPagedResponseDTO.SortType sortType) {
+    public InternshipReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, InternshipReviewPagedResponseDTO.SortType sortType, InternshipReviewStarRatingType internshipReviewStarRatingType, int starRating) {
+        if (internshipReviewStarRatingType != InternshipReviewStarRatingType.ALL && starRating < 1 || starRating > 5) {
+            throw new IllegalArgumentStarRatingException("starRating은 1부터 5 사이의 값이어야 합니다.");
+        }
+
         Pageable pageable;
 
         switch (sortType) {
@@ -121,16 +129,36 @@ public class KindergartenInternshipReviewService {
                 break;
         }
 
-        Page<InternshipReviewDTO> reviewPage = kindergartenInternshipReviewRepository.findReviewsWithUserInfo(
-            kindergartenId, 
-            ReviewStatus.ACCEPTED, 
-            pageable
-        );
+        Page<InternshipReviewDTO> reviewPage;
+
+        switch (internshipReviewStarRatingType) {
+            case WORK_ENVIRONMENT:
+                reviewPage = kindergartenInternshipReviewRepository
+                        .findByWorkEnvironmentScore(
+                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+                break;
+            case LEARNING_SUPPORT:
+                reviewPage = kindergartenInternshipReviewRepository
+                        .findByLearningSupportScore(
+                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+                break;
+            case INSTRUCTION_TEACHER:
+                reviewPage = kindergartenInternshipReviewRepository
+                        .findByInstructionTeacherScore(
+                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+                break;
+            case ALL:
+            default:
+                reviewPage = kindergartenInternshipReviewRepository
+                        .findReviewsWithUserInfo(
+                                kindergartenId, ReviewStatus.ACCEPTED, pageable);
+                break;
+        }
 
         return InternshipReviewPagedResponseDTO.builder()
-            .content(reviewPage.getContent())
-            .totalPages(reviewPage.getTotalPages())
-            .build();
+                .content(reviewPage.getContent())
+                .totalPages(reviewPage.getTotalPages())
+                .build();
     }
 
     /// 내가 작성한 실습 리뷰 조회
@@ -139,14 +167,14 @@ public class KindergartenInternshipReviewService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<InternshipReviewDTO> reviewPage = kindergartenInternshipReviewRepository.findMyReviews(
-            user.getId(),
-            ReviewStatus.ACCEPTED,
-            pageable
+                user.getId(),
+                ReviewStatus.ACCEPTED,
+                pageable
         );
 
         return InternshipReviewPagedResponseDTO.builder()
-            .content(reviewPage.getContent())
-            .totalPages(reviewPage.getTotalPages())
-            .build();
+                .content(reviewPage.getContent())
+                .totalPages(reviewPage.getTotalPages())
+                .build();
     }
 }

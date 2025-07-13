@@ -6,6 +6,7 @@ import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewDTO
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReviewLikeHistory;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.enums.WorkReviewStarRatingType;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.exception.AlreadyExistWorkReviewException;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.exception.NotFoundWorkReviewException;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.repository.KindergartenWorkReviewLikeHistoryRepository;
@@ -16,6 +17,7 @@ import com.onebyone.kindergarten.domain.pushNotification.service.NotificationTem
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReviewStatus;
+import com.onebyone.kindergarten.global.exception.IllegalArgumentStarRatingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +36,7 @@ public class KindergartenWorkReviewService {
     private final KindergartenWorkReviewRepository workReviewRepository;
     private final KindergartenWorkReviewLikeHistoryRepository workReviewLikeHistoryRepository;
     private final NotificationTemplateService notificationTemplateService;
+    private final KindergartenWorkReviewRepository kindergartenWorkReviewRepository;
 
     @Transactional
     public Kindergarten createWorkReview(CreateWorkReviewRequestDTO request, String email) {
@@ -108,7 +111,7 @@ public class KindergartenWorkReviewService {
 
             workReviewLikeHistoryRepository.save(newLike);
             review.plusLikeCount();
-            
+
             // 알림 발송 - 본인 글이 아닌 경우
             if (!review.getUser().getId().equals(user.getId())) {
                 notificationTemplateService.sendLikeNotification(
@@ -123,7 +126,11 @@ public class KindergartenWorkReviewService {
         workReviewRepository.save(review);
     }
 
-    public WorkReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, WorkReviewPagedResponseDTO.SortType sortType) {
+    public WorkReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, WorkReviewPagedResponseDTO.SortType sortType, WorkReviewStarRatingType workReviewStarRatingType, int starRating) {
+        if (workReviewStarRatingType != WorkReviewStarRatingType.ALL && starRating < 1 || starRating > 5) {
+            throw new IllegalArgumentStarRatingException("starRating은 1부터 5 사이의 값이어야 합니다.");
+        }
+
         Pageable pageable;
 
         switch (sortType) {
@@ -136,16 +143,47 @@ public class KindergartenWorkReviewService {
                 break;
         }
 
-        Page<WorkReviewDTO> reviewPage = workReviewRepository.findReviewsWithUserInfo(
-            kindergartenId, 
-            ReviewStatus.ACCEPTED, 
-            pageable
-        );
+        Page<WorkReviewDTO> reviewPage;
+
+        switch (workReviewStarRatingType) {
+            case BENEFIT_AND_SALARY:
+                reviewPage = kindergartenWorkReviewRepository
+                        .findByBenefitAndSalaryScore(
+                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+                break;
+            case WORK_LIFE_BALANCE:
+                reviewPage = kindergartenWorkReviewRepository
+                        .findByWorkLifeBalanceScore(
+                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+                break;
+            case WORK_ENVIRONMENT:
+                reviewPage = kindergartenWorkReviewRepository
+                        .findByWorkEnvironmentScore(
+                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+                break;
+            case MANAGER:
+                reviewPage = kindergartenWorkReviewRepository
+                        .findByManagerScore(
+                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+                break;
+            case CUSTOMER:
+                reviewPage = kindergartenWorkReviewRepository
+                        .findByCustomerScore(
+                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+                break;
+            default:
+                reviewPage = workReviewRepository.findReviewsWithUserInfo(
+                        kindergartenId,
+                        ReviewStatus.ACCEPTED,
+                        pageable
+                );
+                break;
+        }
 
         return WorkReviewPagedResponseDTO.builder()
-            .content(reviewPage.getContent())
-            .totalPages(reviewPage.getTotalPages())
-            .build();
+                .content(reviewPage.getContent())
+                .totalPages(reviewPage.getTotalPages())
+                .build();
     }
 
     /// 내가 작성한 근무 리뷰 조회
@@ -154,14 +192,14 @@ public class KindergartenWorkReviewService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<WorkReviewDTO> reviewPage = workReviewRepository.findMyReviews(
-            user.getId(),
-            ReviewStatus.ACCEPTED,
-            pageable
+                user.getId(),
+                ReviewStatus.ACCEPTED,
+                pageable
         );
 
         return WorkReviewPagedResponseDTO.builder()
-            .content(reviewPage.getContent())
-            .totalPages(reviewPage.getTotalPages())
-            .build();
+                .content(reviewPage.getContent())
+                .totalPages(reviewPage.getTotalPages())
+                .build();
     }
 }

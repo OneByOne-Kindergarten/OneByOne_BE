@@ -250,6 +250,12 @@ public class ErrorHandler {
         return buildError(Error.NOT_FOUND_EXCEPTION_BY_TEMPORARY_PASSWORD_EXCEPTION);
     }
 
+    @ExceptionHandler(IllegalArgumentStarRatingException.class)
+    public ErrorResponse handleIllegalArgumentStarRatingError(IllegalArgumentStarRatingException e) {
+        log.error("IllegalArgumentStarRatingException 발생: {}", e.getMessage(), e);
+        return buildError(Error.ILLEGAL_ARGUMENT_STAR_RATING_EXCEPTION);
+    }
+
     private ErrorResponse buildError(Error error) {
         ErrorResponse retError = ErrorResponse.builder()
                 .message(error.getMessage())
