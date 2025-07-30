@@ -81,9 +81,9 @@ public class User extends BaseEntity {
 
     public boolean hasNotificationEnabled(NotificationSetting setting) {
         return switch (setting) {
-            case ALL_NOTIFICATIONS -> allNotificationsEnabled;
-            case COMMUNITY_NOTIFICATIONS -> communityNotificationsEnabled;
-            case EVENT_NOTIFICATIONS -> eventNotificationsEnabled;
+            case ALL_NOTIFICATIONS -> allNotificationsEnabled == null || allNotificationsEnabled;
+            case COMMUNITY_NOTIFICATIONS -> communityNotificationsEnabled == null || communityNotificationsEnabled;
+            case EVENT_NOTIFICATIONS -> eventNotificationsEnabled == null || eventNotificationsEnabled;
         };
     }
 
