@@ -116,6 +116,9 @@ public class CommunityCommentService {
         if (email != null) {
             User user = userService.getUserByEmail(email);
             blockedUserIds = userBlockRepository.findBlockedUserIdsByUserId(user.getId());
+            if (blockedUserIds == null) {
+                blockedUserIds = Collections.emptyList();
+            }
         }
         
         return commentRepository.findAllCommentsWithRepliesByPostId(postId, blockedUserIds, pageable);
