@@ -42,7 +42,9 @@ public enum Error {
     HTTP_MESSAGE_NOT_REDABLE_EXCEPTION("잘못된 요청 형식입니다."),
     EMAIL_DUPLICATION_EXCEPTION("이메일이 중복 되었습니다."),
     NOT_FOUND_EXCEPTION_BY_TEMPORARY_PASSWORD_EXCEPTION("이메일이 인증되지 않았습니다."),
-    ILLEGAL_ARGUMENT_STAR_RATING_EXCEPTION("starRating은 1부터 5 사이의 값이어야 합니다.");
+    ILLEGAL_ARGUMENT_STAR_RATING_EXCEPTION("starRating은 1부터 5 사이의 값이어야 합니다."),
+    ALREADY_BLOCK_USER("이미 차단한 사용자입니다."),
+    SELF_BLOCK_NOT_ALLOWED("자기 자신을 차단할 수 없습니다.");
 
     private final String message;
 

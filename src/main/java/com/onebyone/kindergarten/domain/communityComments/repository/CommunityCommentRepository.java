@@ -19,7 +19,7 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
 
     // 게시글의 원댓글 목록 조회 (parent IS NULL)
     @Query("SELECT new com.onebyone.kindergarten.domain.communityComments.dto.response.CommentResponseDTO(" +
-            "c.id, c.content, u.nickname, u.career, u.role, c.createdAt, c.status, " +
+            "c.id, c.content, u.nickname, u.email, u.career, u.role, c.createdAt, c.status, " +
             "null, false) " +
             "FROM community_comment c " +
             "JOIN c.user u " +
@@ -29,7 +29,7 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
 
     // 특정 원댓글에 대한 대댓글 목록 조회
     @Query("SELECT new com.onebyone.kindergarten.domain.communityComments.dto.response.CommentResponseDTO(" +
-            "c.id, c.content, u.nickname, u.career, u.role, c.createdAt, c.status, " +
+            "c.id, c.content, u.nickname, u.email, u.career, u.role, c.createdAt, c.status, " +
             "c.parent.id, true) " +
             "FROM community_comment c " +
             "JOIN c.user u " +
@@ -39,16 +39,20 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
 
     // 게시글의 모든 댓글 조회 (대댓글 포함) - 최적화 버전
     @Query("SELECT new com.onebyone.kindergarten.domain.communityComments.dto.response.CommentResponseDTO(" +
-            "c.id, c.content, u.nickname, u.career, u.role, c.createdAt, c.status, " +
+            "c.id, c.content, u.nickname, u.email ,u.career, u.role, c.createdAt, c.status, " +
             "c.parent.id, CASE WHEN c.parent IS NOT NULL THEN true ELSE false END) " +
             "FROM community_comment c " +
             "JOIN c.user u " +
             "LEFT JOIN c.parent p " +
             "WHERE c.post.id = :postId AND c.deletedAt IS NULL " +
+            "AND (u.id NOT IN :blockedUserIds OR :blockedUserIds IS NULL) " +
             "ORDER BY COALESCE(p.createdAt, c.createdAt) DESC, " +
             "CASE WHEN c.parent IS NULL THEN 0 ELSE 1 END, " +
             "c.createdAt ASC")
-    Page<CommentResponseDTO> findAllCommentsWithRepliesByPostId(@Param("postId") Long postId, Pageable pageable);
+    Page<CommentResponseDTO> findAllCommentsWithRepliesByPostId(
+            @Param("postId") Long postId,
+            @Param("blockedUserIds") List<Long> blockedUserIds,
+            Pageable pageable);
 
 
     @Query("SELECT c FROM community_comment c WHERE c.user.id = :userId AND c.deletedAt IS NULL")

@@ -31,6 +31,7 @@ public class CommunityPostMapper {
                 .categoryName(post.getCommunityCategory().getCategoryName())
                 .categoryDescription(post.getCommunityCategory().getDescription())
                 .userNickname(post.getUser().getNickname())
+                .userEmail(post.getUser().getEmail())
                 .userRole(post.getUser().getRole())
                 .career(post.getUser().getCareer())
                 .viewCount(post.getViewCount())

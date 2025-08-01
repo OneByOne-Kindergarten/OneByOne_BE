@@ -1,6 +1,7 @@
 package com.onebyone.kindergarten.domain.communityComments.service;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
+import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,7 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 
 import java.util.List;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class CommunityCommentService {
     private final CommunityCommentRepository commentRepository;
     private final CommunityRepository postRepository;
     private final UserService userService;
+    private final UserBlockRepository userBlockRepository;
     private final NotificationTemplateService notificationTemplateService;
 
     /// 댓글 작성 (원댓글 또는 대댓글)
@@ -106,8 +109,16 @@ public class CommunityCommentService {
     }
     
     /// 게시글의 모든 댓글과 대댓글 목록 조회 (계층 구조로 정렬)
-    public Page<CommentResponseDTO> getAllCommentsWithReplies(Long postId, Pageable pageable) {
-        return commentRepository.findAllCommentsWithRepliesByPostId(postId, pageable);
+    public Page<CommentResponseDTO> getAllCommentsWithReplies(Long postId, Pageable pageable, String email) {
+
+        // 차단된 사용자 ID 목록 조회
+        List<Long> blockedUserIds = Collections.emptyList();
+        if (email != null) {
+            User user = userService.getUserByEmail(email);
+            blockedUserIds = userBlockRepository.findBlockedUserIdsByUserId(user.getId());
+        }
+        
+        return commentRepository.findAllCommentsWithRepliesByPostId(postId, blockedUserIds, pageable);
     }
 
     @Transactional(readOnly = true)

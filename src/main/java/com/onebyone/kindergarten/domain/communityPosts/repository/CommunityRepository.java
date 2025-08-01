@@ -36,7 +36,7 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
            "LIMIT 10")
     List<CommunityPost> findTop10WithUserOrderByLikeCountDescViewCountDesc();
 
-    @Query("""
+        @Query("""
             SELECT p FROM CommunityPost p 
             JOIN FETCH p.user u 
             JOIN FETCH p.communityCategory c 
@@ -48,8 +48,12 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
             AND (:#{#search.userName} IS NULL OR u.nickname LIKE %:#{#search.userName}%) 
             AND (:#{#search.startDate} IS NULL OR p.createdAt >= :#{#search.startDate}) 
             AND (:#{#search.endDate} IS NULL OR p.createdAt <= :#{#search.endDate})
+            AND u.id NOT IN :blockedUserIds
             """)
-    Page<CommunityPost> search(@Param("search") CommunitySearchDTO search, Pageable pageable);
+    Page<CommunityPost> search(
+            @Param("search") CommunitySearchDTO search, 
+            @Param("blockedUserIds") List<Long> blockedUserIds,
+            Pageable pageable);
 
     @Modifying
     @Query("UPDATE CommunityPost p SET p.likeCount = p.likeCount + :delta WHERE p.id = :postId")

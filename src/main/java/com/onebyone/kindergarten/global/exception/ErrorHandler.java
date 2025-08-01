@@ -21,6 +21,8 @@ import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
 import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailExceptionByTemporaryPassword;
+import com.onebyone.kindergarten.domain.userBlock.exception.AlreadyBlockException;
+import com.onebyone.kindergarten.domain.userBlock.exception.SelfBlockException;
 import com.onebyone.kindergarten.domain.user.exception.PasswordMismatchException;
 import com.onebyone.kindergarten.global.error.Error;
 import com.onebyone.kindergarten.global.error.ErrorResponse;
@@ -254,6 +256,20 @@ public class ErrorHandler {
     public ErrorResponse handleIllegalArgumentStarRatingError(IllegalArgumentStarRatingException e) {
         log.error("IllegalArgumentStarRatingException 발생: {}", e.getMessage(), e);
         return buildError(Error.ILLEGAL_ARGUMENT_STAR_RATING_EXCEPTION);
+    }
+
+    @ExceptionHandler(AlreadyBlockException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAlreadyBlockException(AlreadyBlockException e) {
+        log.error("AlreadyBlockException 발생: {}", e.getMessage(), e);
+        return buildError(Error.ALREADY_BLOCK_USER);
+    }
+
+    @ExceptionHandler(SelfBlockException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleSelfBlockException(SelfBlockException e) {
+        log.error("SelfBlockException 발생: {}", e.getMessage(), e);
+        return buildError(Error.SELF_BLOCK_NOT_ALLOWED);
     }
 
     private ErrorResponse buildError(Error error) {

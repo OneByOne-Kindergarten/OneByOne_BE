@@ -50,12 +50,14 @@ public class CommunityController {
     }
 
     @GetMapping()
-    @Operation(summary = "커뮤니티 게시글 목록 조회", description = "게시글 목록을 조회하고 검색합니다.")
+    @Operation(summary = "커뮤니티 게시글 목록 조회", description = "게시글 목록을 조회하고 검색합니다. 차단한 사용자의 게시글은 제외됩니다.")
     public PageResponseDTO<CommunityPostResponseDTO> getPosts(
             CommunitySearchDTO searchDTO,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return new PageResponseDTO<>(communityService.getPosts(searchDTO, pageable));
+        String email = userDetails != null ? userDetails.getUsername() : null;
+        return new PageResponseDTO<>(communityService.getPosts(searchDTO, pageable, email));
     }
 
     @GetMapping("/{id}")

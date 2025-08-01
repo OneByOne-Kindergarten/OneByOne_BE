@@ -19,6 +19,8 @@ public class CommentResponseDTO {
     
     private String nickName;
     
+    private String email;
+    
     private String career;
     
     private UserRole userRole;
@@ -32,12 +34,13 @@ public class CommentResponseDTO {
     private boolean isReply;
 
     public CommentResponseDTO(Long id, String content, String nickName,
-                            String career, UserRole userRole, 
+                            String email, String career, UserRole userRole, 
                             LocalDateTime createdAt, ReportStatus status,
                             Long parentId, boolean isReply) {
         this.id = id;
         this.content = content;
         this.nickName = nickName;
+        this.email = email;
         this.career = career;
         this.userRole = userRole;
         this.createdAt = createdAt;
@@ -53,6 +56,7 @@ public class CommentResponseDTO {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .nickName(user.getNickname())
+                .email(user.getEmail())
                 .career(user.getCareer())
                 .userRole(user.getRole())
                 .createdAt(comment.getCreatedAt())
