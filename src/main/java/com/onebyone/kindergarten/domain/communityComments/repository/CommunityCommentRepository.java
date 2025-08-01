@@ -46,6 +46,8 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
             "LEFT JOIN c.parent p " +
             "WHERE c.post.id = :postId AND c.deletedAt IS NULL " +
             "AND (u.id NOT IN :blockedUserIds OR :blockedUserIds IS NULL) " +
+            "AND (p IS NULL OR p.deletedAt IS NULL) " +
+            "AND (p IS NULL OR p.user.id NOT IN :blockedUserIds OR :blockedUserIds IS NULL) " +
             "ORDER BY COALESCE(p.createdAt, c.createdAt) DESC, " +
             "CASE WHEN c.parent IS NULL THEN 0 ELSE 1 END, " +
             "c.createdAt ASC")
