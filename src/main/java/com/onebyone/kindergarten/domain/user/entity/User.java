@@ -3,11 +3,13 @@ package com.onebyone.kindergarten.domain.user.entity;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.enums.UserStatus;
+import com.onebyone.kindergarten.domain.user.enums.NotificationSetting;
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity(name = "user")
 @Getter
@@ -64,6 +66,32 @@ public class User extends BaseEntity {
 
     @Column(name = "previous_deleted_at")
     private LocalDateTime previousDeletedAt;
+
+    @Column(name = "all_notifications_enabled")
+    @Builder.Default
+    private Boolean allNotificationsEnabled = true;
+
+    @Column(name = "community_notifications_enabled")
+    @Builder.Default
+    private Boolean communityNotificationsEnabled = true;
+
+    @Column(name = "event_notifications_enabled")
+    @Builder.Default
+    private Boolean eventNotificationsEnabled = true;
+
+    public boolean hasNotificationEnabled(NotificationSetting setting) {
+        return switch (setting) {
+            case ALL_NOTIFICATIONS -> allNotificationsEnabled == null || allNotificationsEnabled;
+            case COMMUNITY_NOTIFICATIONS -> communityNotificationsEnabled == null || communityNotificationsEnabled;
+            case EVENT_NOTIFICATIONS -> eventNotificationsEnabled == null || eventNotificationsEnabled;
+        };
+    }
+
+    public void setNotificationSettings(Set<NotificationSetting> enabledSettings) {
+        this.allNotificationsEnabled = enabledSettings.contains(NotificationSetting.ALL_NOTIFICATIONS);
+        this.communityNotificationsEnabled = enabledSettings.contains(NotificationSetting.COMMUNITY_NOTIFICATIONS);
+        this.eventNotificationsEnabled = enabledSettings.contains(NotificationSetting.EVENT_NOTIFICATIONS);
+    }
 
     public static User registerKakao(String email, String password, Long kakaoProviderId, String nickname,
             UserRole role, String profileImageUrl) {

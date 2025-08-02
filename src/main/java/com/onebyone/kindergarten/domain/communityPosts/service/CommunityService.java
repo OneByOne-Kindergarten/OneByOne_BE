@@ -11,6 +11,7 @@ import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityCateg
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
+import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository;
 import com.onebyone.kindergarten.global.config.CacheConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,7 +32,7 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final CommunityCategoryRepository communityCategoryRepository;
     private final UserService userService;
-
+    private final UserBlockRepository userBlockRepository;
     private final CommunityPostMapper communityPostMapper;
 
     /// 게시글 생성
@@ -61,8 +63,18 @@ public class CommunityService {
     }
 
     /// 게시글 목록 조회
-    public Page<CommunityPostResponseDTO> getPosts(CommunitySearchDTO searchDTO, Pageable pageable) {
-        return communityRepository.search(searchDTO, pageable)
+    public Page<CommunityPostResponseDTO> getPosts(CommunitySearchDTO searchDTO, Pageable pageable, String email) {
+
+        // 차단된 사용자 ID 목록 가져오기
+        List<Long> blockedUserIds = Collections.emptyList();
+        if (email != null) {
+            User user = userService.getUserByEmail(email);
+            blockedUserIds = userBlockRepository.findBlockedUserIdsByUserId(user.getId());
+        }
+
+        // 차단된 사용자가 없는 경우 존재하지 않는 ID를 사용
+        List<Long> finalBlockedUserIds = blockedUserIds.isEmpty() ? List.of(-1L) : blockedUserIds;
+        return communityRepository.search(searchDTO, finalBlockedUserIds, pageable)
                 .map(communityPostMapper::toResponse);
     }
 

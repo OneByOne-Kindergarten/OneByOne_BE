@@ -5,6 +5,7 @@ import com.onebyone.kindergarten.domain.facade.UserFacade;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.HomeShortcutsDto;
+import com.onebyone.kindergarten.domain.user.dto.NotificationSettingsDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.*;
 import com.onebyone.kindergarten.domain.user.dto.response.GetUserResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.ReIssueResponseDTO;
@@ -12,6 +13,7 @@ import com.onebyone.kindergarten.domain.user.dto.response.SignInResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.SignUpResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.UpdateHomeShortcutsResponseDTO;
 import com.onebyone.kindergarten.domain.user.service.UserService;
+import com.onebyone.kindergarten.global.common.ResponseDto;
 import com.onebyone.kindergarten.global.jwt.JwtProvider;
 import com.onebyone.kindergarten.global.jwt.exception.InvalidTokenException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -239,4 +241,21 @@ public class UserApiController {
             @RequestParam(defaultValue = "10") int size) {
         return userFacade.getMyWorkReviews(userDetails.getUsername(), page, size);
     }
+
+    @Operation(summary = "유저-018 알림 설정 조회", description = "사용자의 알림 설정을 조회합니다.")
+    @GetMapping("/notification-settings")
+    public ResponseDto<NotificationSettingsDTO> getNotificationSettings(@AuthenticationPrincipal UserDetails userDetails) {
+        NotificationSettingsDTO settings = userService.getNotificationSettings(userDetails.getUsername());
+        return ResponseDto.success(settings);
+    }
+
+    @Operation(summary = "유저-019 알림 설정 업데이트", description = "사용자의 알림 설정을 업데이트합니다.")
+    @PutMapping("/notification-settings")
+    public ResponseDto<NotificationSettingsDTO> updateNotificationSettings(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody NotificationSettingsDTO request) {
+        NotificationSettingsDTO updatedSettings = userService.updateNotificationSettings(userDetails.getUsername(), request);
+        return ResponseDto.success(updatedSettings);
+    }
+
 }

@@ -16,6 +16,7 @@ public class CommunityPostResponseDTO {
     private String categoryName;
     private String categoryDescription;
     private String userNickname;
+    private String userEmail;
     private UserRole userRole;
     private String career;
     private Integer viewCount;

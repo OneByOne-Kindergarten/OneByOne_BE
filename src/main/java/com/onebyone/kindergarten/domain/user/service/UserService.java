@@ -12,6 +12,7 @@ import com.onebyone.kindergarten.domain.user.dto.response.KakaoUserResponse;
 import com.onebyone.kindergarten.domain.user.dto.response.NaverUserResponse;
 import com.onebyone.kindergarten.domain.user.entity.EmailCertification;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.domain.user.enums.NotificationSetting;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
 import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
@@ -27,9 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -329,5 +333,38 @@ public class UserService {
         if (!emailCertification.isCertificated()) {
             throw new NotFoundEmailExceptionByTemporaryPassword("이메일이 검증되지 않았습니다.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public NotificationSettingsDTO getNotificationSettings(String email) {
+        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+        
+        return NotificationSettingsDTO.builder()
+                .allNotificationsEnabled(user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS))
+                .communityNotificationsEnabled(user.hasNotificationEnabled(NotificationSetting.COMMUNITY_NOTIFICATIONS))
+                .eventNotificationsEnabled(user.hasNotificationEnabled(NotificationSetting.EVENT_NOTIFICATIONS))
+                .build();
+    }
+
+    @Transactional
+    public NotificationSettingsDTO updateNotificationSettings(String email, NotificationSettingsDTO request) {
+        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+        
+        Set<NotificationSetting> enabledSettings = new HashSet<>();
+        if (request.isAllNotificationsEnabled()) {
+            enabledSettings.add(NotificationSetting.ALL_NOTIFICATIONS);
+        }
+        if (request.isCommunityNotificationsEnabled()) {
+            enabledSettings.add(NotificationSetting.COMMUNITY_NOTIFICATIONS);
+        }
+        if (request.isEventNotificationsEnabled()) {
+            enabledSettings.add(NotificationSetting.EVENT_NOTIFICATIONS);
+        }
+        
+        user.setNotificationSettings(enabledSettings);
+        
+        return request;
     }
 }

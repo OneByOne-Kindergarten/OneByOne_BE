@@ -28,6 +28,8 @@ import java.util.concurrent.ExecutionException;
 import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutureCallback;
 import com.google.api.core.ApiFutures;
+import com.onebyone.kindergarten.domain.user.enums.NotificationSetting;
+import com.onebyone.kindergarten.domain.pushNotification.enums.NotificationType;
 
 @Slf4j
 @Service
@@ -37,12 +39,32 @@ public class PushNotificationService {
     private final PushNotificationRepository pushNotificationRepository;
     private final UserRepository userRepository;
 
+    /// 알림 전송 여부 확인 ( 내부 메서드 )
+    private boolean shouldSendNotification(User user, NotificationType type) {
+        /// 사용자가 전체 알림을 활성화했는지 확인
+        if (user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS)) {
+            return true;
+        }
+
+        /// 알림 타입에 따라 특정 설정 확인
+        return switch (type) {
+            case REVIEW, COMMENT, LIKE -> user.hasNotificationEnabled(NotificationSetting.COMMUNITY_NOTIFICATIONS);
+            case SYSTEM, NOTICE -> user.hasNotificationEnabled(NotificationSetting.EVENT_NOTIFICATIONS);
+        };
+    }
+
     /// 푸시 알림 저장 (FCM 발송하지 않음)
     @Transactional
     public void savePushNotification(PushNotificationRequestDTO requestDTO) {
         // 사용자 조회
         User user = userRepository.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new NotificationException("사용자를 찾을 수 없습니다."));
+
+        // 알림 설정 확인
+        if (!shouldSendNotification(user, requestDTO.getType())) {
+            log.debug("User {} has disabled notifications for type {}", user.getId(), requestDTO.getType());
+            return;
+        }
 
         // 알림 저장 (FCM 발송하지 않음)
         PushNotification notification = PushNotification.builder()

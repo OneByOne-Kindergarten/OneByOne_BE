@@ -56,11 +56,13 @@ public class CommunityCommentController {
     }
     
     @GetMapping("/all")
-    @Operation(summary = "모든 댓글 조회", description = "게시글의 모든 댓글과 대댓글을 함께 조회합니다.")
+    @Operation(summary = "모든 댓글 조회", description = "게시글의 모든 댓글과 대댓글을 함께 조회합니다. 차단한 사용자의 댓글은 제외됩니다.")
     public PageResponseDTO<CommentResponseDTO> getAllComments(
             @PathVariable Long postId,
-            @PageableDefault(size = 30, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 30, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return new PageResponseDTO<>(commentService.getAllCommentsWithReplies(postId, pageable));
+        String email = userDetails != null ? userDetails.getUsername() : null;
+        return new PageResponseDTO<>(commentService.getAllCommentsWithReplies(postId, pageable, email));
     }
 }
