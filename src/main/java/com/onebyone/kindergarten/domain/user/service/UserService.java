@@ -288,6 +288,10 @@ public class UserService {
 
     @Transactional
     public boolean saveCertification(String email, String certification) {
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailDuplicationException("이미 존재하는 이메일입니다.");
+        }
+
         EmailCertification emailCert = EmailCertification.builder()
                 .email(email)
                 .certification(certification)
