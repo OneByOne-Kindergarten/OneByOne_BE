@@ -23,6 +23,7 @@ public class UserDTO {
     private boolean allNotificationsEnabled;
     private boolean communityNotificationsEnabled;
     private boolean eventNotificationsEnabled;
+    private boolean hasWrittenReview;
 
     public static UserDTO from(User user) {
         HomeShortcutsDto homeShortcutsDto = user.getHomeShortcut() != null ?
@@ -41,7 +42,8 @@ public class UserDTO {
                 user.getPreviousDeletedAt(),
                 user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS),
                 user.hasNotificationEnabled(NotificationSetting.COMMUNITY_NOTIFICATIONS),
-                user.hasNotificationEnabled(NotificationSetting.EVENT_NOTIFICATIONS)
+                user.hasNotificationEnabled(NotificationSetting.EVENT_NOTIFICATIONS),
+                user.hasWrittenReview()
         );
     }
 }

@@ -9,6 +9,7 @@ import com.onebyone.kindergarten.domain.kindergartenWorkReview.service.Kindergar
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenInternshipReviewAggregateService;
 import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenWorkReviewAggregateService;
+import com.onebyone.kindergarten.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class KindergartenFacade {
     private final KindergartenInternshipReviewAggregateService kindergartenInternshipReviewAggregateService;
     private final KindergartenWorkReviewService kindergartenWorkReviewService;
     private final KindergartenWorkReviewAggregateService kindergartenWorkReviewAggregateService;
+    private final UserService userService;
 
 
     @Transactional
@@ -27,6 +29,9 @@ public class KindergartenFacade {
         Kindergarten kindergarten = kindergartenInternshipReviewService.createInternshipReview(request, email);
 
         kindergartenInternshipReviewAggregateService.updateOrCreateAggregate(kindergarten);
+        
+        /// 사용자 리뷰 작성 플래그 업데이트
+        userService.markUserAsReviewWriter(email);
     }
 
     @Transactional
@@ -41,6 +46,9 @@ public class KindergartenFacade {
         Kindergarten kindergarten = kindergartenWorkReviewService.createWorkReview(request, email);
 
         kindergartenWorkReviewAggregateService.updateOrCreateAggregate(kindergarten);
+        
+        /// 사용자 리뷰 작성 플래그 업데이트
+        userService.markUserAsReviewWriter(email);
     }
 
     @Transactional

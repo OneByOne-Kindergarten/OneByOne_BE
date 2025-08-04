@@ -367,4 +367,12 @@ public class UserService {
         
         return request;
     }
+
+    @Transactional
+    public void markUserAsReviewWriter(String email) {
+        User user = getUserByEmail(email);
+        if (!user.hasWrittenReview()) {
+            user.markAsReviewWriter();
+        }
+    }
 }
