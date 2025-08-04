@@ -79,6 +79,10 @@ public class User extends BaseEntity {
     @Builder.Default
     private Boolean eventNotificationsEnabled = true;
 
+    @Column(name = "has_written_review")
+    @Builder.Default
+    private Boolean hasWrittenReview = false;
+
     public boolean hasNotificationEnabled(NotificationSetting setting) {
         return switch (setting) {
             case ALL_NOTIFICATIONS -> allNotificationsEnabled == null || allNotificationsEnabled;
@@ -187,5 +191,13 @@ public class User extends BaseEntity {
 
     public boolean isRestoredUser() {
         return this.previousDeletedAt != null;
+    }
+
+    public void markAsReviewWriter() {
+        this.hasWrittenReview = true;
+    }
+
+    public boolean hasWrittenReview() {
+        return this.hasWrittenReview != null && this.hasWrittenReview;
     }
 }
