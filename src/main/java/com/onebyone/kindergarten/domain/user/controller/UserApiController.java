@@ -111,16 +111,18 @@ public class UserApiController {
     @Operation(summary = "유저-08 카카오 소셜 로그인", description = "카카오 소셜로그인을 진행합니다")
     @GetMapping("/kakao/callback")
     public SignInResponseDTO getKakaoAuthorizationCode(
-            @RequestParam(name = "code") String code) {
-        return userFacade.kakaoLogin(code);
+            @RequestParam(name = "code") String code,
+            @RequestParam(name = "fcmToken", required = false) String fcmToken) {
+        return userFacade.kakaoLogin(code, fcmToken);
     }
 
     @Operation(summary = "유저-09 네이버 소셜 로그인", description = "네이버 소셜로그인을 진행합니다")
     @GetMapping("/naver/callback")
     public SignInResponseDTO getNaverAuthorizationCode(
             @RequestParam(name = "code") String code,
-            @RequestParam(name = "state") String state) {
-        return userFacade.naverLogin(code, state);
+            @RequestParam(name = "state") String state,
+            @RequestParam(name = "fcmToken", required = false) String fcmToken) {
+        return userFacade.naverLogin(code, state, fcmToken);
     }
 
     @Operation(summary = "유저-10 애플 소셜 로그인", description = "애플 소셜로그인을 진행합니다")
@@ -129,11 +131,12 @@ public class UserApiController {
             @RequestParam("id_token") String idToken,
             @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "state", required = false) String state,
+            @RequestParam(value = "fcmToken", required = false) String fcmToken,
             HttpServletResponse response) throws IOException {
 
         try {
             /// 애플 로그인 처리
-            SignInResponseDTO loginResponse = userFacade.appleLogin(idToken);
+            SignInResponseDTO loginResponse = userFacade.appleLogin(idToken, fcmToken);
 
             /// 프론트엔드로 리다이렉트 (성공)
             String frontendUrl = "https://one-by-one-fe.vercel.app/users/apple/callback";

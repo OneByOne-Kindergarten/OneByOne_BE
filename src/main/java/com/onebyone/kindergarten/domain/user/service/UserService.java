@@ -199,6 +199,20 @@ public class UserService {
     }
 
     @Transactional
+    public String signUpByKakao(KakaoUserResponse userResponse, String fcmToken) {
+        String email = signUpByKakao(userResponse);
+        
+        // FCM 토큰이 있으면 업데이트
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+                    .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+            user.updateFcmToken(fcmToken);
+        }
+        
+        return email;
+    }
+
+    @Transactional
     public String signUpByNaver(NaverUserResponse userResponse) {
         String email = userResponse.getResponse().getEmail();
 
@@ -232,6 +246,20 @@ public class UserService {
         userRepository.save(user);
 
         return user.getEmail();
+    }
+
+    @Transactional
+    public String signUpByNaver(NaverUserResponse userResponse, String fcmToken) {
+        String email = signUpByNaver(userResponse);
+        
+        // FCM 토큰이 있으면 업데이트
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+                    .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+            user.updateFcmToken(fcmToken);
+        }
+        
+        return email;
     }
 
     @Transactional
@@ -278,6 +306,20 @@ public class UserService {
         userRepository.save(user);
 
         return user.getEmail();
+    }
+
+    @Transactional
+    public String signUpByApple(AppleUserResponse userResponse, String fcmToken) {
+        String email = signUpByApple(userResponse);
+        
+        // FCM 토큰이 있으면 업데이트
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+                    .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+            user.updateFcmToken(fcmToken);
+        }
+        
+        return email;
     }
 
     @Transactional
