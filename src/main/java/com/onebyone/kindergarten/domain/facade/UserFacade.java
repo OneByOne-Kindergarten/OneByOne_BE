@@ -75,7 +75,7 @@ public class UserFacade {
                 .build();
     }
 
-    public SignInResponseDTO kakaoLogin(String code) {
+    public SignInResponseDTO kakaoLogin(String code, String fcmToken) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", kakaoApiKey);
@@ -86,13 +86,14 @@ public class UserFacade {
         log.info("client_id: {}", kakaoApiKey);
         log.info("redirect_uri: {}", kakaoRedirectUrl);
         log.info("code: {}", code);
+        log.info("fcmToken 존재: {}", fcmToken != null);
         log.info("============================");
 
         KakaoTokenResponse tokenResponse = kakaoAuthClient.getAccessToken(params);
         String kakaoAccessToken = tokenResponse.getAccess_token();
 
         KakaoUserResponse userResponse = kakaoApiClient.getUserInfo("Bearer " + kakaoAccessToken);
-        String email = userService.signUpByKakao(userResponse);
+        String email = userService.signUpByKakao(userResponse, fcmToken);
 
         String accessToken = jwtProvider.generateAccessToken(email);
         String refreshToken = jwtProvider.generateRefreshToken(email);
@@ -103,7 +104,7 @@ public class UserFacade {
                 .build();
     }
 
-    public SignInResponseDTO naverLogin(String code, String state) {
+    public SignInResponseDTO naverLogin(String code, String state, String fcmToken) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", naverClientId);
@@ -111,10 +112,17 @@ public class UserFacade {
         params.add("code", code);
         params.add("state", state);
 
+        log.info("=== 네이버 토큰 요청 파라미터 ===");
+        log.info("client_id: {}", naverClientId);
+        log.info("code: {}", code);
+        log.info("state: {}", state);
+        log.info("fcmToken 존재: {}", fcmToken != null);
+        log.info("============================");
+
         NaverTokenResponse response = naverAuthClient.getAccessToken(params);
 
         NaverUserResponse userResponse = naverApiClient.getUserInfo("Bearer " + response.getAccess_token());
-        String email = userService.signUpByNaver(userResponse);
+        String email = userService.signUpByNaver(userResponse, fcmToken);
 
         String accessToken = jwtProvider.generateAccessToken(email);
         String refreshToken = jwtProvider.generateRefreshToken(email);
@@ -125,10 +133,18 @@ public class UserFacade {
                 .build();
     }
 
-    public SignInResponseDTO appleLogin(String idToken) {
+
+
+    public SignInResponseDTO appleLogin(String idToken, String fcmToken) {
+
+        log.info("=== 애플 로그인 요청 ===");
+        log.info("idToken 존재: {}", idToken != null);
+        log.info("fcmToken 존재: {}", fcmToken != null);
+        log.info("=====================");
+
         // Apple ID Token 검증 및 사용자 정보 추출
         AppleUserResponse userResponse = appleAuthService.verifyIdToken(idToken);
-        String email = userService.signUpByApple(userResponse);
+        String email = userService.signUpByApple(userResponse, fcmToken);
 
         String accessToken = jwtProvider.generateAccessToken(email);
         String refreshToken = jwtProvider.generateRefreshToken(email);
