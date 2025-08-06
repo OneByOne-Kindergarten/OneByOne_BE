@@ -131,12 +131,12 @@ public class UserApiController {
             @RequestParam("id_token") String idToken,
             @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "state", required = false) String state,
-            @RequestParam(value = "fcmToken", required = false) String fcmToken,
             HttpServletResponse response) throws IOException {
 
         try {
-            /// 애플 로그인 처리
-            SignInResponseDTO loginResponse = userFacade.appleLogin(idToken, fcmToken);
+            /// 애플 로그인 처리 (state 파라미터 - FCM 토큰 사용)
+            /// -> 애플 정책상 state 파라미터 가능
+            SignInResponseDTO loginResponse = userFacade.appleLogin(idToken, state);
 
             /// 프론트엔드로 리다이렉트 (성공)
             String frontendUrl = "https://one-by-one-fe.vercel.app/users/apple/callback";
