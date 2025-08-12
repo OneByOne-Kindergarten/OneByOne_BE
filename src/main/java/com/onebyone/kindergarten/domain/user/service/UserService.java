@@ -159,9 +159,20 @@ public class UserService {
     public String signUpByKakao(KakaoUserResponse userResponse) {
         String email = userResponse.getKakao_account().getEmail();
 
-        String nickname = userResponse.getKakao_account().getProfile() != null
-                ? userResponse.getKakao_account().getProfile().getNickname()
-                : "카카오_" + userResponse.getId();
+        String nickname;
+        if (userResponse.getKakao_account().getProfile() != null 
+                && userResponse.getKakao_account().getProfile().getNickname() != null
+                && !userResponse.getKakao_account().getProfile().getNickname().trim().isEmpty()) {
+            String originalNickname = userResponse.getKakao_account().getProfile().getNickname().trim();
+            nickname = originalNickname.length() > 10 ? originalNickname.substring(0, 10) : originalNickname;
+        } else {
+            // "카카오" (3글자) + ID 마지막 6자리 = 최대 9글자
+            String idSuffix = String.valueOf(userResponse.getId());
+            if (idSuffix.length() > 6) {
+                idSuffix = idSuffix.substring(idSuffix.length() - 6);
+            }
+            nickname = "카카오" + idSuffix;
+        }
 
         // 활성 사용자 확인
         Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(email);
@@ -239,8 +250,24 @@ public class UserService {
         // 새로운 사용자 생성
         String dummyPassword = encodePassword("naver_" + userResponse.getResponse().getId());
 
+        // 네이버 닉네임 길이 제한 처리
+        String naverNickname = userResponse.getResponse().getNickname();
+        if (naverNickname != null && !naverNickname.trim().isEmpty()) {
+            naverNickname = naverNickname.trim();
+            if (naverNickname.length() > 10) {
+                naverNickname = naverNickname.substring(0, 10);
+            }
+        } else {
+            // 닉네임이 없는 경우 기본 닉네임 생성: "네이버" + ID 마지막 6자리
+            String idSuffix = userResponse.getResponse().getId();
+            if (idSuffix != null && idSuffix.length() > 6) {
+                idSuffix = idSuffix.substring(idSuffix.length() - 6);
+            }
+            naverNickname = "네이버" + (idSuffix != null ? idSuffix : "사용자");
+        }
+        
         User user = User.registerNaver(email, dummyPassword, userResponse.getResponse().getId(),
-                userResponse.getResponse().getNickname(), UserRole.GENERAL,
+                naverNickname, UserRole.GENERAL,
                 userResponse.getResponse().getProfile_image());
 
         userRepository.save(user);
@@ -298,8 +325,15 @@ public class UserService {
 
         // 새로운 사용자 생성
         String dummyPassword = encodePassword("apple_" + appleUserId);
-        String nickname = userResponse.getName() != null ? userResponse.getName()
-                : "애플_사용자_" + appleUserId.substring(0, 8);
+        String nickname;
+        if (userResponse.getName() != null && !userResponse.getName().trim().isEmpty()) {
+            String originalName = userResponse.getName().trim();
+            nickname = originalName.length() > 10 ? originalName.substring(0, 10) : originalName;
+        } else {
+            // "애플" (2글자) + 사용자 ID 마지막 6자리 = 최대 8글자
+            String idSuffix = appleUserId.length() > 6 ? appleUserId.substring(appleUserId.length() - 6) : appleUserId;
+            nickname = "애플" + idSuffix;
+        }
 
         User user = User.registerApple(systemEmail, dummyPassword, appleUserId, nickname, UserRole.GENERAL);
 
