@@ -32,6 +32,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -270,6 +271,14 @@ public class ErrorHandler {
     public ErrorResponse handleSelfBlockException(SelfBlockException e) {
         log.error("SelfBlockException 발생: {}", e.getMessage(), e);
         return buildError(Error.SELF_BLOCK_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse handleStaticResource404(NoResourceFoundException e) {
+        return ErrorResponse.builder()
+                .message("존재하지 않는 Url 입니다")
+                .build();
     }
 
     private ErrorResponse buildError(Error error) {
