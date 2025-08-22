@@ -32,6 +32,9 @@ services:
     networks:
       - backend_network
     restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
 
   promtail:
     image: grafana/promtail:3.0.0

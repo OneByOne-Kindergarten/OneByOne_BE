@@ -86,6 +86,8 @@ jobs:
             REGISTRY=${{ secrets.DOCKER_HUB }}
             APP_TAG=latest
             SPRING_PROFILE=production
+            GRAFANA_USER=${{ secrets.GRAFANA_USER }}
+            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
             EOF
 
             # 최신 이미지 풀 & 재기동
@@ -129,6 +131,8 @@ jobs:
             REGISTRY=${{ secrets.DOCKER_HUB }}
             APP_TAG=dev
             SPRING_PROFILE=dev
+            GRAFANA_USER=${{ secrets.GRAFANA_USER }}
+            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
             EOF
 
             sudo docker compose pull
