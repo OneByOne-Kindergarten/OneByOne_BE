@@ -18,7 +18,7 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ./loki/config:/etc/loki:ro
+      - /home/ubuntu/stack/docker/loki/config:/etc/loki:ro
     networks:
       - backend_network
     restart: unless-stopped
@@ -38,7 +38,7 @@ services:
     command: -config.file=/etc/promtail/config.yml
     volumes:
       - /home/ubuntu/logs:/var/log/app-logs:ro
-      - ./promtail/config:/etc/promtail:ro
+      - /home/ubuntu/stack/docker/promtail/config:/etc/promtail:ro
     networks:
       - backend_network
     restart: unless-stopped
