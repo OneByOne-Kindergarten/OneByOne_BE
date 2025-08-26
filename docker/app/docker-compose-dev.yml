@@ -26,13 +26,15 @@ services:
   grafana:
     image: grafana/grafana:10.4.4
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
     networks:
       - backend_network
     restart: unless-stopped
     environment:
+      - GF_SERVER_ROOT_URL=${GRAFANA_DEV_ROOT_URL}
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
 
