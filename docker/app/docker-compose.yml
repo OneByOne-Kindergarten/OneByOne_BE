@@ -1,0 +1,54 @@
+services:
+  app:
+    image: ${REGISTRY}/kindergarten:${APP_TAG}
+    container_name: kindergarten
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+    volumes:
+      - /home/ubuntu/logs:/home/ubuntu/logs
+    networks:
+      - backend_network
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.0.0
+    command: -config.file=/etc/loki/config.yml
+    ports:
+      - "3100:3100"
+    volumes:
+      - /home/ubuntu/stack/docker/loki/config:/etc/loki:ro
+    networks:
+      - backend_network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.4.4
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - backend_network
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - /home/ubuntu/logs:/var/log/app-logs:ro
+      - /home/ubuntu/stack/docker/promtail/config:/etc/promtail:ro
+    networks:
+      - backend_network
+    restart: unless-stopped
+
+volumes:
+  grafana-storage:
+
+networks:
+  backend_network:
+    driver: bridge

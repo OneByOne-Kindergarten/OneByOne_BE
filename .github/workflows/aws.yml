@@ -52,7 +52,20 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_HUB }}/kindergarten:${{ github.ref == 'refs/heads/main' && 'latest' || 'dev' }}
 
-      - name: Deploy to Server
+      # ---------- 프로덕션 배포 ----------
+      - name: Upload stack files (prod)
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.PRODUCTION_SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.PRODUCTION_SERVER_SSH_KEY }}
+          # 레포의 실제 경로에 맞춰 업로드
+          source: "./docker/app/docker-compose.yml,./docker/loki/config/config.yml,./docker/promtail/config/config.yml"
+
+          target: /home/ubuntu/stack
+
+      - name: Deploy to Server (prod)
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1
         with:
@@ -60,10 +73,43 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.PRODUCTION_SERVER_SSH_KEY }}
           script: |
-            sudo docker stop kindergarten || true
-            sudo docker rm kindergarten || true
-            sudo docker pull ${{ secrets.DOCKER_HUB }}/kindergarten:latest
-            sudo docker run -d --name kindergarten -p 8080:8080 -v /home/ubuntu/logs:/home/ubuntu/logs -e SPRING_PROFILES_ACTIVE=production ${{ secrets.DOCKER_HUB }}/kindergarten:latest
+            set -e
+            cd /home/ubuntu/stack/docker/app
+
+            sudo docker compose down || true
+
+            # 기존 kindergarten 이미지 전부 삭제
+            sudo docker images "juhoonlee/kindergarten" -q | xargs -r sudo docker rmi -f
+
+            # .env 주입 (compose에서 사용)
+            cat > .env << 'EOF'
+            REGISTRY=${{ secrets.DOCKER_HUB }}
+            APP_TAG=latest
+            SPRING_PROFILE=production
+            GRAFANA_USER=${{ secrets.GRAFANA_USER }}
+            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
+            EOF
+
+            # 최신 이미지 풀 & 재기동
+            sudo docker compose pull
+            sudo docker compose up -d --remove-orphans
+
+      - name: Debug upload paths
+        run: |
+          set -e
+          ls -al docker/app/docker-compose.yml
+          ls -al docker/loki/config/config.yml
+          ls -al docker/promtail/config/config.yml      
+
+      - name: Upload stack files (dev)
+        if: github.ref == 'refs/heads/develop'
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "./docker/app/docker-compose.yml,./docker/loki/config/config.yml,./docker/promtail/config/config.yml"
+          target: /home/ubuntu/stack
 
       - name: Deploy to Dev Server
         if: github.ref == 'refs/heads/develop'
@@ -73,7 +119,21 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            sudo docker stop kindergarten || true
-            sudo docker rm kindergarten || true
-            sudo docker pull ${{ secrets.DOCKER_HUB }}/kindergarten:dev
-            sudo docker run -d --name kindergarten -p 8080:8080 -v /home/ubuntu/logs:/home/ubuntu/logs -e SPRING_PROFILES_ACTIVE=dev ${{ secrets.DOCKER_HUB }}/kindergarten:dev
+            set -e
+            cd /home/ubuntu/stack/docker/app
+
+            sudo docker compose down || true
+
+            # 기존 kindergarten 이미지 전부 삭제
+            sudo docker images "juhoonlee/kindergarten" -q | xargs -r sudo docker rmi -f
+
+            cat > .env << 'EOF'
+            REGISTRY=${{ secrets.DOCKER_HUB }}
+            APP_TAG=dev
+            SPRING_PROFILE=dev
+            GRAFANA_USER=${{ secrets.GRAFANA_USER }}
+            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
+            EOF
+
+            sudo docker compose pull
+            sudo docker compose up -d --remove-orphans
