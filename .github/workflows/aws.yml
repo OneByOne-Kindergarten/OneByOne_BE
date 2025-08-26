@@ -108,7 +108,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "./docker/app/docker-compose.yml,./docker/loki/config/config.yml,./docker/promtail/config/config.yml"
+          source: "./docker/app/docker-compose-dev.yml,./docker/loki/config/config.yml,./docker/promtail/config/config.yml"
           target: /home/ubuntu/stack
 
       - name: Deploy to Dev Server

@@ -33,10 +33,6 @@ services:
       - backend_network
     restart: unless-stopped
     environment:
-      - GF_SERVER_PROTOCOL=${PRODUCTION_PROTOCOL}
-      - GF_SERVER_DOMAIN=${PRODUCTION_DOMAIN}
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
 
