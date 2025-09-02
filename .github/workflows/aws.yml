@@ -123,7 +123,7 @@ jobs:
             set -e
             cd /home/ubuntu/stack/docker/app
 
-            sudo docker compose down || true
+            sudo docker compose -f docker-compose-dev.yml down || true
 
             # 기존 kindergarten 이미지 전부 삭제
             sudo docker images "juhoonlee/kindergarten" -q | xargs -r sudo docker rmi -f
