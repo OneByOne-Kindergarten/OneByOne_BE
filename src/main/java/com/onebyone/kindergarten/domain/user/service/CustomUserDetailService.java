@@ -2,8 +2,9 @@ package com.onebyone.kindergarten.domain.user.service;
 
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
-import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,7 +19,7 @@ public class CustomUserDetailService implements UserDetailsService{
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(email)

@@ -7,8 +7,6 @@ import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.ModifyI
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReviewLikeHistory;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.enums.InternshipReviewStarRatingType;
-import com.onebyone.kindergarten.domain.kindergartenInternshipReview.exception.AlreadyExistInternshipReviewException;
-import com.onebyone.kindergarten.domain.kindergartenInternshipReview.exception.NotFoundInternshipReviewException;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.repository.KindergartenInternshipReviewLikeHistoryRepository;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.repository.KindergartenInternshipReviewRepository;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
@@ -16,8 +14,8 @@ import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenService
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReviewStatus;
-import com.onebyone.kindergarten.global.exception.IllegalArgumentStarRatingException;
-import com.onebyone.kindergarten.global.exception.IncorrectUserException;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.data.domain.Page;
@@ -45,7 +43,7 @@ public class KindergartenInternshipReviewService {
 
         boolean exists = kindergartenInternshipReviewRepository.existsByUserAndKindergarten(user, kindergarten);
         if (exists) {
-            throw new AlreadyExistInternshipReviewException("이미 등록된 실습 리뷰가 존재합니다.");
+            throw new BusinessException(ErrorCodes.ALREADY_EXIST_INTERNSHIP_REVIEW);
         }
 
         KindergartenInternshipReview review = KindergartenInternshipReview.builder()
@@ -76,10 +74,10 @@ public class KindergartenInternshipReviewService {
 
         KindergartenInternshipReview review = kindergartenInternshipReviewRepository
                 .findById(request.getInternshipReviewId())
-                .orElseThrow(() -> new NotFoundInternshipReviewException("존재하지 않는 실습 리뷰입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
 
         if (!review.getUser().equals(user)) {
-            throw new IncorrectUserException("작성자가 일치하지 않습니다.");
+            throw new BusinessException(ErrorCodes.INCORRECT_USER_EXCEPTION);
         }
 
         review.updateReview(request);
@@ -92,7 +90,7 @@ public class KindergartenInternshipReviewService {
         User user = userService.getUserByEmail(email);
 
         KindergartenInternshipReview review = kindergartenInternshipReviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundInternshipReviewException("존재하지 않는 실습 리뷰입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
 
         Optional<KindergartenInternshipReviewLikeHistory> existingLike = kindergartenInternshipReviewLikeHistoryRepository.findByUserAndInternshipReview(user, review);
 
@@ -114,7 +112,7 @@ public class KindergartenInternshipReviewService {
 
     public InternshipReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, InternshipReviewPagedResponseDTO.SortType sortType, InternshipReviewStarRatingType internshipReviewStarRatingType, int starRating) {
         if (internshipReviewStarRatingType != InternshipReviewStarRatingType.ALL && starRating < 1 || starRating > 5) {
-            throw new IllegalArgumentStarRatingException("starRating은 1부터 5 사이의 값이어야 합니다.");
+            throw new BusinessException(ErrorCodes.ILLEGAL_ARGUMENT_STAR_RATING_EXCEPTION);
         }
 
         Pageable pageable;

@@ -5,10 +5,11 @@ import com.google.firebase.messaging.*;
 import com.onebyone.kindergarten.domain.pushNotification.dto.PushNotificationRequestDTO;
 import com.onebyone.kindergarten.domain.pushNotification.dto.PushNotificationResponseDTO;
 import com.onebyone.kindergarten.domain.pushNotification.entity.PushNotification;
-import com.onebyone.kindergarten.domain.pushNotification.exception.NotificationException;
 import com.onebyone.kindergarten.domain.pushNotification.repository.PushNotificationRepository;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -58,7 +59,7 @@ public class PushNotificationService {
     public void savePushNotification(PushNotificationRequestDTO requestDTO) {
         // 사용자 조회
         User user = userRepository.findById(requestDTO.getUserId())
-                .orElseThrow(() -> new NotificationException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
         // 알림 설정 확인
         if (!shouldSendNotification(user, requestDTO.getType())) {
@@ -250,7 +251,7 @@ public class PushNotificationService {
 
         // 사용자 조회
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotificationException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
         // 모든 알림 조회
         return pushNotificationRepository.findByUserOrderByCreatedAtDesc(user)
@@ -265,7 +266,7 @@ public class PushNotificationService {
 
         // 사용자 조회
         User user = userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
-                .orElseThrow(() -> new NotificationException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
         // 모든 알림 조회
         return pushNotificationRepository.findByUserOrderByCreatedAtDesc(user)
@@ -281,7 +282,7 @@ public class PushNotificationService {
 
         // 사용자 조회
         User user = userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
-                .orElseThrow(() -> new NotificationException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
         // 읽지 않은 알림 조회
         return pushNotificationRepository.findByUserAndIsReadFalseOrderByCreatedAtDesc(user)
@@ -296,7 +297,7 @@ public class PushNotificationService {
 
         // 알림 조회
         PushNotification notification = pushNotificationRepository.findById(notificationId)
-                .orElseThrow(() -> new NotificationException("알림을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
         // 읽음 처리
         notification.markAsRead();
@@ -309,7 +310,7 @@ public class PushNotificationService {
 
         // 사용자 조회
         User user = userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
-                .orElseThrow(() -> new NotificationException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
         // 모든 알림 읽음 처리
         pushNotificationRepository.markAllAsRead(user);
@@ -321,7 +322,7 @@ public class PushNotificationService {
 
         // 사용자 조회
         User user = userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
-                .orElseThrow(() -> new NotificationException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
         // 읽지 않은 알림 개수 조회
         return pushNotificationRepository.countByUserAndIsReadFalse(user);

@@ -14,19 +14,15 @@ import com.onebyone.kindergarten.domain.user.entity.EmailCertification;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.NotificationSetting;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
-import com.onebyone.kindergarten.domain.user.exception.EmailDuplicationException;
-import com.onebyone.kindergarten.domain.user.exception.InvalidPasswordException;
-import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailException;
-import com.onebyone.kindergarten.domain.user.exception.NotFoundEmailExceptionByTemporaryPassword;
-import com.onebyone.kindergarten.domain.user.exception.PasswordMismatchException;
 import com.onebyone.kindergarten.domain.user.repository.EmailCertificationRepository;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
+import com.onebyone.kindergarten.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.security.auth.login.AccountNotFoundException;
 import java.util.Optional;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,19 +42,11 @@ public class UserService {
     @Transactional
     public String signUp(SignUpRequestDTO request) {
         if (isExistedEmail(request.getEmail())) {
-            throw new EmailDuplicationException(request.getEmail());
+            throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
         }
 
         String encodedPassword = encodePassword(request.getPassword());
         User user = userRepository.save(request.toEntity(encodedPassword));
-
-        return user.getEmail();
-    }
-
-    @Transactional(readOnly = true)
-    public String findById(Long id) throws AccountNotFoundException {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new AccountNotFoundException("id가 존재하지 않습니다."));
 
         return user.getEmail();
     }
@@ -79,7 +67,7 @@ public class UserService {
         if (activeUser.isPresent()) {
             User user = activeUser.get();
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+                throw new BusinessException(ErrorCodes.INVALID_PASSWORD_ERROR);
             }
             
             if (request.getFcmToken() != null) {
@@ -94,7 +82,7 @@ public class UserService {
         if (deletedUser.isPresent()) {
             User user = deletedUser.get();
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+                throw new BusinessException(ErrorCodes.INVALID_PASSWORD_ERROR);
             }
             
             // 계정 복구
@@ -107,7 +95,7 @@ public class UserService {
             return user.getEmail();
         }
 
-        throw new NotFoundEmailException("이메일이 존재하지 않습니다.");
+        throw new BusinessException(ErrorCodes.NOT_FOUND_EMAIL);
     }
 
     @Transactional
@@ -127,7 +115,7 @@ public class UserService {
         User user = findUser(email);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
+            throw new BusinessException(ErrorCodes.INVALID_PASSWORD_ERROR);
         }
 
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
@@ -135,7 +123,7 @@ public class UserService {
 
     private User findUser(String email) {
         return userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다"));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
     }
 
     @Transactional
@@ -146,7 +134,7 @@ public class UserService {
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다"));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
     }
 
     @Transactional
@@ -156,7 +144,7 @@ public class UserService {
 
     public UserDTO getUser(String email) {
         return UserDTO.from(userRepository.findUserWithKindergarten(email)
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다")));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL)));
     }
 
     @Transactional
@@ -220,7 +208,7 @@ public class UserService {
         // FCM 토큰이 있으면 업데이트
         if (fcmToken != null && !fcmToken.trim().isEmpty()) {
             User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                    .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
             user.updateFcmToken(fcmToken);
         }
         
@@ -286,7 +274,7 @@ public class UserService {
         // FCM 토큰이 있으면 업데이트
         if (fcmToken != null && !fcmToken.trim().isEmpty()) {
             User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                    .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
             user.updateFcmToken(fcmToken);
         }
         
@@ -353,7 +341,7 @@ public class UserService {
         // FCM 토큰이 있으면 업데이트
         if (fcmToken != null && !fcmToken.trim().isEmpty()) {
             User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                    .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
             user.updateFcmToken(fcmToken);
         }
         
@@ -369,7 +357,7 @@ public class UserService {
     @Transactional
     public boolean saveCertification(String email, String certification) {
         if (userRepository.existsByEmail(email)) {
-            throw new EmailDuplicationException("이미 존재하는 이메일입니다.");
+            throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
         }
 
         EmailCertification emailCert = EmailCertification.builder()
@@ -386,7 +374,7 @@ public class UserService {
     public boolean checkEmailCertification(CheckEmailCertificationRequestDTO request) {
         EmailCertification emailCertification = emailCertificationRepository
                 .findById(request.getEmail())
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
 
         if (emailCertification.getCertification().equals(request.getCertification())) {
             emailCertification.completeCertification();
@@ -412,17 +400,17 @@ public class UserService {
     public void checkEmailCertificationByTemporaryPassword(String email) {
         EmailCertification emailCertification = emailCertificationRepository
                 .findById(email)
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
 
         if (!emailCertification.isCertificated()) {
-            throw new NotFoundEmailExceptionByTemporaryPassword("이메일이 검증되지 않았습니다.");
+            throw new BusinessException(ErrorCodes.NOT_FOUND_EXCEPTION_BY_TEMPORARY_PASSWORD_EXCEPTION);
         }
     }
 
     @Transactional(readOnly = true)
     public NotificationSettingsDTO getNotificationSettings(String email) {
         User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
         
         return NotificationSettingsDTO.builder()
                 .allNotificationsEnabled(user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS))
@@ -434,7 +422,7 @@ public class UserService {
     @Transactional
     public NotificationSettingsDTO updateNotificationSettings(String email, NotificationSettingsDTO request) {
         User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new NotFoundEmailException("이메일이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
         
         Set<NotificationSetting> enabledSettings = new HashSet<>();
         if (request.isAllNotificationsEnabled()) {

@@ -7,8 +7,6 @@ import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPag
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReviewLikeHistory;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.enums.WorkReviewStarRatingType;
-import com.onebyone.kindergarten.domain.kindergartenWorkReview.exception.AlreadyExistWorkReviewException;
-import com.onebyone.kindergarten.domain.kindergartenWorkReview.exception.NotFoundWorkReviewException;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.repository.KindergartenWorkReviewLikeHistoryRepository;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.repository.KindergartenWorkReviewRepository;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
@@ -17,7 +15,8 @@ import com.onebyone.kindergarten.domain.pushNotification.service.NotificationTem
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReviewStatus;
-import com.onebyone.kindergarten.global.exception.IllegalArgumentStarRatingException;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,7 +44,7 @@ public class KindergartenWorkReviewService {
 
         boolean exists = workReviewRepository.existsByUserAndKindergarten(user, kindergarten);
         if (exists) {
-            throw new AlreadyExistWorkReviewException("이미 등록된 근무 리뷰가 존재합니다.");
+            throw new BusinessException(ErrorCodes.ALREADY_EXIST_WORK_REVIEW);
         }
 
         KindergartenWorkReview review = KindergartenWorkReview.builder()
@@ -79,10 +78,10 @@ public class KindergartenWorkReviewService {
         Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
 
         KindergartenWorkReview review = workReviewRepository.findById(request.getWorkReviewId())
-                .orElseThrow(() -> new NotFoundWorkReviewException("존재하지 않는 근무 리뷰입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_WORK_REVIEW));
 
         if (!review.getUser().equals(user)) {
-            throw new SecurityException("본인의 리뷰만 수정할 수 있습니다.");
+            throw new BusinessException(ErrorCodes.REVIEW_EDIT_NOT_OWNER);
         }
 
         review.updateReview(request);
@@ -94,7 +93,7 @@ public class KindergartenWorkReviewService {
         User user = userService.getUserByEmail(email);
 
         KindergartenWorkReview review = workReviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundWorkReviewException("존재하지 않는 근무 리뷰입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_WORK_REVIEW));
 
         Optional<KindergartenWorkReviewLikeHistory> existingLike = workReviewLikeHistoryRepository.findByUserAndWorkReview(user, review);
 
@@ -128,7 +127,7 @@ public class KindergartenWorkReviewService {
 
     public WorkReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, WorkReviewPagedResponseDTO.SortType sortType, WorkReviewStarRatingType workReviewStarRatingType, int starRating) {
         if (workReviewStarRatingType != WorkReviewStarRatingType.ALL && starRating < 1 || starRating > 5) {
-            throw new IllegalArgumentStarRatingException("starRating은 1부터 5 사이의 값이어야 합니다.");
+            throw new BusinessException(ErrorCodes.ILLEGAL_ARGUMENT_STAR_RATING_EXCEPTION);
         }
 
         Pageable pageable;

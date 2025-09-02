@@ -14,8 +14,9 @@ import com.onebyone.kindergarten.domain.user.dto.response.SignUpResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.UpdateHomeShortcutsResponseDTO;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.common.ResponseDto;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import com.onebyone.kindergarten.global.jwt.JwtProvider;
-import com.onebyone.kindergarten.global.jwt.exception.InvalidTokenException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -92,7 +93,7 @@ public class UserApiController {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new InvalidTokenException("RefreshToken이 존재하지 않거나 형식이 잘못되었습니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
 
         String refreshToken = authHeader.substring(7);

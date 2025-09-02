@@ -2,6 +2,8 @@ package com.onebyone.kindergarten.domain.communityComments.service;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
 import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,28 +44,28 @@ public class CommunityCommentService {
         
         // 게시글 조회 (작성자 정보를 포함)
         CommunityPost post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
 
         CommunityComment parent = null;
         
         // 대댓글인 경우 부모 댓글 조회
         if (dto.getParentId() != null) {
             parent = commentRepository.findByIdWithUser(dto.getParentId())
-                    .orElseThrow(() -> new IllegalArgumentException("원댓글을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_PARENT_COMMENT));
             
             // 부모 댓글의 게시글과 요청된 게시글이 일치하는지 확인
             if (!parent.getPost().getId().equals(postId)) {
-                throw new IllegalArgumentException("원댓글의 게시글이 일치하지 않습니다.");
+                throw new BusinessException(ErrorCodes.PARENT_POST_MISMATCH);
             }
             
             // 이미 대댓글인 경우 대댓글에 대댓글 작성 방지
             if (parent.isReply()) {
-                throw new IllegalArgumentException("대댓글에는 답글을 작성할 수 없습니다.");
+                throw new BusinessException(ErrorCodes.REPLY_TO_REPLY_NOT_ALLOWED);
             }
             
             // 삭제된 댓글에는 대댓글 작성 불가
             if (parent.getDeletedAt() != null) {
-                throw new IllegalArgumentException("삭제된 댓글에는 답글을 작성할 수 없습니다.");
+                throw new BusinessException(ErrorCodes.REPLY_TO_DELETED_COMMENT_NOT_ALLOWED);
             }
         }
 
@@ -143,11 +145,11 @@ public class CommunityCommentService {
     public void deleteComment(Long commentId, String email) {
         // 댓글 조회 (작성자 정보 포함)
         CommunityComment comment = commentRepository.findByIdWithUser(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_COMMENT));
         
         // 작성자 확인
         if (!comment.getUser().getEmail().equals(email)) {
-            throw new com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException();
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
 
         Long postId = comment.getPost().getId();

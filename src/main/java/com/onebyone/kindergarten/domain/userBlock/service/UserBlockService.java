@@ -2,12 +2,12 @@ package com.onebyone.kindergarten.domain.userBlock.service;
 
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
-import com.onebyone.kindergarten.domain.userBlock.exception.AlreadyBlockException;
-import com.onebyone.kindergarten.domain.userBlock.exception.SelfBlockException;
 import com.onebyone.kindergarten.domain.userBlock.dto.response.BlockedUserResponseDto;
 import java.util.List;
 import com.onebyone.kindergarten.domain.userBlock.entity.UserBlock;
 import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -46,10 +46,10 @@ public class UserBlockService {
 
     private void validateBlockRequest(Long userId, Long targetUserId) {
         if (userId.equals(targetUserId)) {
-            throw new SelfBlockException("자기 자신을 차단할 수 없습니다.");
+            throw new BusinessException(ErrorCodes.SELF_BLOCK_NOT_ALLOWED);
         }
         if (userBlockRepository.existsByUserIdAndBlockedUserId(userId, targetUserId)) {
-            throw new AlreadyBlockException("이미 차단한 사용자입니다.");
+            throw new BusinessException(ErrorCodes.ALREADY_BLOCK_USER);
         }
     }
 

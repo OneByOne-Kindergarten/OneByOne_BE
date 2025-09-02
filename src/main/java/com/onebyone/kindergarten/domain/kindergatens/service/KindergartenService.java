@@ -8,7 +8,8 @@ import com.onebyone.kindergarten.domain.kindergatens.entity.KindergartenWorkRevi
 import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenInternshipReviewAggregateRepository;
 import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenRepository;
 import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenWorkReviewAggregateRepository;
-import com.onebyone.kindergarten.global.exception.EntityNotFoundException;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -83,7 +84,7 @@ public class KindergartenService {
     /// 유치원 상세 조회
     public KindergartenResponseDTO findById(Long id) {
         Kindergarten kindergarten = kindergartenRepository.findWithReviewsById(id)
-                .orElseThrow(() -> new EntityNotFoundException("유치원을 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.ENTITY_NOT_FOUND_EXCEPTION));
         return KindergartenResponseDTO.from(kindergarten);
     }
 
@@ -102,7 +103,7 @@ public class KindergartenService {
 
     public Kindergarten getKindergartenById(Long id) {
         return kindergartenRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("유치원을 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.ENTITY_NOT_FOUND_EXCEPTION));
     }
 
     /// DTO -> Entity 변환
@@ -130,6 +131,5 @@ public class KindergartenService {
 
     public KindergartenSimpleDTO getSimpleKindergarten(Long id) {
         return kindergartenRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("유치원을 찾을 수 없습니다. ID: " + id)).toSimpleDTO();
-    }
+                .orElseThrow(() -> new BusinessException(ErrorCodes.ENTITY_NOT_FOUND_EXCEPTION)).toSimpleDTO();}
 }
