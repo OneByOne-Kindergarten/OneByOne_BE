@@ -30,6 +30,10 @@ import javax.security.auth.login.AccountNotFoundException;
 import java.util.Optional;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.onebyone.kindergarten.domain.user.dto.request.UserSearchDTO;
+import com.onebyone.kindergarten.domain.user.dto.response.AdminUserResponseDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -454,5 +458,36 @@ public class UserService {
         if (!user.hasWrittenReview()) {
             user.markAsReviewWriter();
         }
+    }
+
+    /// 관리자용 - 전체 유저 조회
+    @Transactional(readOnly = true)
+    public Page<AdminUserResponseDTO> getAllUsers(Pageable pageable) {
+        Page<User> users = userRepository.findAllUsersWithKindergarten(pageable);
+        return users.map(AdminUserResponseDTO::from);
+    }
+
+    /// 관리자용 - 유저 검색
+    @Transactional(readOnly = true)
+    public Page<AdminUserResponseDTO> searchUsers(UserSearchDTO searchDTO, Pageable pageable) {
+        Page<User> users = userRepository.findUsersWithFilters(
+                searchDTO.getEmail(),
+                searchDTO.getNickname(),
+                searchDTO.getRole(),
+                searchDTO.getProvider(),
+                searchDTO.getStatus(),
+                searchDTO.getKindergartenName(),
+                searchDTO.getHasWrittenReview(),
+                searchDTO.getIsRestoredUser(),
+                pageable
+        );
+        return users.map(AdminUserResponseDTO::from);
+    }
+
+    @Transactional(readOnly = true)
+    public AdminUserResponseDTO getUserById(Long userId) {
+        User user = userRepository.findByIdWithKindergarten(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + userId));
+        return AdminUserResponseDTO.from(user);
     }
 }
