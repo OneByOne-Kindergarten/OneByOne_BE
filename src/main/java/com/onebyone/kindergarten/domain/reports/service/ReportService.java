@@ -13,13 +13,13 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReportStatus;
 import com.onebyone.kindergarten.domain.reports.dto.request.ReportSearchDTO;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.onebyone.kindergarten.domain.reports.exception.ReportNotFoundException;
-import com.onebyone.kindergarten.domain.reports.exception.InvalidReportTargetException;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -71,7 +71,7 @@ public class ReportService {
 
         // 신고 존재 여부 확인
         Report report = reportRepository.findByIdWithReporter(reportId)
-                .orElseThrow(() -> new ReportNotFoundException("존재하지 않는 신고입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_REPORT));
 
         // 신고 상태 업데이트
         report.updateStatus(status);
@@ -101,7 +101,7 @@ public class ReportService {
         // 신고 상세 조회
         return reportRepository.findByIdWithReporter(reportId)
                 .map(ReportResponseDTO::fromEntity)
-                .orElseThrow(() -> new ReportNotFoundException("존재하지 않는 신고입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_REPORT));
     }
 
     /// 신고 대상 상태 업데이트
@@ -109,18 +109,18 @@ public class ReportService {
         switch (targetType) {
             case POST -> {
                 CommunityPost post = communityRepository.findById(targetId)
-                        .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 게시글입니다."));
+                        .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_POST_TARGET));
                 post.updateStatus(status);
             }
             case COMMENT -> {
                 CommunityComment comment = commentRepository.findById(targetId)
-                        .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 댓글입니다."));
+                        .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_COMMENT_TARGET));
                 comment.updateStatus(status);
             }
             case REVIEW -> {
-                throw new InvalidReportTargetException("리뷰 처리는 아직 구현되지 않았습니다.");
+                throw new BusinessException(ErrorCodes.REVIEW_REPORT_NOT_IMPLEMENTED);
             }
-            default -> throw new InvalidReportTargetException("지원하지 않는 신고 대상 타입입니다.");
+            default -> throw new BusinessException(ErrorCodes.INVALID_REPORT_TARGET_TYPE);
         }
     }
 
@@ -128,10 +128,10 @@ public class ReportService {
     private void validateReportTarget(ReportTargetType targetType, Long targetId) {
         switch (targetType) {
             case POST -> communityRepository.findById(targetId)
-                    .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 게시글입니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_POST_TARGET));
             case COMMENT -> commentRepository.findById(targetId)
-                    .orElseThrow(() -> new InvalidReportTargetException("존재하지 않는 댓글입니다."));
-            case REVIEW -> throw new InvalidReportTargetException("리뷰 처리는 아직 구현되지 않았습니다.");
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_COMMENT_TARGET));
+            case REVIEW -> throw new BusinessException(ErrorCodes.REVIEW_REPORT_NOT_IMPLEMENTED);
         }
     }
 }

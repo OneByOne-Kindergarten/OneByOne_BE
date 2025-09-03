@@ -5,7 +5,6 @@ import com.onebyone.kindergarten.domain.communityPosts.dto.request.CreateCommuni
 import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityPostResponseDTO;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityCategory;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityPost;
-import com.onebyone.kindergarten.domain.communityPosts.exception.PostNotFoundException;
 import com.onebyone.kindergarten.domain.communityPosts.mapper.CommunityPostMapper;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityCategoryRepository;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
@@ -13,6 +12,8 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository;
 import com.onebyone.kindergarten.global.config.CacheConfig;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -84,7 +85,7 @@ public class CommunityService {
 
         // 게시글 조회 (User 정보 포함)
         CommunityPost post = communityRepository.findByIdWithUser(id)
-                .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
         
         // 게시글이 존재할 때만 조회수 증가
         communityRepository.increaseViewCount(id);
@@ -111,11 +112,11 @@ public class CommunityService {
 
         // 게시글 조회 (작성자 정보 포함)
         CommunityPost post = communityRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
         
         // 작성자 확인
         if (!post.getUser().getEmail().equals(email)) {
-            throw new com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException();
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
         
         // 게시글 소프트 삭제 (deletedAt 설정)

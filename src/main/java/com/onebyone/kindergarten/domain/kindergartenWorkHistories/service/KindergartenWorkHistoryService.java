@@ -8,6 +8,8 @@ import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenRepository;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.KindergartenNotFoundException;
-import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.WorkHistoryNotFoundException;
-import com.onebyone.kindergarten.domain.kindergartenWorkHistories.exception.UnauthorizedDeleteException;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +42,7 @@ public class KindergartenWorkHistoryService {
 
         // 유치원 이름으로 유치원 조회
         Kindergarten kindergarten = kindergartenRepository.findByName(request.getKindergartenName())
-                .orElseThrow(KindergartenNotFoundException::new);
+                .orElseThrow(() -> new BusinessException(ErrorCodes.KINDERGARTEN_NOT_FOUND));
 
         // 사용자 조회
         User user = userService.getUserByEmail(email);
@@ -82,14 +79,14 @@ public class KindergartenWorkHistoryService {
 
         // 유치원 근무 이력 조회
         KindergartenWorkHistory workHistory = workHistoryRepository.findByIdWithKindergarten(historyId)
-                .orElseThrow(WorkHistoryNotFoundException::new);
+                .orElseThrow(() -> new BusinessException(ErrorCodes.WORK_HISTORY_NOT_FOUND));
 
         // 사용자 조회
         User user = userService.getUserByEmail(email);
 
         // 유치원 근무 이력 소유자 확인
         if (!workHistory.getUser().equals(user)) {
-            throw new UnauthorizedDeleteException();
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
 
         // 유치원 경력 개월 수 업데이트

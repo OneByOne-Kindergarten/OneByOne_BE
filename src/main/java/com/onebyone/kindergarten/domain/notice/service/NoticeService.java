@@ -3,8 +3,9 @@ package com.onebyone.kindergarten.domain.notice.service;
 import com.onebyone.kindergarten.domain.notice.dto.request.NoticeCreateRequestDTO;
 import com.onebyone.kindergarten.domain.notice.dto.response.NoticeResponseDTO;
 import com.onebyone.kindergarten.domain.notice.entity.Notice;
-import com.onebyone.kindergarten.domain.notice.exception.NoticeNotFoundException;
 import com.onebyone.kindergarten.domain.notice.repository.NoticeRepository;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +54,7 @@ public class NoticeService {
 
         // 공지사항 조회
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(NoticeNotFoundException::new);
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_NOTICE));
 
         // 공개 여부 토글
         notice.togglePublicStatus();

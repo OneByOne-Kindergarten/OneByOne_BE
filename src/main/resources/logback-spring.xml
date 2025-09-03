@@ -39,15 +39,6 @@
         </rollingPolicy>
     </appender>
 
-    <!-- 로그 레벨 설정 -->
-    <logger name="com.test.project" level="DEBUG">
-        <appender-ref ref="DAILY_ROLLING_FILE_APPENDER" />
-    </logger>
-
-    <logger name="org.springframework.web.client" level="TRACE">
-        <appender-ref ref="DAILY_ROLLING_FILE_APPENDER" />
-    </logger>
-
     <!-- 루트 로거 설정 -->
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

@@ -3,12 +3,13 @@ package com.onebyone.kindergarten.domain.communityPosts.service;
 import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityLikeResponseDTO;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityLike;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityPost;
-import com.onebyone.kindergarten.domain.communityPosts.exception.PostNotFoundException;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityLikeRepository;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
 import com.onebyone.kindergarten.domain.pushNotification.service.NotificationTemplateService;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +52,7 @@ public class CommunityLikeService {
                 .orElseGet(() -> {
                     // 게시글 존재 여부 확인 및 좋아요 추가
                     CommunityPost post = communityRepository.findById(postId)
-                            .orElseThrow(() -> new PostNotFoundException("게시글을 찾을 수 없습니다."));
+                            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
                     
                     CommunityLike newLike = CommunityLike.builder()
                             .user(user)

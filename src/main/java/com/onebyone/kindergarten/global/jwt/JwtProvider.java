@@ -77,15 +77,15 @@ public class JwtProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new ExpiredTokenException("만료된 토큰입니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_EXPIRED);
         } catch (UnsupportedJwtException e) {
-            throw new UnsupportedTokenException("잘못된 형식의 토큰입니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_UNSUPPORTED);
         } catch (MalformedJwtException e) {
-            throw new MalformedTokenException("잘못된 구조의 토큰입니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_MALFORMED);
         } catch (SignatureException e) {
-            throw new InvalidSignatureTokenException("잘못 서명된 토큰입니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_SIGNATURE);
         } catch (IllegalArgumentException e) {
-            throw new InvalidTokenArgumentException("잘못 생성된 토큰입니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
     }
 
@@ -103,7 +103,7 @@ public class JwtProvider {
         } catch (Exception e) {
             // 다른 예외인 경우 throw
             log.error("유효하지 않은 토큰입니다. {}", e.toString());
-            throw new InvalidTokenArgumentException("유효하지 않은 토큰입니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
     }
 
@@ -116,7 +116,7 @@ public class JwtProvider {
 
         if (email == null) {
             log.error("권한 정보가 없는 토큰입니다. {}", token);
-            throw new InvalidTokenArgumentException("권한 정보가 없는 토큰입니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
 
         UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
@@ -131,7 +131,7 @@ public class JwtProvider {
 
     public String getEmailFromRefreshToken(String refreshToken) {
         if (!validateToken(refreshToken)) {
-            throw new InvalidTokenArgumentException("유효하지 않은 RefreshToken입니다.");
+            throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
 
         return getClaims(refreshToken).getSubject(); // email
