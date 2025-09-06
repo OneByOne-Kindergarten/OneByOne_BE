@@ -99,4 +99,9 @@ public class KindergartenWorkReview extends BaseEntity {
     public void plusLikeCount() {
         this.likeCount++;
     }
+
+    /// 리뷰 소프트 삭제
+    public void markAsDeleted() {
+        this.deletedAt = java.time.LocalDateTime.now();
+    }
 }

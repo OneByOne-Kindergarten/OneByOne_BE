@@ -12,12 +12,12 @@ import com.onebyone.kindergarten.domain.kindergartenInternshipReview.repository.
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenService;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReviewStatus;
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +34,6 @@ public class KindergartenInternshipReviewService {
     private final KindergartenService kindergartenService;
     private final KindergartenInternshipReviewRepository kindergartenInternshipReviewRepository;
     private final KindergartenInternshipReviewLikeHistoryRepository kindergartenInternshipReviewLikeHistoryRepository;
-    private final JdbcTemplateAutoConfiguration jdbcTemplateAutoConfiguration;
 
     public Kindergarten createInternshipReview(CreateInternshipReviewRequestDTO request, String email) {
         User user = userService.getUserByEmail(email);
@@ -174,5 +173,24 @@ public class KindergartenInternshipReviewService {
                 .content(reviewPage.getContent())
                 .totalPages(reviewPage.getTotalPages())
                 .build();
+    }
+
+    /// 실습 리뷰 삭제 (소프트 삭제)
+    @Transactional
+    public void deleteInternshipReview(Long reviewId, String email) {
+        // 리뷰 조회
+        KindergartenInternshipReview review = kindergartenInternshipReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
+        
+        // 현재 사용자 조회
+        User currentUser = userService.getUserByEmail(email);
+        
+        // 작성자 또는 관리자 권한 확인
+        if (!review.getUser().getEmail().equals(email) && !currentUser.getRole().equals(UserRole.ADMIN)) {
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
+        }
+        
+        // 리뷰 소프트 삭제 (deletedAt 설정)
+        review.markAsDeleted();
     }
 }

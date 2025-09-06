@@ -1,12 +1,7 @@
 package com.onebyone.kindergarten.domain.user.service;
 
 import com.onebyone.kindergarten.domain.user.dto.*;
-import com.onebyone.kindergarten.domain.user.dto.request.CheckEmailCertificationRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserNicknameRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.request.ModifyUserPasswordRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.request.SignInRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.request.SignUpRequestDTO;
-import com.onebyone.kindergarten.domain.user.dto.request.UpdateUserRoleRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.*;
 import com.onebyone.kindergarten.domain.user.dto.response.AppleUserResponse;
 import com.onebyone.kindergarten.domain.user.dto.response.KakaoUserResponse;
 import com.onebyone.kindergarten.domain.user.dto.response.NaverUserResponse;
@@ -28,7 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.onebyone.kindergarten.domain.user.dto.request.UserSearchDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.AdminUserResponseDTO;
 
 @Service
@@ -477,5 +471,27 @@ public class UserService {
         User user = userRepository.findByIdWithKindergarten(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + userId));
         return AdminUserResponseDTO.from(user);
+    }
+
+    /// 관리자용 - 유저 상태 변경
+    @Transactional
+    public void updateUserStatus(Long userId, UpdateUserStatusRequestDTO request, String adminEmail) {
+        // 관리자 권한 확인
+        User admin = getUserByEmail(adminEmail);
+        if (!admin.getRole().equals(UserRole.ADMIN)) {
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
+        }
+
+        // 대상 유저 조회
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+
+        // 관리자는 자신의 상태를 변경할 수 없음
+        if (targetUser.getRole().equals(UserRole.ADMIN)) {
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
+        }
+
+        // 상태 변경
+        targetUser.updateStatus(request.getStatus());
     }
 }
