@@ -6,6 +6,7 @@ import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.ModifyWorkRev
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.enums.WorkReviewStarRatingType;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.service.KindergartenWorkReviewService;
+import com.onebyone.kindergarten.global.common.ResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -60,4 +61,15 @@ public class KindergartenWorkReviewController {
     ) {
         return kindergartenWorkReviewService.getReviews(kindergartenId, page, size, sortType, internshipReviewStarRatingType, starRating);
     }
+
+    @Operation(summary = "근무리뷰-05 리뷰 삭제", description = "근무 리뷰를 삭제합니다. 본인이 작성한 리뷰 또는 관리자가 삭제할 수 있습니다.")
+    @DeleteMapping("/review/{workReviewId}")
+    public ResponseDto<String> deleteWorkReview(
+            @PathVariable("workReviewId") Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        kindergartenWorkReviewService.deleteWorkReview(id, userDetails.getUsername());
+        return ResponseDto.success("근무 리뷰가 삭제되었습니다.");
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.onebyone.kindergarten.domain.communityComments.service;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
+import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository;
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
@@ -147,8 +148,11 @@ public class CommunityCommentService {
         CommunityComment comment = commentRepository.findByIdWithUser(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_COMMENT));
         
-        // 작성자 확인
-        if (!comment.getUser().getEmail().equals(email)) {
+        // 현재 사용자 조회
+        User currentUser = userService.getUserByEmail(email);
+        
+        // 작성자 또는 관리자 권한 확인
+        if (!comment.getUser().getEmail().equals(email) && !currentUser.getRole().equals(UserRole.ADMIN)) {
             throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
 

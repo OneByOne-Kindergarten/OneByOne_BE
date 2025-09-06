@@ -200,4 +200,14 @@ public class User extends BaseEntity {
     public boolean hasWrittenReview() {
         return this.hasWrittenReview != null && this.hasWrittenReview;
     }
+
+    /// 유저 상태 변경 (관리자용)
+    public void updateStatus(UserStatus status) {
+        this.status = status;
+        if (status == UserStatus.SUSPENDED) {
+            // TODO : 정지 시 특별한 처리가 필요하다면 여기에 추가
+        } else if (status == UserStatus.ACTIVE) {
+            // TODO : 활성화 시 특별한 처리가 필요하다면 여기에 추가
+        }
+    }
 }

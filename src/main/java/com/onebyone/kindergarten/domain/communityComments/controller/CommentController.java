@@ -18,7 +18,7 @@ public class CommentController {
     private final CommunityCommentService commentService;
 
     @DeleteMapping("/{commentId}")
-    @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다. 본인이 작성한 댓글만 삭제할 수 있습니다. 원댓글 삭제 시 대댓글도 함께 삭제됩니다.")
+    @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다. 본인이 작성한 댓글 또는 관리자가 삭제할 수 있습니다. 원댓글 삭제 시 대댓글도 함께 삭제됩니다.")
     public ResponseDto<String> deleteComment(
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserDetails userDetails

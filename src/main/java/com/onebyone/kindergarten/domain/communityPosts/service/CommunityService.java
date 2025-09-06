@@ -9,6 +9,7 @@ import com.onebyone.kindergarten.domain.communityPosts.mapper.CommunityPostMappe
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityCategoryRepository;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository;
 import com.onebyone.kindergarten.global.config.CacheConfig;
@@ -114,8 +115,11 @@ public class CommunityService {
         CommunityPost post = communityRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
         
-        // 작성자 확인
-        if (!post.getUser().getEmail().equals(email)) {
+        // 현재 사용자 조회
+        User currentUser = userService.getUserByEmail(email);
+        
+        // 작성자 또는 관리자 권한 확인
+        if (!post.getUser().getEmail().equals(email) && !currentUser.getRole().equals(UserRole.ADMIN)) {
             throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
         
