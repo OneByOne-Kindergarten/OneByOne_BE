@@ -166,7 +166,18 @@ public class User extends BaseEntity {
     }
 
     public void updateFcmToken(String fcmToken) {
-        this.fcmToken = fcmToken;
+        // FCM 토큰 유효성 검증
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            String trimmedToken = fcmToken.trim();
+            // 최소 길이 및 기본 패턴 검증
+            if (trimmedToken.length() >= 140 && trimmedToken.matches("^[a-zA-Z0-9_:.-]+$")) {
+                this.fcmToken = trimmedToken;
+            } else {
+                this.fcmToken = null;
+            }
+        } else {
+            this.fcmToken = null;
+        }
     }
 
     public String getTotalCareer() {
