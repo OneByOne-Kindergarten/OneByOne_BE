@@ -45,6 +45,15 @@ public class PushNotificationJob extends QuartzJobBean {
             
         } catch (Exception e) {
             log.error("푸시 알림 Job 실행 중 오류 발생: {}", e.getMessage(), e);
+            
+            // Firebase 관련 예외는 Job 실패로 처리하지 않음 (스케줄러가 계속 실행되도록)
+            if (e.getMessage() != null && 
+                (e.getMessage().contains("FirebaseMessagingException") || 
+                 e.getMessage().contains("Requested entity was not found"))) {
+                log.warn("Firebase 관련 오류이므로 Job을 계속 실행합니다: {}", e.getMessage());
+                return; // 예외를 던지지 않고 정상 종료
+            }
+            
             throw new JobExecutionException(e);
         }
         

@@ -67,10 +67,17 @@ public class PushNotificationService {
             return;
         }
 
+        // FCM 토큰 유효성 검증
+        String userFcmToken = user.getFcmToken();
+        if (!isValidFcmToken(userFcmToken)) {
+            log.warn("유효하지 않은 FCM 토큰 - 사용자 ID: {}, 알림 저장하지만 전송되지 않음", user.getId());
+            userFcmToken = null; // 유효하지 않은 토큰은 null로 설정
+        }
+
         // 알림 저장 (FCM 발송하지 않음)
         PushNotification notification = PushNotification.builder()
                 .user(user)
-                .fcmToken(user.getFcmToken()) // FCM 토큰을 알림 엔티티에 직접 저장
+                .fcmToken(userFcmToken)
                 .title(requestDTO.getTitle())
                 .message(requestDTO.getMessage())
                 .type(requestDTO.getType())
@@ -206,9 +213,14 @@ public class PushNotificationService {
                 // 실패한 경우
                 failureCount++;
 
-                // 실패 처리
-                log.error("FCM 알림 전송 실패: {}, 에러: {}",
-                        notification.getId(), e.getMessage());
+                // Firebase 관련 예외인지 확인
+                Throwable cause = e.getCause();
+                if (cause instanceof FirebaseMessagingException fme) {
+                    handleFirebaseMessagingException(notification, fme);
+                } else {
+                    log.error("FCM 알림 전송 실패: {}, 에러: {}",
+                            notification.getId(), e.getMessage());
+                }
             }
         }
 
@@ -326,5 +338,88 @@ public class PushNotificationService {
 
         // 읽지 않은 알림 개수 조회
         return pushNotificationRepository.countByUserAndIsReadFalse(user);
+    }
+
+    /// Firebase 메시징 예외 처리 (토큰 정리 포함)
+    private void handleFirebaseMessagingException(PushNotification notification, FirebaseMessagingException exception) {
+        MessagingErrorCode errorCode = exception.getMessagingErrorCode();
+        String errorMessage = exception.getMessage();
+        
+        log.error("FCM 알림 전송 실패 - 알림 ID: {}, 에러 코드: {}, 메시지: {}", 
+                notification.getId(), errorCode, errorMessage);
+
+        // 토큰 관련 오류인 경우 사용자의 FCM 토큰 정리
+        switch (errorCode) {
+            case UNREGISTERED:
+                // 토큰이 등록되지 않음 (앱 삭제됨)
+                log.warn("등록되지 않은 FCM 토큰 발견 - 사용자 ID: {}, 토큰 정리", notification.getUser().getId());
+                clearUserFcmToken(notification.getUser());
+                break;
+                
+            case INVALID_ARGUMENT:
+                // 잘못된 토큰 형식
+                if (errorMessage != null && errorMessage.contains("Requested entity was not found")) {
+                    log.warn("유효하지 않은 FCM 토큰 발견 - 사용자 ID: {}, 토큰 정리", notification.getUser().getId());
+                    clearUserFcmToken(notification.getUser());
+                }
+                break;
+                
+            case SENDER_ID_MISMATCH:
+                // 잘못된 발신자 ID
+                log.warn("FCM 발신자 ID 불일치 - 사용자 ID: {}, 토큰 정리", notification.getUser().getId());
+                clearUserFcmToken(notification.getUser());
+                break;
+                
+            case QUOTA_EXCEEDED:
+                // 할당량 초과 - 토큰은 유효하므로 정리하지 않음
+                log.warn("FCM 할당량 초과 - 알림 ID: {}", notification.getId());
+                break;
+                
+            case UNAVAILABLE:
+                // 서비스 일시 불가 - 토큰은 유효하므로 정리하지 않음
+                log.warn("FCM 서비스 일시 불가 - 알림 ID: {}", notification.getId());
+                break;
+                
+            case INTERNAL:
+                // 내부 오류 - 토큰은 유효하므로 정리하지 않음
+                log.warn("FCM 내부 오류 - 알림 ID: {}", notification.getId());
+                break;
+                
+            default:
+                log.error("알 수 없는 FCM 오류 - 알림 ID: {}, 에러 코드: {}", notification.getId(), errorCode);
+                break;
+        }
+    }
+
+    /// 사용자의 FCM 토큰 정리 (별도 트랜잭션)
+    public void clearUserFcmToken(User user) {
+        try {
+            User currentUser = userRepository.findById(user.getId())
+                    .orElse(null);
+            
+            if (currentUser != null && currentUser.getFcmToken() != null) {
+                currentUser.updateFcmToken(null);
+                userRepository.save(currentUser);
+                log.info("사용자 FCM 토큰 정리 완료 - 사용자 ID: {}", user.getId());
+            }
+        } catch (Exception e) {
+            log.error("사용자 FCM 토큰 정리 중 오류 발생 - 사용자 ID: {}, 에러: {}", 
+                    user.getId(), e.getMessage(), e);
+        }
+    }
+
+    /// FCM 토큰 유효성 검증
+    public boolean isValidFcmToken(String fcmToken) {
+        if (fcmToken == null || fcmToken.trim().isEmpty()) {
+            return false;
+        }
+        
+        String trimmedToken = fcmToken.trim();
+        if (trimmedToken.length() < 140) { // FCM 토큰은 일반적으로 140자 이상
+            return false;
+        }
+        
+        // 기본적인 문자 패턴 검증 (영숫자, 하이픈, 언더스코어, 콜론만 허용)
+        return trimmedToken.matches("^[a-zA-Z0-9_:.-]+$");
     }
 }
