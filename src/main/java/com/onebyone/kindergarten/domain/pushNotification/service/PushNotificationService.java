@@ -96,6 +96,9 @@ public class PushNotificationService {
     /// FCM 통해 여러 알림 동시 전송 (비동기 처리)
     @Transactional
     public void sendAllFCMNotificationsByAsync(List<PushNotification> notifications) {
+        // 성공한 알림들을 저장할 리스트 (catch 블록에서도 접근 가능하도록 외부에 선언)
+        List<PushNotification> updatedNotifications = new ArrayList<>();
+        
         try {
             // 알림이 비어있거나 null인 경우 처리
             if (notifications == null || notifications.isEmpty()) {
@@ -194,7 +197,6 @@ public class PushNotificationService {
         // 응답 결과 수집
         int successCount = 0;
         int failureCount = 0;
-        List<PushNotification> updatedNotifications = new ArrayList<>();
 
         // 각 Future의 결과 처리
         for (int i = 0; i < futures.size(); i++) {
@@ -235,7 +237,15 @@ public class PushNotificationService {
 
             log.info("FCM 알림 배치 전송 요청 완료: {} 개", validNotifications.size());
         } catch (Exception e) {
-            log.error("FCM 알림 전송 중 오류 발생하였지만 Job은 계속 실행됩니다: {}", e.getMessage());
+            // 예외가 발생하더라도 성공한 알림들은 반드시 상태 업데이트
+            if (!updatedNotifications.isEmpty()) {
+                try {
+                    updateNotificationStatus(updatedNotifications);
+                    log.info("성공한 알림 상태 업데이트 완료: {} 개", updatedNotifications.size());
+                } catch (Exception updateException) {
+                    log.error("알림 상태 업데이트 중 추가 오류 발생: {}", updateException.getMessage(), updateException);
+                }
+            }
         }
     }
 
