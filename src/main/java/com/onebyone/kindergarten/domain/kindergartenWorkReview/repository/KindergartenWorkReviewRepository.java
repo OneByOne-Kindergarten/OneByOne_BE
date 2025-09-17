@@ -169,4 +169,23 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             @Param("score") int score,
             Pageable pageable
     );
+
+    /// 전체 근무 리뷰 조회 (유치원 상관없이)
+    @Query("SELECT new com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewDTO(" +
+            "r.id, u.id, u.nickname, k.id, k.name, r.workYear, r.oneLineComment, " +
+            "r.benefitAndSalaryComment, r.benefitAndSalaryScore, " +
+            "r.workLifeBalanceComment, r.workLifeBalanceScore, " +
+            "r.workEnvironmentComment, r.workEnvironmentScore, " +
+            "r.managerComment, r.managerScore, " +
+            "r.customerComment, r.customerScore, " +
+            "r.likeCount, r.shareCount, r.createdAt, r.workType) " +
+            "FROM kindergarten_work_review r " +
+            "JOIN r.user u " +
+            "JOIN r.kindergarten k " +
+            "WHERE r.status = :reviewStatus " +
+            "AND r.deletedAt IS NULL")
+    Page<WorkReviewDTO> findAllReviewsWithUserInfo(
+            @Param("reviewStatus") ReviewStatus reviewStatus,
+            Pageable pageable
+    );
 }
