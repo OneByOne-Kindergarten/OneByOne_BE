@@ -1,6 +1,8 @@
 package com.onebyone.kindergarten.global.batch.job;
 
 import com.onebyone.kindergarten.domain.communityPosts.service.CommunityService;
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
@@ -30,8 +32,7 @@ public class TopPostsCacheRefreshJob extends QuartzJobBean {
 
             log.info("인기 게시글 캐시가 성공적으로 갱신되었습니다.");
         } catch (Exception e) {
-            log.error("인기 게시글 캐시 갱신 중 오류 발생: {}", e.getMessage(), e);
-            throw new JobExecutionException(e);
+            throw new BusinessException(ErrorCodes.FAILED_TOP_POST_CACHE_EXCEPTION);
         }
 
         log.info("===== 인기 게시글 캐시 갱신 Job 실행 완료: {} =====", LocalDateTime.now());
