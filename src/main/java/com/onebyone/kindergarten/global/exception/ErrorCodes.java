@@ -47,6 +47,7 @@ public enum ErrorCodes {
     INVALID_REPORT_COMMENT_TARGET("E0041", "존재하지 않는 신고 댓글입니다."),
     REVIEW_REPORT_NOT_IMPLEMENTED("E0042", "리뷰 처리는 아직 구현되지 않았습니다."),
     INVALID_REPORT_TARGET_TYPE("E0043", "지원하지 않는 신고 대상 타입입니다."),
+    FAILED_TOP_POST_CACHE_EXCEPTION("E0044", "인기 게시글 캐시 갱신에 실패했습니다."),
     INTERNAL_SERVER_ERROR("E9999","알 수 없는 에러 발생");
 
     private final String code;
