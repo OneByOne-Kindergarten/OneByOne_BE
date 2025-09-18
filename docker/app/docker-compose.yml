@@ -8,6 +8,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
     volumes:
       - /home/ubuntu/logs:/home/ubuntu/logs
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - backend_network
     restart: unless-stopped
