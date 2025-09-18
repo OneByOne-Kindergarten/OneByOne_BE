@@ -28,19 +28,12 @@ public class JwtProvider {
     private final Long accessTokenValidationMs = 30 * 60 * 1000L;
     private final Long refreshTokenValidationMs = 15 * 24 * 60 * 60 * 1000L;
 
-//    public Long getRefreshTokenValidationMs() { // Redis에 저장 시 사용
-//        return refreshTokenValidationMs;
-//    }
-
     public String generateAccessToken(String email) {
 
         Claims claims = Jwts.claims()
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidationMs));
-
-        // Private claim. 서버-클라이언트간의 협의하에 사용되는 클레임.
-//        claims.put("email", email);
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
@@ -97,11 +90,7 @@ public class JwtProvider {
                     .build() // Thread-Safe한 JwtParser를 반환하기 위해 build 호출
                     .parseClaimsJws(token) // Claim(Payload) 파싱
                     .getBody();
-        } catch (ExpiredJwtException e) {
-            // 만료된 토큰이어도 refresh token 검증 후 재발급할 수 있또록 claims 반환
-            return e.getClaims();
         } catch (Exception e) {
-            // 다른 예외인 경우 throw
             log.error("유효하지 않은 토큰입니다. {}", e.toString());
             throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
@@ -121,12 +110,6 @@ public class JwtProvider {
 
         UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-    }
-
-    public Long getRemainingTime(String token) {
-        Date expiration = getClaims(token).getExpiration();
-        Date now = new Date();
-        return expiration.getTime() - now.getTime();
     }
 
     public String getEmailFromRefreshToken(String refreshToken) {
