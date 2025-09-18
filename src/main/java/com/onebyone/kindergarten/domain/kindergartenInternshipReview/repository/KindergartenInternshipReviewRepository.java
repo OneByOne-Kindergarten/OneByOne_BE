@@ -117,4 +117,21 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
             @Param("score") Integer score,
             Pageable pageable
     );
+
+    /// 전체 실습 리뷰 조회 (유치원 상관없이)
+    @Query("SELECT new com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewDTO(" +
+           "r.id, u.id, u.nickname, k.id, k.name, r.oneLineComment, " +
+           "r.workEnvironmentComment, r.workEnvironmentScore, " +
+           "r.learningSupportComment, r.learningSupportScore, " +
+           "r.instructionTeacherComment, r.instructionTeacherScore, " +
+           "r.likeCount, r.shareCount, r.createdAt) " +
+           "FROM kindergarten_internship_review r " +
+           "JOIN r.user u " +
+           "JOIN r.kindergarten k " +
+           "WHERE r.status = :reviewStatus " +
+           "AND r.deletedAt IS NULL")
+    Page<InternshipReviewDTO> findAllReviewsWithUserInfo(
+        @Param("reviewStatus") ReviewStatus reviewStatus,
+        Pageable pageable
+    );
 }

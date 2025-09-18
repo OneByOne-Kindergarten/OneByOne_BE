@@ -175,6 +175,29 @@ public class KindergartenInternshipReviewService {
                 .build();
     }
 
+    /// 전체 실습 리뷰 조회 (유치원 상관없이)
+    public InternshipReviewPagedResponseDTO getAllReviews(int page, int size, InternshipReviewPagedResponseDTO.SortType sortType) {
+        Pageable pageable;
+
+        switch (sortType) {
+            case POPULAR:
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount", "createdAt"));
+                break;
+            case LATEST:
+            default:
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+                break;
+        }
+
+        Page<InternshipReviewDTO> reviewPage = kindergartenInternshipReviewRepository
+                .findAllReviewsWithUserInfo(ReviewStatus.ACCEPTED, pageable);
+
+        return InternshipReviewPagedResponseDTO.builder()
+                .content(reviewPage.getContent())
+                .totalPages(reviewPage.getTotalPages())
+                .build();
+    }
+
     /// 실습 리뷰 삭제 (소프트 삭제)
     @Transactional
     public void deleteInternshipReview(Long reviewId, String email) {

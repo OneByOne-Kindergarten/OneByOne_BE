@@ -72,4 +72,14 @@ public class KindergartenInternshipReviewController {
         return ResponseDto.success("실습 리뷰가 삭제되었습니다.");
     }
 
+    @Operation(summary = "실습리뷰-06 전체 리뷰 조회", description = "유치원 상관없이 전체 실습 리뷰를 페이징 조회합니다. (정렬: LATEST-최신순, POPULAR-인기순)")
+    @GetMapping("/reviews")
+    public InternshipReviewPagedResponseDTO getAllReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "LATEST") InternshipReviewPagedResponseDTO.SortType sortType
+    ) {
+        return kindergartenInternshipReviewService.getAllReviews(page, size, sortType);
+    }
+
 }

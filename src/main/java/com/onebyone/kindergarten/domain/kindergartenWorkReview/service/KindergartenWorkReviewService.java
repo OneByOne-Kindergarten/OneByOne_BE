@@ -203,6 +203,29 @@ public class KindergartenWorkReviewService {
                 .build();
     }
 
+    /// 전체 근무 리뷰 조회 (유치원 상관없이)
+    public WorkReviewPagedResponseDTO getAllReviews(int page, int size, WorkReviewPagedResponseDTO.SortType sortType) {
+        Pageable pageable;
+
+        switch (sortType) {
+            case POPULAR:
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount", "createdAt"));
+                break;
+            case LATEST:
+            default:
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+                break;
+        }
+
+        Page<WorkReviewDTO> reviewPage = workReviewRepository
+                .findAllReviewsWithUserInfo(ReviewStatus.ACCEPTED, pageable);
+
+        return WorkReviewPagedResponseDTO.builder()
+                .content(reviewPage.getContent())
+                .totalPages(reviewPage.getTotalPages())
+                .build();
+    }
+
     /// 근무 리뷰 삭제 (소프트 삭제)
     @Transactional
     public void deleteWorkReview(Long reviewId, String email) {
