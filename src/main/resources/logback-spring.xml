@@ -4,7 +4,7 @@
     <!-- 콘솔 출력 공통 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[%thread] %highlight(%-5level) %cyan(%logger{15})[%line] - %msg%n</pattern>
+            <pattern>[%thread] %-5level %logger[%method:%line] - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -31,7 +31,7 @@
         </encoder>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS_PATH}/application-logging-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${LOGS_PATH}/application-logging-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -39,8 +39,12 @@
         </rollingPolicy>
     </appender>
 
+    <logger name="org.springframework" level="info" />
+
+    <logger name="com.onebyone.kindergarten" level="debug"/>
+
     <!-- 루트 로거 설정 -->
-    <root level="INFO">
+    <root level="error">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="DAILY_ROLLING_FILE_APPENDER"/>
     </root>
