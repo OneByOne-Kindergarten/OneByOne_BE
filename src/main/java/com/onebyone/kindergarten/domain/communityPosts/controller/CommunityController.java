@@ -3,6 +3,7 @@ package com.onebyone.kindergarten.domain.communityPosts.controller;
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CreateCommunityPostRequestDTO;
 import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityPostResponseDTO;
 import com.onebyone.kindergarten.domain.communityPosts.service.CommunityService;
+import com.onebyone.kindergarten.domain.facade.CommunityFacade;
 import com.onebyone.kindergarten.global.common.PageResponseDTO;
 import com.onebyone.kindergarten.global.common.ResponseDto;
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CommunitySearchDTO;
@@ -27,6 +28,7 @@ import java.util.List;
 @RequestMapping("/community")
 @Tag(name = "커뮤니티 게시글", description = "커뮤니티 게시글 관련 API")
 public class CommunityController {
+    private final CommunityFacade communityFacade;
     private final CommunityService communityService;
     private final CommunityLikeService communityLikeService;
 
@@ -45,7 +47,7 @@ public class CommunityController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        communityService.deletePost(id, userDetails.getUsername());
+        communityFacade.deletePost(id, userDetails.getUsername());
         return ResponseDto.success("게시글이 삭제되었습니다.");
     }
 

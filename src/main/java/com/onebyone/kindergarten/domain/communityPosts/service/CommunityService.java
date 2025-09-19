@@ -125,9 +125,6 @@ public class CommunityService {
         
         // 게시글 소프트 삭제 (deletedAt 설정)
         post.markAsDeleted();
-        
-        // 인기 게시글 캐시 갱신
-        refreshTopPostsCache();
     }
 
 }
