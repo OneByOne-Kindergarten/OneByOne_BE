@@ -20,7 +20,7 @@ public class TopPostsCacheRefreshJob extends QuartzJobBean {
     private final CommunityService communityService;
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected void executeInternal(JobExecutionContext context) {
         log.info("===== 인기 게시글 캐시 갱신 Job 실행 시작: {} =====", LocalDateTime.now());
 
         try {

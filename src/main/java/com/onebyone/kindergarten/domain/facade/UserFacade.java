@@ -172,15 +172,9 @@ public class UserFacade {
 
     @Transactional
     public boolean emailCertification(String email) {
-        String number = createNumber();
-        boolean isSaved = userService.saveCertification(email, number);
-        if (isSaved) {
-            boolean isSended = emailProvider.sendCertifivationMail(email, number);
-            if (isSended) {
-                return true;
-            }
-        }
-        return false;
+        String code = createNumber();
+        userService.saveCertification(email, code);
+        return emailProvider.sendCertificationMail(email, code);
     }
 
     @Transactional
@@ -193,7 +187,7 @@ public class UserFacade {
 
     public String createNumber() {
         Random random = new Random();
-        StringBuffer key = new StringBuffer();
+        StringBuilder key = new StringBuilder();
 
         for (int i = 0; i < 8; i++) {
             int idx = random.nextInt(3);
