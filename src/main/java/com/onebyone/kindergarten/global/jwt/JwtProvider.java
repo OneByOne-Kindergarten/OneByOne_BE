@@ -70,15 +70,20 @@ public class JwtProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new BusinessException(ErrorCodes.INVALID_TOKEN_EXPIRED);
+            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_EXPIRED);
+            return false;
         } catch (UnsupportedJwtException e) {
-            throw new BusinessException(ErrorCodes.INVALID_TOKEN_UNSUPPORTED);
+            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_UNSUPPORTED);
+            return false;
         } catch (MalformedJwtException e) {
-            throw new BusinessException(ErrorCodes.INVALID_TOKEN_MALFORMED);
+            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_MALFORMED);
+            return false;
         } catch (SignatureException e) {
-            throw new BusinessException(ErrorCodes.INVALID_TOKEN_SIGNATURE);
+            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_SIGNATURE);
+            return false;
         } catch (IllegalArgumentException e) {
-            throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
+            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_ILLEGAL);
+            return false;
         }
     }
 

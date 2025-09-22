@@ -21,17 +21,18 @@ public class JwtEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
-                         AuthenticationException authException) {
+                         AuthenticationException authException) throws IOException {
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         
         try {
-            ErrorResponse body = ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_EXPIRED);
+            ErrorResponse body = ErrorResponse.buildError(ErrorCodes.FAILED_AUTHORIZATION_EXCEPTION);
             om.writeValue(response.getWriter(), body);
-        } catch (IOException e) {
-
+        } catch (Exception e) {
+            ErrorResponse body = ErrorResponse.buildError(ErrorCodes.INTERNAL_SERVER_ERROR);
+            om.writeValue(response.getWriter(), body);
         }
     }
 }
