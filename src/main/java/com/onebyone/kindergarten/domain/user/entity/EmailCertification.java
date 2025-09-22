@@ -1,8 +1,11 @@
 package com.onebyone.kindergarten.domain.user.entity;
 
-import org.springframework.data.redis.core.RedisHash;
+import com.onebyone.kindergarten.global.common.BaseEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,12 +15,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@RedisHash(value = "email_certification", timeToLive = 600)
-public class EmailCertification {
+@Entity(name = "email_certification")
+public class EmailCertification extends BaseEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long emailCertificationId;
+
     private String email;
 
-    private String certification;
+    private String code;
 
     private boolean isCertificated;
 

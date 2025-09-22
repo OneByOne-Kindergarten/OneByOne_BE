@@ -181,9 +181,9 @@ public class UserApiController {
     @PostMapping("/email-certification")
     public ResponseEntity<String> emailCertification(
             @RequestBody EmailCertificationRequestDTO request) {
-        boolean isSended = userFacade.emailCertification(request.getEmail());
+        boolean isSent = userFacade.emailCertification(request.getEmail());
 
-        if (isSended) {
+        if (isSent) {
             return ResponseEntity.ok("인증번호가 성공적으로 발송되었습니다.");
         } else {
             return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)

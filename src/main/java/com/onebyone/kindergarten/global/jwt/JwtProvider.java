@@ -91,7 +91,6 @@ public class JwtProvider {
                     .parseClaimsJws(token) // Claim(Payload) 파싱
                     .getBody();
         } catch (Exception e) {
-            log.error("유효하지 않은 토큰입니다. {}", e.toString());
             throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
     }
@@ -104,7 +103,6 @@ public class JwtProvider {
         String email = claims.getSubject();
 
         if (email == null) {
-            log.error("권한 정보가 없는 토큰입니다. {}", token);
             throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
 

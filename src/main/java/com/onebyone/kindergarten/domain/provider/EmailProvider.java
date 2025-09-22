@@ -1,5 +1,7 @@
 package com.onebyone.kindergarten.domain.provider;
 
+import com.onebyone.kindergarten.global.exception.BusinessException;
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -14,7 +16,7 @@ public class EmailProvider {
     private final String certificationSubject = "[원바원] 인증메일입니다.";
     private final String temporaryPasswordSubject = "[원바원] 비밀번호 재설정 메일입니다.";
 
-    public boolean sendCertifivationMail(String email, String number) {
+    public boolean sendCertificationMail(String email, String number) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message);
@@ -26,8 +28,7 @@ public class EmailProvider {
 
             javaMailSender.send(message);
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            throw new BusinessException(ErrorCodes.FAILED_SEND_MAIL_EXCEPTION);
         }
         return true;
     }

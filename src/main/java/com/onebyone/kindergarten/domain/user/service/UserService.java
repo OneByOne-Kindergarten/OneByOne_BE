@@ -349,28 +349,34 @@ public class UserService {
     }
 
     @Transactional
-    public boolean saveCertification(String email, String certification) {
+    public void saveCertification(String email, String certification) {
         if (userRepository.existsByEmail(email)) {
             throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
         }
 
+        if (emailCertificationRepository.existsByEmail(email)) {
+            throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL_CERTIFICATION);
+        }
+
         EmailCertification emailCert = EmailCertification.builder()
                 .email(email)
-                .certification(certification)
+                .code(certification)
                 .isCertificated(false)
                 .build();
 
-        EmailCertification saved = emailCertificationRepository.save(emailCert);
-        return saved != null;
+        emailCertificationRepository.save(emailCert);
     }
 
     @Transactional
     public boolean checkEmailCertification(CheckEmailCertificationRequestDTO request) {
         EmailCertification emailCertification = emailCertificationRepository
-                .findById(request.getEmail())
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+                .findByEmail(request.getEmail());
 
-        if (emailCertification.getCertification().equals(request.getCertification())) {
+        if (emailCertification == null) {
+            throw new BusinessException(ErrorCodes.NOT_FOUND_EMAIL);
+        }
+
+        if (emailCertification.getCode().equals(request.getCertification())) {
             emailCertification.completeCertification();
             emailCertificationRepository.save(emailCertification);
             return true;
