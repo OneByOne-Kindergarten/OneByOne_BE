@@ -3,6 +3,7 @@ package com.onebyone.kindergarten.domain.user.dto.request;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.entity.UserProvider;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
+import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -32,6 +33,7 @@ public class SignUpRequestDTO {
                 .provider(provider)
                 .nickname(nickname)
                 .role(role)
+                .status(UserStatus.ACTIVE)
                 .profileImageUrl(profileImageUrl)
                 .build();
     }
