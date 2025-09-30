@@ -1,4 +1,4 @@
-package com.onebyone.kindergarten.domain.provider;
+package com.onebyone.kindergarten.global.provider;
 
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;

@@ -1,6 +1,6 @@
 package com.onebyone.kindergarten.domain.kindergartenInternshipReview.controller;
 
-import com.onebyone.kindergarten.domain.facade.KindergartenFacade;
+import com.onebyone.kindergarten.global.facade.KindergartenFacade;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.CreateInternshipReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.ModifyInternshipReviewRequestDTO;

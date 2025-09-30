@@ -1,4 +1,4 @@
-package com.onebyone.kindergarten.domain.feignClient;
+package com.onebyone.kindergarten.global.feignClient;
 
 import com.onebyone.kindergarten.domain.user.dto.response.ApplePublicKeyResponse;
 import org.springframework.cloud.openfeign.FeignClient;

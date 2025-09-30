@@ -1,7 +1,7 @@
 package com.onebyone.kindergarten.domain.user.controller;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
-import com.onebyone.kindergarten.domain.facade.UserFacade;
+import com.onebyone.kindergarten.global.facade.UserFacade;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.HomeShortcutsDto;

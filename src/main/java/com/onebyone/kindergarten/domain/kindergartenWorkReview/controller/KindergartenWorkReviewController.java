@@ -1,6 +1,6 @@
 package com.onebyone.kindergarten.domain.kindergartenWorkReview.controller;
 
-import com.onebyone.kindergarten.domain.facade.KindergartenFacade;
+import com.onebyone.kindergarten.global.facade.KindergartenFacade;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.CreateWorkReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.ModifyWorkReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;

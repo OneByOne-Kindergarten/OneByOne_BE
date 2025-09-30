@@ -1,4 +1,4 @@
-package com.onebyone.kindergarten.domain.facade;
+package com.onebyone.kindergarten.global.facade;
 
 import org.springframework.stereotype.Component;
 

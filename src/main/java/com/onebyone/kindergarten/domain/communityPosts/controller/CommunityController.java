@@ -3,7 +3,7 @@ package com.onebyone.kindergarten.domain.communityPosts.controller;
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CreateCommunityPostRequestDTO;
 import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityPostResponseDTO;
 import com.onebyone.kindergarten.domain.communityPosts.service.CommunityService;
-import com.onebyone.kindergarten.domain.facade.CommunityFacade;
+import com.onebyone.kindergarten.global.facade.CommunityFacade;
 import com.onebyone.kindergarten.global.common.PageResponseDTO;
 import com.onebyone.kindergarten.global.common.ResponseDto;
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CommunitySearchDTO;

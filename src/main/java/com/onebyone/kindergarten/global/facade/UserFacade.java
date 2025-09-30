@@ -1,12 +1,12 @@
-package com.onebyone.kindergarten.domain.facade;
+package com.onebyone.kindergarten.global.facade;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
 import com.onebyone.kindergarten.domain.communityComments.service.CommunityCommentService;
-import com.onebyone.kindergarten.domain.feignClient.KakaoApiClient;
-import com.onebyone.kindergarten.domain.feignClient.KakaoAuthClient;
-import com.onebyone.kindergarten.domain.feignClient.NaverApiClient;
-import com.onebyone.kindergarten.domain.feignClient.NaverAuthClient;
-import com.onebyone.kindergarten.domain.provider.EmailProvider;
+import com.onebyone.kindergarten.global.feignClient.KakaoApiClient;
+import com.onebyone.kindergarten.global.feignClient.KakaoAuthClient;
+import com.onebyone.kindergarten.global.feignClient.NaverApiClient;
+import com.onebyone.kindergarten.global.feignClient.NaverAuthClient;
+import com.onebyone.kindergarten.global.provider.EmailProvider;
 import com.onebyone.kindergarten.domain.user.dto.UserDTO;
 import com.onebyone.kindergarten.domain.user.service.AppleAuthService;
 import com.onebyone.kindergarten.domain.user.dto.response.*;

@@ -1,4 +1,4 @@
-package com.onebyone.kindergarten.domain.facade;
+package com.onebyone.kindergarten.global.facade;
 
 import com.onebyone.kindergarten.domain.communityPosts.service.CommunityService;
 import jakarta.transaction.Transactional;
