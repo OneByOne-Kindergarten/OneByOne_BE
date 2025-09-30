@@ -1,7 +1,7 @@
 package com.onebyone.kindergarten.domain.user.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onebyone.kindergarten.domain.feignClient.AppleAuthClient;
+import com.onebyone.kindergarten.global.feignClient.AppleAuthClient;
 import com.onebyone.kindergarten.domain.user.dto.response.ApplePublicKeyResponse;
 import com.onebyone.kindergarten.domain.user.dto.response.AppleUserResponse;
 import io.jsonwebtoken.Claims;
