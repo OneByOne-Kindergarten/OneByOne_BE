@@ -22,9 +22,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutureCallback;
@@ -42,9 +44,15 @@ public class PushNotificationService {
 
     /// 알림 전송 여부 확인 ( 내부 메서드 )
     private boolean shouldSendNotification(User user, NotificationType type) {
-        /// 사용자가 전체 알림을 활성화했는지 확인
-        if (user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS)) {
-            return true;
+        /// NotificationType null 체크
+        if (type == null) {
+            log.warn("NotificationType is null - userId: {}", user.getId());
+            return false;
+        }
+        
+        /// 사용자가 전체 알림을 비활성화한 경우 모든 알림 차단
+        if (!user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS)) {
+            return false;
         }
 
         /// 알림 타입에 따라 특정 설정 확인
@@ -61,17 +69,51 @@ public class PushNotificationService {
         User user = userRepository.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
-        // 알림 설정 확인
-        if (!shouldSendNotification(user, requestDTO.getType())) {
-            log.debug("User {} has disabled notifications for type {}", user.getId(), requestDTO.getType());
+        // 알림 설정 확인 및 FCM 토큰 유효성 검증
+        boolean shouldSend = shouldSendNotification(user, requestDTO.getType());
+        String userFcmToken = user.getFcmToken();
+        boolean hasValidToken = isValidFcmToken(userFcmToken);
+        
+        // 알림 설정이 꺼져있거나 FCM 토큰이 없는 경우
+        // → 알림은 저장하되 전송 완료(isSent=true)로 표시
+        // → 앱 내 알림 목록에서는 확인 가능, 푸시 알림만 전송 안 함
+        if (!shouldSend || !hasValidToken) {
+            String reason = !shouldSend ? "알림 설정 비활성화" : "FCM 토큰 없음";
+            log.debug("{} - 사용자 ID: {}, 알림은 저장하되 푸시 전송 스킵", reason, user.getId());
+            
+            PushNotification notification = PushNotification.builder()
+                    .user(user)
+                    .fcmToken(null)
+                    .title(requestDTO.getTitle())
+                    .message(requestDTO.getMessage())
+                    .type(requestDTO.getType())
+                    .targetId(requestDTO.getTargetId())
+                    .isRead(false)
+                    .isSent(true) // 전송 완료로 표시하여 스케줄러가 재시도하지 않도록
+                    .groupKey(requestDTO.getGroupKey())
+                    .groupCount(requestDTO.getGroupCount() != null ? requestDTO.getGroupCount() : 1)
+                    .build();
+            
+            pushNotificationRepository.save(notification);
+            log.debug("푸시 전송 스킵 알림 저장 완료 (사유: {}) - 사용자 ID: {}, 타입: {}", 
+                reason, user.getId(), requestDTO.getType());
             return;
         }
 
-        // FCM 토큰 유효성 검증
-        String userFcmToken = user.getFcmToken();
-        if (!isValidFcmToken(userFcmToken)) {
-            log.warn("유효하지 않은 FCM 토큰 - 사용자 ID: {}, 알림 저장하지만 전송되지 않음", user.getId());
-            userFcmToken = null; // 유효하지 않은 토큰은 null로 설정
+        // 그룹키가 있는 경우, 기존 미전송 알림 확인하여 중복 방지
+        if (requestDTO.getGroupKey() != null && !requestDTO.getGroupKey().isEmpty()) {
+            Optional<PushNotification> existingNotification = 
+                pushNotificationRepository.findFirstByUserIdAndGroupKeyAndIsSentFalseOrderByCreatedAtDesc(
+                    requestDTO.getUserId(), 
+                    requestDTO.getGroupKey()
+                );
+            
+            if (existingNotification.isPresent()) {
+                // 기존 미전송 알림이 있으면 중복 생성하지 않고 로그만 남김
+                log.debug("중복 알림 방지 - 사용자 ID: {}, 그룹키: {}, 기존 알림 ID: {}", 
+                    user.getId(), requestDTO.getGroupKey(), existingNotification.get().getId());
+                return;
+            }
         }
 
         // 알림 저장 (FCM 발송하지 않음)
@@ -91,6 +133,8 @@ public class PushNotificationService {
                 .build();
 
         pushNotificationRepository.save(notification);
+        log.info("푸시 알림 저장 완료 - 사용자 ID: {}, 타입: {}, 그룹키: {}", 
+            user.getId(), requestDTO.getType(), requestDTO.getGroupKey());
     }
 
     /// FCM 통해 여러 알림 동시 전송 (비동기 처리)
@@ -111,6 +155,12 @@ public class PushNotificationService {
         List<PushNotification> validNotifications = new ArrayList<>();
         
         for (PushNotification notification : notifications) {
+            /// 중복 전송 방지: 이미 전송된 알림은 건너뛰기
+            if (notification.getIsSent() != null && notification.getIsSent()) {
+                log.debug("이미 전송된 알림 발견 (ID: {}), 건너뛰기", notification.getId());
+                continue;
+            }
+            
             if (notification.getFcmToken() == null || notification.getFcmToken().isEmpty()) {
                 log.warn("FCM 토큰이 없는 알림 발견 (ID: {}), 건너뛰기", notification.getId());
                 continue;
@@ -191,8 +241,15 @@ public class PushNotificationService {
             futures.add(completableFuture);
         }
 
-        // 모든 Future가 완료될 때까지 대기
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        // 모든 Future가 완료될 때까지 대기 (최대 30초 타임아웃)
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .orTimeout(30, TimeUnit.SECONDS)
+                .join();
+        } catch (Exception e) {
+            log.error("FCM 알림 전송 중 타임아웃 또는 오류 발생: {}", e.getMessage());
+            // 타임아웃이어도 개별 Future 결과는 처리
+        }
 
         // 응답 결과 수집
         int successCount = 0;
@@ -406,6 +463,7 @@ public class PushNotificationService {
     }
 
     /// 사용자의 FCM 토큰 정리 (별도 트랜잭션)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void clearUserFcmToken(User user) {
         try {
             User currentUser = userRepository.findById(user.getId())

@@ -142,12 +142,13 @@ public class NotificationTemplateService {
 
     /**
      * 알림 그룹화 가능 여부를 확인합니다.
+     * 미전송 알림 중에서만 그룹화 대상을 찾습니다.
      */
     private Optional<PushNotification> findGroupableNotification(
             Long userId,
             String groupKey,
             LocalDateTime sinceTime) {
-        return notificationRepository.findFirstByUserIdAndGroupKeyOrderByCreatedAtDesc(userId, groupKey)
+        return notificationRepository.findFirstByUserIdAndGroupKeyAndIsSentFalseOrderByCreatedAtDesc(userId, groupKey)
                 .filter(notification -> notification.getCreatedAt().isAfter(sinceTime));
     }
 
