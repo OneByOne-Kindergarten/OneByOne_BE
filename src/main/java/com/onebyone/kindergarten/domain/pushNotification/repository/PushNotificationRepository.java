@@ -28,6 +28,6 @@ public interface PushNotificationRepository extends JpaRepository<PushNotificati
     @Query("SELECT p FROM push_notification p WHERE p.isSent = false AND p.createdAt <= :cursorTime AND p.fcmToken IS NOT NULL AND p.fcmToken <> '' ORDER BY p.createdAt ASC")
     List<PushNotification> findUnsentNotificationsBeforeTime(@Param("cursorTime") LocalDateTime cursorTime);
     
-    // 그룹 키로 가장 최근 알림 찾기
-    Optional<PushNotification> findFirstByUserIdAndGroupKeyOrderByCreatedAtDesc(Long userId, String groupKey);
+    // 그룹 키로 미전송 알림 찾기 (중복 방지용)
+    Optional<PushNotification> findFirstByUserIdAndGroupKeyAndIsSentFalseOrderByCreatedAtDesc(Long userId, String groupKey);
 } 
