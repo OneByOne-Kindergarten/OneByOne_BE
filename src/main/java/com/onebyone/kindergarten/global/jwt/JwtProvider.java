@@ -4,7 +4,6 @@ import com.onebyone.kindergarten.domain.user.service.CustomUserDetailService;
 import com.onebyone.kindergarten.global.exception.*;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +15,8 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.Map;
+import java.util.HashMap;
 
 @Slf4j
 @Component
@@ -69,22 +70,34 @@ public class JwtProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (ExpiredJwtException e) {
-            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_EXPIRED);
-            return false;
-        } catch (UnsupportedJwtException e) {
-            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_UNSUPPORTED);
-            return false;
-        } catch (MalformedJwtException e) {
-            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_MALFORMED);
-            return false;
-        } catch (SignatureException e) {
-            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_SIGNATURE);
-            return false;
-        } catch (IllegalArgumentException e) {
-            ErrorResponse.buildError(ErrorCodes.INVALID_TOKEN_ILLEGAL);
+        } catch (JwtException e) {
             return false;
         }
+    }
+
+    public Map<String, Object> validateTokenWithError(String token) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSignKey(secretKey))
+                    .build()
+                    .parseClaimsJws(token);
+            result.put("isValid", true);
+        } catch (ExpiredJwtException e) {
+            result.put("isValid", false);
+            result.put("errorCode", ErrorCodes.INVALID_TOKEN_EXPIRED);
+        } catch (UnsupportedJwtException e) {
+            result.put("isValid", false);
+            result.put("errorCode", ErrorCodes.INVALID_TOKEN_UNSUPPORTED);
+        } catch (MalformedJwtException e) {
+            result.put("isValid", false);
+            result.put("errorCode", ErrorCodes.INVALID_TOKEN_MALFORMED);
+        } catch (IllegalArgumentException e) {
+            result.put("isValid", false);
+            result.put("errorCode", ErrorCodes.INVALID_TOKEN_ILLEGAL);
+        }
+
+        return result;
     }
 
     // JWT payload를 복호화해서 반환

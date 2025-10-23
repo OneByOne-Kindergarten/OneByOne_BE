@@ -1,5 +1,7 @@
 package com.onebyone.kindergarten.global.jwt;
 
+import com.onebyone.kindergarten.global.exception.ErrorCodes;
+import com.onebyone.kindergarten.global.exception.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 
 @Component
@@ -48,19 +51,30 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String jwt = resolveToken(request);
 
-        if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {
+        if (StringUtils.hasText(jwt) ) {
+            Map<String, Object> map = jwtProvider.validateTokenWithError(jwt);
+
+            if ((boolean) map.get("isValid")) {
+                Authentication authentication = jwtProvider.getAuthentication(jwt);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                filterChain.doFilter(request, response);
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+
+                ErrorResponse errorResponse = ErrorResponse.buildError((ErrorCodes) map.get("errorCode"));
+                response.getWriter().write(
+                        "{\"code\": \"" + errorResponse.getCode() + "\", \"message\": \"" + errorResponse.getMessage() + "\"}");
+            }
 
 //            TODO: BlackList에 존재하는 토큰으로 요청이 온 경우.
 //            Optional<String> isBlackList = redisService.getBlackList(jwt);
 //            isBlackList.ifPresent(t -> {
 //                throw new RuntimeException("이미 로그아웃된 토큰입니다.");
 //            });
-
-            Authentication authentication = jwtProvider.getAuthentication(jwt);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
     }
 
     public String resolveToken(HttpServletRequest request) {
