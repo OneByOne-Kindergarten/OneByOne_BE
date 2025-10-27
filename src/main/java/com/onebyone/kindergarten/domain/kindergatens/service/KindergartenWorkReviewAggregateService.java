@@ -48,11 +48,6 @@ public class KindergartenWorkReviewAggregateService {
         BigDecimal avgCustomer = BigDecimal.valueOf((double) totalCustomer / reviewCount);
 
         KindergartenWorkReviewAggregate aggregate = workReviewAggregateRepository.findByKindergarten(kindergarten);
-
-        aggregate.updateBenefitAndSalaryScoreAggregate(avgBenefitAndSalary);
-        aggregate.updateWorkLiftBalanceScoreAggregate(avgWorkLifeBalance);
-        aggregate.updateWorkEnvironmentScoreAggregate(avgWorkEnvironment);
-        aggregate.updateManagerScoreAggregate(avgManager);
-        aggregate.updateCustomerScoreAggregate(avgCustomer);
+        aggregate.updateScoreAggregates(avgBenefitAndSalary, avgWorkLifeBalance, avgWorkEnvironment, avgManager, avgCustomer);
     }
 }

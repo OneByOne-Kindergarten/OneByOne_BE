@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity(name = "kindergarten_work_review")
 @Builder
 @NoArgsConstructor
@@ -90,6 +92,7 @@ public class KindergartenWorkReview extends BaseEntity {
         this.managerScore = request.getManagerScore();
         this.customerComment = request.getCustomerComment();
         this.customerScore = request.getCustomerScore();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void minusLikeCount() {
@@ -102,6 +105,7 @@ public class KindergartenWorkReview extends BaseEntity {
 
     /// 리뷰 소프트 삭제
     public void markAsDeleted() {
-        this.deletedAt = java.time.LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.deletedAt = LocalDateTime.now();
     }
 }

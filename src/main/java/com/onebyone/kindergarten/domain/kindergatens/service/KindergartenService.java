@@ -106,6 +106,10 @@ public class KindergartenService {
                 .orElseThrow(() -> new BusinessException(ErrorCodes.ENTITY_NOT_FOUND_EXCEPTION));
     }
 
+    public Kindergarten getKindergartenByName(String kindergartenName) {
+        return kindergartenRepository.findByName(kindergartenName).orElseThrow(() -> new BusinessException(ErrorCodes.KINDERGARTEN_NOT_FOUND));
+    }
+
     /// DTO -> Entity 변환
     private Kindergarten convertToEntity(KindergartenDTO dto) {
         return Kindergarten.builder()

@@ -18,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.HashSet;
 import java.util.Set;
@@ -136,9 +138,14 @@ public class UserService {
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
     }
 
-    @Transactional
-    public void updateCareer(User user, String career) {
-        user.updateCareer(career);
+    public void addCareer(User user, LocalDate startDate, LocalDate endDate) {
+        int careerMonths = calculateCareerMonths(user, startDate, endDate, true);
+        user.updateCareer(String.valueOf(careerMonths));
+    }
+
+    public void removeCareer(User user, LocalDate startDate, LocalDate endDate) {
+        int careerMonths = calculateCareerMonths(user, startDate, endDate, false);
+        user.updateCareer(String.valueOf(careerMonths));
     }
 
     public UserDTO getUser(String email) {
@@ -504,5 +511,14 @@ public class UserService {
 
         // 상태 변경
         targetUser.updateStatus(request.getStatus());
+    }
+
+    /// 경력 개월 수 계산
+    private int calculateCareerMonths(User user, LocalDate startDate, LocalDate endDate, boolean isAdding) {
+        int currentCareerMonths = user.getCareer() == null ? 0 : Integer.parseInt(user.getCareer());
+        long monthsBetween = ChronoUnit.MONTHS.between(startDate, endDate);
+        return isAdding ?
+                currentCareerMonths + (int)monthsBetween :
+                currentCareerMonths - (int)monthsBetween;
     }
 }

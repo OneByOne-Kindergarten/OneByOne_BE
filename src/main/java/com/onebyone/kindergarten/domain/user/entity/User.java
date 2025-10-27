@@ -95,6 +95,7 @@ public class User extends BaseEntity {
         this.allNotificationsEnabled = enabledSettings.contains(NotificationSetting.ALL_NOTIFICATIONS);
         this.communityNotificationsEnabled = enabledSettings.contains(NotificationSetting.COMMUNITY_NOTIFICATIONS);
         this.eventNotificationsEnabled = enabledSettings.contains(NotificationSetting.EVENT_NOTIFICATIONS);
+        this.updatedAt = LocalDateTime.now();
     }
 
     public static User registerKakao(String email, String password, Long kakaoProviderId, String nickname,
@@ -140,10 +141,12 @@ public class User extends BaseEntity {
 
     public void changeNickname(String nickname) {
         this.nickname = nickname;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void changePassword(String password) {
         this.password = password;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void withdraw() {
@@ -156,6 +159,7 @@ public class User extends BaseEntity {
         this.profileImageUrl = null;
         this.homeShortcut = null;
         this.fcmToken = null;
+        this.updatedAt = LocalDateTime.now();
     }
 
     /// 현재 deletedAt 값을 previousDeletedAt에 저장
@@ -163,6 +167,7 @@ public class User extends BaseEntity {
         this.previousDeletedAt = this.deletedAt;
         this.status = UserStatus.ACTIVE;
         this.deletedAt = null;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateFcmToken(String fcmToken) {
@@ -172,6 +177,7 @@ public class User extends BaseEntity {
             // 최소 길이 및 기본 패턴 검증
             if (trimmedToken.length() >= 140 && trimmedToken.matches("^[a-zA-Z0-9_:.-]+$")) {
                 this.fcmToken = trimmedToken;
+                this.updatedAt = LocalDateTime.now();
             } else {
                 this.fcmToken = null;
             }
@@ -186,18 +192,22 @@ public class User extends BaseEntity {
 
     public void updateCareer(String career) {
         this.career = career;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateHomeShortcut(String homeShortcutJson) {
         this.homeShortcut = homeShortcutJson;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateUserRole(UserRole role) {
         this.role = role;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public boolean isRestoredUser() {
@@ -206,6 +216,7 @@ public class User extends BaseEntity {
 
     public void markAsReviewWriter() {
         this.hasWrittenReview = true;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public boolean hasWrittenReview() {
@@ -215,6 +226,8 @@ public class User extends BaseEntity {
     /// 유저 상태 변경 (관리자용)
     public void updateStatus(UserStatus status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
+
         if (status == UserStatus.SUSPENDED) {
             // TODO : 정지 시 특별한 처리가 필요하다면 여기에 추가
         } else if (status == UserStatus.ACTIVE) {

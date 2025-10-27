@@ -4,6 +4,7 @@ import com.onebyone.kindergarten.domain.kindergartenWorkHistories.dto.Kindergart
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.dto.KindergartenWorkHistoryResponse;
 import com.onebyone.kindergarten.domain.kindergartenWorkHistories.service.KindergartenWorkHistoryService;
 import com.onebyone.kindergarten.global.common.ResponseDto;
+import com.onebyone.kindergarten.global.facade.KindergartenWorkHistoryFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/certification")
 public class KindergartenWorkHistoryController {
+    private final KindergartenWorkHistoryFacade kindergartenWorkHistoryFacade;
     private final KindergartenWorkHistoryService workHistoryService;
 
     @PostMapping
@@ -25,7 +27,7 @@ public class KindergartenWorkHistoryController {
     public ResponseDto<KindergartenWorkHistoryResponse> addCertification(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody KindergartenWorkHistoryRequest request) {
-       return ResponseDto.success(workHistoryService.addCertification(userDetails.getUsername(), request));
+       return ResponseDto.success(kindergartenWorkHistoryFacade.addCertification(userDetails.getUsername(), request));
     }
 
     @GetMapping
@@ -39,7 +41,7 @@ public class KindergartenWorkHistoryController {
     public ResponseDto<Void> deleteCertification(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long certificationId) {
-        workHistoryService.deleteCertification(userDetails.getUsername(), certificationId);
+        kindergartenWorkHistoryFacade.deleteCertification(userDetails.getUsername(), certificationId);
         return ResponseDto.success(null);
     }
 } 

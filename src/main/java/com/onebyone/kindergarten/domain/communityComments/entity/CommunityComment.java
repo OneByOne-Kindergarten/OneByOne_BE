@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity(name = "community_comment")
 @Getter
 @NoArgsConstructor
@@ -47,6 +49,7 @@ public class CommunityComment extends BaseEntity {
     /// 댓글 신고 상태 변경
     public void updateStatus(ReportStatus status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
     }
     
     /// 대댓글 여부 확인
@@ -56,6 +59,7 @@ public class CommunityComment extends BaseEntity {
 
     /// 댓글 소프트 삭제
     public void markAsDeleted() {
-        this.deletedAt = java.time.LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.deletedAt = LocalDateTime.now();
     }
 }

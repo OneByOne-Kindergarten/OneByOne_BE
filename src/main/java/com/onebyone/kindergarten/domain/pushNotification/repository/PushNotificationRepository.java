@@ -19,8 +19,8 @@ public interface PushNotificationRepository extends JpaRepository<PushNotificati
     List<PushNotification> findByUserAndIsReadFalseOrderByCreatedAtDesc(User user);
     
     @Modifying
-    @Query("UPDATE push_notification p SET p.isRead = true WHERE p.user = :user")
-    void markAllAsRead(@Param("user") User user);
+    @Query("UPDATE push_notification p SET p.isRead = true, p.updatedAt = :now WHERE p.user = :user")
+    void markAllAsRead(@Param("user") User user, @Param("now") LocalDateTime now);
     
     long countByUserAndIsReadFalse(User user);
     

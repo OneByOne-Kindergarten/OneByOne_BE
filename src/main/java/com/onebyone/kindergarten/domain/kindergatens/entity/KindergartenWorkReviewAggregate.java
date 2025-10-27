@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity(name = "kindergarten_work_review_aggregate")
 @Getter
@@ -37,23 +38,12 @@ public class KindergartenWorkReviewAggregate extends BaseEntity {
     @Column(name = "customer_score_aggregate", precision = 10, scale = 2)
     private BigDecimal customerScoreAggregate; // 고객 총합
 
-    public void updateBenefitAndSalaryScoreAggregate(BigDecimal avgBenefitAndSalary) {
+    public void updateScoreAggregates(BigDecimal avgBenefitAndSalary, BigDecimal avgWorkLifeBalance, BigDecimal avgWorkEnvironment, BigDecimal avgManager, BigDecimal avgCustomer) {
         this.benefitAndSalaryScoreAggregate = avgBenefitAndSalary;
-    }
-
-    public void updateWorkLiftBalanceScoreAggregate(BigDecimal avgWorkLifeBalance) {
         this.workLiftBalanceScoreAggregate = avgWorkLifeBalance;
-    }
-
-    public void updateWorkEnvironmentScoreAggregate(BigDecimal avgWorkEnvironment) {
         this.workEnvironmentScoreAggregate = avgWorkEnvironment;
-    }
-
-    public void updateManagerScoreAggregate(BigDecimal avgManager) {
         this.managerScoreAggregate = avgManager;
-    }
-
-    public void updateCustomerScoreAggregate(BigDecimal avgCustomer) {
         this.customerScoreAggregate = avgCustomer;
+        this.updatedAt = LocalDateTime.now();
     }
 }

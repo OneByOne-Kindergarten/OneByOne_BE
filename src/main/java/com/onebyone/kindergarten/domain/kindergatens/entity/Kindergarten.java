@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -113,14 +114,17 @@ public class Kindergarten extends BaseEntity {
         this.specialPupilCount = kindergartenDTO.getSpecialPupilCount();
         this.latitude = kindergartenDTO.getLatitude();
         this.longitude = kindergartenDTO.getLongitude();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateInternshipReviewAggregate(KindergartenInternshipReviewAggregate kindergartenInternshipReviewAggregate ) {
         this.kindergartenInternshipReviewAggregate = kindergartenInternshipReviewAggregate;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateWorkReviewAggregate(KindergartenWorkReviewAggregate kindergartenWorkReviewAggregate) {
         this.kindergartenWorkReviewAggregate = kindergartenWorkReviewAggregate;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public KindergartenSimpleDTO toSimpleDTO() {

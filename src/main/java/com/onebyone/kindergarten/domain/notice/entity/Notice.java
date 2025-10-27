@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -37,5 +39,6 @@ public class Notice extends BaseEntity {
 
     public void togglePublicStatus() {
         this.isPublic = !this.isPublic;
+        this.updatedAt = LocalDateTime.now();
     }
 }

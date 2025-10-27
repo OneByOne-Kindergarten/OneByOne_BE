@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity(name = "kindergarten_internship_review_aggregate")
 @Getter
@@ -31,15 +32,10 @@ public class KindergartenInternshipReviewAggregate extends BaseEntity {
     @Column(name = "instruction_teacher_score_aggregate", precision = 10, scale = 2)
     private BigDecimal instructionTeacherScoreAggregate; // 지도교사 총합
 
-    public void updateWorkEnvironmentScoreAggregate(BigDecimal avgWorkEnvironmentScore) {
+    public void updateScoreAggregates(BigDecimal avgWorkEnvironmentScore, BigDecimal avgLearningSupportScore, BigDecimal avgInstructionTeacherScore) {
         this.workEnvironmentScoreAggregate = avgWorkEnvironmentScore;
-    }
-
-    public void updateLearningSupportScoreAggregate(BigDecimal avgLearningSupportScore) {
         this.learningSupportScoreAggregate = avgLearningSupportScore;
-    }
-
-    public void updateInstructionTeacherScoreAggregate(BigDecimal avgInstructionTeacherScore) {
         this.instructionTeacherScoreAggregate = avgInstructionTeacherScore;
+        this.updatedAt = LocalDateTime.now();
     }
 }

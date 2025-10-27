@@ -43,8 +43,6 @@ public class KindergartenInternshipReviewAggregateService {
 
         KindergartenInternshipReviewAggregate aggregate = kindergartenInternshipReviewAggregateRepository.findByKindergarten(kindergarten);
 
-        aggregate.updateWorkEnvironmentScoreAggregate(avgWorkEnvironmentScore);
-        aggregate.updateLearningSupportScoreAggregate(avgLearningSupportScore);
-        aggregate.updateInstructionTeacherScoreAggregate(avgInstructionTeacherScore);
+        aggregate.updateScoreAggregates(avgWorkEnvironmentScore, avgLearningSupportScore, avgInstructionTeacherScore);
     }
 }
