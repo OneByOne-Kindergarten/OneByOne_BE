@@ -68,19 +68,23 @@ public class KindergartenInternshipReviewService {
 
     public Kindergarten modifyInternshipReview(ModifyInternshipReviewRequestDTO request, String email) {
         User user = userService.getUserByEmail(email);
-
         Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
 
         KindergartenInternshipReview review = kindergartenInternshipReviewRepository
                 .findById(request.getInternshipReviewId())
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
 
-        if (!review.getUser().equals(user)) {
-            throw new BusinessException(ErrorCodes.INCORRECT_USER_EXCEPTION);
+        // 리뷰와 유치원이 다를 때
+        if (!review.getKindergarten().getId().equals(kindergarten.getId())) {
+            throw new BusinessException(ErrorCodes.INCORRECT_KINDERGARTEN_EXCEPTION);
+        }
+
+        // 리뷰 작성자가 다를 때
+        if (!review.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(ErrorCodes.REVIEW_EDIT_NOT_OWNER);
         }
 
         review.updateReview(request);
-
         return kindergarten;
     }
 
