@@ -396,7 +396,7 @@ public class PushNotificationService {
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
         // 모든 알림 읽음 처리
-        pushNotificationRepository.markAllAsRead(user);
+        pushNotificationRepository.markAllAsRead(user, LocalDateTime.now());
     }
 
     /// 읽지 않은 알림 개수 조회

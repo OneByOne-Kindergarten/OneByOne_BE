@@ -22,6 +22,7 @@ import com.onebyone.kindergarten.domain.pushNotification.service.NotificationTem
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Collections;
 
@@ -164,7 +165,7 @@ public class CommunityCommentService {
         
         // 대댓글이 있는 원댓글인 경우 대댓글들도 함께 삭제
         if (isOriginalComment) {
-            commentRepository.updateRepliesDeletedAt(commentId);
+            commentRepository.updateRepliesDeletedAt(commentId, LocalDateTime.now());
         }
         
         // 원댓글이었다면 게시글의 댓글 수 감소

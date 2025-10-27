@@ -52,6 +52,7 @@ public enum ErrorCodes {
     ALREADY_EXIST_EMAIL_CERTIFICATION("E0046", "기존에 발급된 인증번호가 존재합니다."),
     FAILED_EMAIL_CERTIFICATION_EXCEPTION("E0047", "인증되지 않은 이메일입니다."),
     FAILED_AUTHORIZATION_EXCEPTION("E0048", "인증되지 않은 요청입니다."),
+    INCORRECT_KINDERGARTEN_EXCEPTION("E0049", "유치원이 일치하지 않습니다."),
     INTERNAL_SERVER_ERROR("E9999","알 수 없는 에러 발생");
 
     private final String code;

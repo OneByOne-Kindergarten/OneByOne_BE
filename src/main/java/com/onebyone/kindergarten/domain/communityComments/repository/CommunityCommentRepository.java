@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.onebyone.kindergarten.domain.communityComments.entity.CommunityComment;
 import com.onebyone.kindergarten.domain.communityComments.dto.response.CommentResponseDTO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,6 +65,6 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
     Optional<CommunityComment> findByIdWithUser(@Param("id") Long id);
 
     @Modifying
-    @Query("UPDATE community_comment c SET c.deletedAt = CURRENT_TIMESTAMP WHERE c.parent.id = :parentId")
-    void updateRepliesDeletedAt(@Param("parentId") Long parentId);
+    @Query("UPDATE community_comment c SET c.updatedAt = :now, c.deletedAt = :now WHERE c.parent.id = :parentId")
+    void updateRepliesDeletedAt(@Param("parentId") Long parentId, @Param("now") LocalDateTime now);
 }

@@ -46,5 +46,6 @@ public class Report extends BaseEntity {
 
     public void updateStatus(ReportStatus status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
     }
 }

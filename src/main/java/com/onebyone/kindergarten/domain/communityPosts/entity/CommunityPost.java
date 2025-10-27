@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -73,10 +75,12 @@ public class CommunityPost extends BaseEntity {
     /// 게시물 신고 상태 변경
     public void updateStatus(ReportStatus status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
     }
 
     /// 게시물 소프트 삭제
     public void markAsDeleted() {
-        this.deletedAt = java.time.LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.deletedAt = LocalDateTime.now();
     }
 }

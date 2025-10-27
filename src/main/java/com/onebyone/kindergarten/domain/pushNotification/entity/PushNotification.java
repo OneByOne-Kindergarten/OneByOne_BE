@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity(name = "push_notification")
 @Getter
 @NoArgsConstructor
@@ -52,20 +54,24 @@ public class PushNotification extends BaseEntity {
     /// 알림 읽음 처리
     public void markAsRead() {
         this.isRead = true;
+        this.updatedAt = LocalDateTime.now();
     }
     
     /// 알림 전송 처리
     public void markAsSent() {
         this.isSent = true;
+        this.updatedAt = LocalDateTime.now();
     }
     
     /// 그룹 카운트 증가
     public void increaseGroupCount() {
         this.groupCount++;
+        this.updatedAt = LocalDateTime.now();
     }
     
     /// 그룹 메시지 업데이트
     public void updateGroupMessage(String newMessage) {
         this.message = newMessage;
+        this.updatedAt = LocalDateTime.now();
     }
 }

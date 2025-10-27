@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -43,10 +45,12 @@ public class Inquiry extends BaseEntity {
     public void answerInquiry(String answer) {
         this.answer = answer;
         this.status = InquiryStatus.ANSWERED;
+        this.updatedAt = LocalDateTime.now();
     }
 
     // 문의 마감
     public void closeInquiry() {
         this.status = InquiryStatus.CLOSED;
+        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -81,7 +81,11 @@ public class KindergartenWorkReviewService {
         KindergartenWorkReview review = workReviewRepository.findById(request.getWorkReviewId())
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_WORK_REVIEW));
 
-        if (!review.getUser().equals(user)) {
+        if (!review.getKindergarten().getId().equals(kindergarten.getId())) {
+            throw new BusinessException(ErrorCodes.INCORRECT_KINDERGARTEN_EXCEPTION);
+        }
+
+        if (!review.getUser().getId().equals(user.getId())) {
             throw new BusinessException(ErrorCodes.REVIEW_EDIT_NOT_OWNER);
         }
 

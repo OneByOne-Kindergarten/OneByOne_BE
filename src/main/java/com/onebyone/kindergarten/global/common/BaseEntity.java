@@ -18,8 +18,7 @@ public class BaseEntity {
     protected LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    @LastModifiedDate
-    protected LocalDateTime updatedAt; // 수정일
+    protected LocalDateTime updatedAt;
 
     @Column(name = "deleted_at")
     protected LocalDateTime deletedAt;
