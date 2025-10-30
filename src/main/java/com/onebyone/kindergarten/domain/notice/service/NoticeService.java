@@ -41,8 +41,6 @@ public class NoticeService {
                 .isPublic(dto.getIsPublic())
                 .build();
 
-        /// TODO : 푸시 알림 여부 확인 후 푸시 알림 전송 로직 추가
-
         // 공지사항 저장
         noticeRepository.save(notice);
         return new NoticeResponseDTO(notice);
