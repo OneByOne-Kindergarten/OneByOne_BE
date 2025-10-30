@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -68,4 +69,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("isRestoredUser") Boolean isRestoredUser,
             Pageable pageable
     );
+
+    /// 모든 활성 사용자 조회
+    @Query("SELECT u FROM user u WHERE u.deletedAt IS NULL")
+    List<User> findAllActiveUsers();
 }

@@ -4,6 +4,7 @@ import com.onebyone.kindergarten.domain.notice.dto.request.NoticeCreateRequestDT
 import com.onebyone.kindergarten.domain.notice.dto.response.NoticeResponseDTO;
 import com.onebyone.kindergarten.domain.notice.service.NoticeService;
 import com.onebyone.kindergarten.global.common.ResponseDto;
+import com.onebyone.kindergarten.global.facade.NoticeFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ import java.util.List;
 public class AdminNoticeController {
    
     private final NoticeService noticeService;
+    private final NoticeFacade noticeFacade;
 
     @GetMapping
     @Operation(summary = "전체 공지사항 목록 조회", description = "모든 공지사항 목록을 조회합니다.")
@@ -31,7 +33,7 @@ public class AdminNoticeController {
     public ResponseDto<NoticeResponseDTO> createNotice(
             @Valid @RequestBody NoticeCreateRequestDTO request
     ) {
-        return ResponseDto.success(noticeService.createNotice(request));
+        return ResponseDto.success(noticeFacade.createNotice(request));
     }
 
     @PatchMapping("/{noticeId}/public-status")

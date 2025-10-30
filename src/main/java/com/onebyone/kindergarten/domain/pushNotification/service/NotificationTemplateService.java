@@ -6,6 +6,8 @@ import com.onebyone.kindergarten.domain.pushNotification.event.PushNotificationE
 import com.onebyone.kindergarten.domain.pushNotification.event.PushNotificationEventPublisher;
 import com.onebyone.kindergarten.domain.pushNotification.repository.PushNotificationRepository;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.domain.user.enums.NotificationSetting;
+import com.onebyone.kindergarten.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,6 +29,7 @@ public class NotificationTemplateService {
 
     private final PushNotificationEventPublisher notificationEventPublisher;
     private final PushNotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     /// 메시지 템플릿 상수
     private static final String CHECK_APP_MESSAGE = " 👀 앱에서 자세히 확인해보세요!";
@@ -134,6 +138,62 @@ public class NotificationTemplateService {
         );
         notificationEventPublisher.publish(event);
         log.debug("시스템 알림 발송: 대상자={}", targetUserId);
+    }
+
+    /**
+     * 모든 활성 사용자에게 공지사항 알림을 발송합니다.
+     * 사용자별 알림 설정을 확인하여 알림을 받을 사용자에게만 전송합니다.
+     */
+    public void sendNoticeNotificationToAllUsers(String noticeTitle, String noticeContent, Long noticeId) {
+        try {
+            List<User> activeUsers = userRepository.findAllActiveUsers();
+            
+            log.info("공지사항 푸시 알림 전송 시작 - 공지 ID: {}, 전체 사용자 수: {}", 
+                noticeId, activeUsers.size());
+
+            int sentCount = 0;
+            int skippedCount = 0;
+
+            for (User user : activeUsers) {
+                try {
+                    if (shouldSendNoticeNotification(user)) {
+                        sendNoticeNotification(
+                            user.getId(),
+                            noticeTitle,
+                            noticeContent,
+                            noticeId
+                        );
+                        sentCount++;
+                    } else {
+                        skippedCount++;
+                        log.debug("알림 설정으로 인해 푸시 전송 스킵 - 사용자 ID: {}", user.getId());
+                    }
+                } catch (Exception e) {
+                    log.error("사용자 {}에게 공지사항 푸시 알림 전송 실패: {}", 
+                        user.getId(), e.getMessage(), e);
+                    skippedCount++;
+                }
+            }
+
+            log.info("공지사항 푸시 알림 전송 완료 - 공지 ID: {}, 전송: {}명, 스킵: {}명", 
+                noticeId, sentCount, skippedCount);
+        } catch (Exception e) {
+            log.error("공지사항 푸시 알림 전송 중 오류 발생 - 공지 ID: {}, 오류: {}", 
+                noticeId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 사용자가 공지사항 알림을 받을 수 있는지 확인합니다.
+     */
+    private boolean shouldSendNoticeNotification(User user) {
+        /// 전체 알림이 비활성화된 경우
+        if (!user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS)) {
+            return false;
+        }
+        
+        /// 공지사항은 EVENT_NOTIFICATIONS 설정 확인
+        return user.hasNotificationEnabled(NotificationSetting.EVENT_NOTIFICATIONS);
     }
 
 
