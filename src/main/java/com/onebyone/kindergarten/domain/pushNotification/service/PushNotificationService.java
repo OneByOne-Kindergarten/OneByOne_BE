@@ -281,6 +281,10 @@ public class PushNotificationService {
                     log.error("FCM 알림 전송 실패: {}, 에러: {}",
                             notification.getId(), e.getMessage());
                 }
+                
+                // 실패한 알림도 전송 완료로 표시하여 재시도 방지
+                notification.markAsSent();
+                updatedNotifications.add(notification);
             }
         }
 
