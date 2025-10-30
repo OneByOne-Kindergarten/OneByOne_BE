@@ -23,6 +23,7 @@ public class AsyncConfig {
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(25);
         executor.setThreadNamePrefix("PushNotification-");
+        executor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
         return executor;
     }

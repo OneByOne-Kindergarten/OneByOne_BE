@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 알림 타입별 템플릿을 관리하고 발행하는 서비스
@@ -143,6 +144,7 @@ public class NotificationTemplateService {
     /**
      * 모든 활성 사용자에게 공지사항 알림을 발송합니다.
      * 사용자별 알림 설정을 확인하여 알림을 받을 사용자에게만 전송합니다.
+     * 배치 처리로 스레드 풀 포화를 방지합니다.
      */
     public void sendNoticeNotificationToAllUsers(String noticeTitle, String noticeContent, Long noticeId) {
         try {
@@ -153,25 +155,46 @@ public class NotificationTemplateService {
 
             int sentCount = 0;
             int skippedCount = 0;
+            final int BATCH_SIZE = 20; // 배치 크기 설정 (스레드 풀 용량 35개 고려)
 
-            for (User user : activeUsers) {
-                try {
-                    if (shouldSendNoticeNotification(user)) {
-                        sendNoticeNotification(
-                            user.getId(),
-                            noticeTitle,
-                            noticeContent,
-                            noticeId
-                        );
-                        sentCount++;
-                    } else {
+            for (int i = 0; i < activeUsers.size(); i += BATCH_SIZE) {
+                int endIndex = Math.min(i + BATCH_SIZE, activeUsers.size());
+                List<User> batch = activeUsers.subList(i, endIndex);
+                
+                log.debug("배치 처리 중: {}/{} (배치 크기: {})", 
+                    endIndex, activeUsers.size(), batch.size());
+
+                /// 푸시 알림 전송
+                for (User user : batch) {
+                    try {
+                        if (shouldSendNoticeNotification(user)) {
+                            sendNoticeNotification(
+                                user.getId(),
+                                noticeTitle,
+                                noticeContent,
+                                noticeId
+                            );
+                            sentCount++;
+                        } else {
+                            skippedCount++;
+                            log.debug("알림 설정으로 인해 푸시 전송 스킵 - 사용자 ID: {}", user.getId());
+                        }
+                    } catch (Exception e) {
+                        log.error("사용자 {}에게 공지사항 푸시 알림 전송 실패: {}", 
+                            user.getId(), e.getMessage(), e);
                         skippedCount++;
-                        log.debug("알림 설정으로 인해 푸시 전송 스킵 - 사용자 ID: {}", user.getId());
                     }
-                } catch (Exception e) {
-                    log.error("사용자 {}에게 공지사항 푸시 알림 전송 실패: {}", 
-                        user.getId(), e.getMessage(), e);
-                    skippedCount++;
+                }
+
+                /// 배치 간 대기 (스레드 풀 여유 확보)
+                if (endIndex < activeUsers.size()) {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(100);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        log.warn("배치 처리 중 인터럽트 발생");
+                        break;
+                    }
                 }
             }
 
