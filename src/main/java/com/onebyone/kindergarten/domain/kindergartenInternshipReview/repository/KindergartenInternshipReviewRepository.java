@@ -18,7 +18,7 @@ import java.util.List;
 public interface KindergartenInternshipReviewRepository extends JpaRepository<KindergartenInternshipReview, Long> {
     boolean existsByUserAndKindergarten(User user, Kindergarten kindergarten);
 
-    List<KindergartenInternshipReview> findByKindergartenAndStatus(Kindergarten kindergarten, ReviewStatus status);
+    List<KindergartenInternshipReview> findByKindergartenAndReviewStatus(Kindergarten kindergarten, ReviewStatus status);
 
     @Query("SELECT new com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewDTO(" +
            "r.id, u.id, u.nickname, k.id, k.name, r.oneLineComment, " +
@@ -30,7 +30,7 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
            "JOIN r.user u " +
            "JOIN r.kindergarten k " +
            "WHERE r.kindergarten.id = :kindergartenId " +
-           "AND r.status = :reviewStatus " +
+           "AND r.reviewStatus = :reviewStatus " +
            "AND r.deletedAt IS NULL")
     Page<InternshipReviewDTO> findReviewsWithUserInfo(
         @Param("kindergartenId") Long kindergartenId,
@@ -49,7 +49,7 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
            "JOIN r.user u " +
            "JOIN r.kindergarten k " +
            "WHERE r.user.id = :userId " +
-           "AND r.status = :reviewStatus " +
+           "AND r.reviewStatus = :reviewStatus " +
            "AND r.deletedAt IS NULL " +
            "ORDER BY r.createdAt DESC")
     Page<InternshipReviewDTO> findMyReviews(
@@ -68,7 +68,7 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.workEnvironmentScore = :score " +
             "AND r.deletedAt IS NULL")
     Page<InternshipReviewDTO> findByWorkEnvironmentScore(
@@ -88,7 +88,7 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.learningSupportScore = :score " +
             "AND r.deletedAt IS NULL")
     Page<InternshipReviewDTO> findByLearningSupportScore(
@@ -108,7 +108,7 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.instructionTeacherScore = :score " +
             "AND r.deletedAt IS NULL")
     Page<InternshipReviewDTO> findByInstructionTeacherScore(
@@ -128,7 +128,7 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
            "FROM kindergarten_internship_review r " +
            "JOIN r.user u " +
            "JOIN r.kindergarten k " +
-           "WHERE r.status = :reviewStatus " +
+           "WHERE r.reviewStatus = :reviewStatus " +
            "AND r.deletedAt IS NULL")
     Page<InternshipReviewDTO> findAllReviewsWithUserInfo(
         @Param("reviewStatus") ReviewStatus reviewStatus,

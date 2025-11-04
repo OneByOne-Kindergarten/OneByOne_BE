@@ -4,6 +4,7 @@ import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.ModifyWorkRev
 import com.onebyone.kindergarten.global.common.BaseEntity;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.global.enums.ReportStatus;
 import com.onebyone.kindergarten.global.enums.ReviewStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,7 +33,10 @@ public class KindergartenWorkReview extends BaseEntity {
     private Kindergarten kindergarten; // 유치원
 
     @Enumerated(EnumType.STRING)
-    private ReviewStatus status = ReviewStatus.ACCEPTED;
+    private ReviewStatus reviewStatus = ReviewStatus.ACCEPTED;
+
+    @Enumerated(EnumType.STRING)
+    private ReportStatus reportStatus = ReportStatus.YET;
 
     @Column(name = "work_type", nullable = false, columnDefinition = "varchar(255) default ''")
     private String workType; // 근무 형태
@@ -107,5 +111,10 @@ public class KindergartenWorkReview extends BaseEntity {
     public void markAsDeleted() {
         this.updatedAt = LocalDateTime.now();
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateStatus(ReportStatus status) {
+        this.updatedAt = LocalDateTime.now();
+        this.reportStatus = status;
     }
 }

@@ -19,7 +19,7 @@ public class KindergartenInternshipReviewAggregateService {
     private final KindergartenInternshipReviewAggregateRepository kindergartenInternshipReviewAggregateRepository;
 
     public void updateOrCreateAggregate(Kindergarten kindergarten) {
-        List<KindergartenInternshipReview> acceptedReviews = kindergartenInternshipReviewRepository.findByKindergartenAndStatus(kindergarten, ReviewStatus.ACCEPTED);
+        List<KindergartenInternshipReview> acceptedReviews = kindergartenInternshipReviewRepository.findByKindergartenAndReviewStatus(kindergarten, ReviewStatus.ACCEPTED);
 
         if (acceptedReviews.isEmpty()) {
             return;
