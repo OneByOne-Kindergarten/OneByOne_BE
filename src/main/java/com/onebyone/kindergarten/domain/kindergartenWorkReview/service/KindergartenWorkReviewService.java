@@ -64,7 +64,7 @@ public class KindergartenWorkReviewService {
                 .managerScore(request.getManagerScore())
                 .customerComment(request.getCustomerComment())
                 .customerScore(request.getCustomerScore())
-                .status(ReviewStatus.ACCEPTED)
+                .reviewStatus(ReviewStatus.ACCEPTED)
                 .likeCount(0)
                 .shareCount(0)
                 .build();

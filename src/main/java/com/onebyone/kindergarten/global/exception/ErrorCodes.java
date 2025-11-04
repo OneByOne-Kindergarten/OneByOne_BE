@@ -53,6 +53,8 @@ public enum ErrorCodes {
     FAILED_EMAIL_CERTIFICATION_EXCEPTION("E0047", "인증되지 않은 이메일입니다."),
     FAILED_AUTHORIZATION_EXCEPTION("E0048", "인증되지 않은 요청입니다."),
     INCORRECT_KINDERGARTEN_EXCEPTION("E0049", "유치원이 일치하지 않습니다."),
+    INVALID_REPORT_INTERNSHIP_REVIEW_TARGET("E0013", "존재하지 않는 실습 신고 리뷰입니다."),
+    INVALID_REPORT_WORK_REVIEW_TARGET("E0013", "존재하지 않는 근무 신고 리뷰입니다."),
     INTERNAL_SERVER_ERROR("E9999","알 수 없는 에러 발생");
 
     private final String code;

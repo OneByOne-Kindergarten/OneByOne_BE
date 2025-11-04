@@ -56,7 +56,7 @@ public class KindergartenInternshipReviewService {
                 .learningSupportScore(request.getLearningSupportScore())
                 .instructionTeacherComment(request.getInstructionTeacherComment())
                 .instructionTeacherScore(request.getInstructionTeacherScore())
-                .status(ReviewStatus.ACCEPTED)
+                .reviewStatus(ReviewStatus.ACCEPTED)
                 .likeCount(0)
                 .shareCount(0)
                 .build();

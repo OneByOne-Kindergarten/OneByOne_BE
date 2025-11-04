@@ -4,6 +4,10 @@ import com.onebyone.kindergarten.domain.communityComments.entity.CommunityCommen
 import com.onebyone.kindergarten.domain.communityComments.repository.CommunityCommentRepository;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityPost;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.repository.KindergartenInternshipReviewRepository;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
+import com.onebyone.kindergarten.domain.kindergartenWorkReview.repository.KindergartenWorkReviewRepository;
 import com.onebyone.kindergarten.domain.reports.enums.ReportTargetType;
 import com.onebyone.kindergarten.domain.reports.repository.ReportRepository;
 import com.onebyone.kindergarten.domain.reports.dto.request.CreateReportRequestDTO;
@@ -27,11 +31,12 @@ import java.util.concurrent.CompletableFuture;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReportService {
-
     private final ReportRepository reportRepository;
     private final UserService userService;
     private final CommunityRepository communityRepository;
     private final CommunityCommentRepository commentRepository;
+    private final KindergartenWorkReviewRepository kindergartenWorkReviewRepository;
+    private final KindergartenInternshipReviewRepository kindergartenInternshipReviewRepository;
 
     /// 신고 생성 (사용자)
     @Transactional
@@ -51,6 +56,7 @@ public class ReportService {
                 .reason(dto.getReason())
                 .status(ReportStatus.PENDING)
                 .build();
+
         reportRepository.save(report);
         return ReportResponseDTO.fromEntity(report);
     }
@@ -117,8 +123,15 @@ public class ReportService {
                         .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_COMMENT_TARGET));
                 comment.updateStatus(status);
             }
-            case REVIEW -> {
-                throw new BusinessException(ErrorCodes.REVIEW_REPORT_NOT_IMPLEMENTED);
+            case WORK_REVIEW -> {
+                KindergartenWorkReview kindergartenWorkReview = kindergartenWorkReviewRepository.findById(targetId)
+                        .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_WORK_REVIEW_TARGET));
+                kindergartenWorkReview.updateStatus(status);
+            }
+            case INTERNSHIP_REVIEW -> {
+                KindergartenInternshipReview kindergartenInternshipReview = kindergartenInternshipReviewRepository.findById(targetId)
+                        .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_INTERNSHIP_REVIEW_TARGET));
+                kindergartenInternshipReview.updateStatus(status);
             }
             default -> throw new BusinessException(ErrorCodes.INVALID_REPORT_TARGET_TYPE);
         }
@@ -131,7 +144,10 @@ public class ReportService {
                     .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_POST_TARGET));
             case COMMENT -> commentRepository.findById(targetId)
                     .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_COMMENT_TARGET));
-            case REVIEW -> throw new BusinessException(ErrorCodes.REVIEW_REPORT_NOT_IMPLEMENTED);
+            case WORK_REVIEW -> kindergartenWorkReviewRepository.findById(targetId)
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_WORK_REVIEW_TARGET));
+            case INTERNSHIP_REVIEW -> kindergartenInternshipReviewRepository.findById(targetId)
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.INVALID_REPORT_INTERNSHIP_REVIEW_TARGET));
         }
     }
 }

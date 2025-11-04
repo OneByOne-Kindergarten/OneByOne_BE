@@ -16,7 +16,7 @@ import java.util.List;
 public interface KindergartenWorkReviewRepository extends JpaRepository<KindergartenWorkReview, Long> {
     boolean existsByUserAndKindergarten(User user, Kindergarten kindergarten);
 
-    List<KindergartenWorkReview> findByKindergartenAndStatus(Kindergarten kindergarten, ReviewStatus status);
+    List<KindergartenWorkReview> findByKindergartenAndReviewStatus(Kindergarten kindergarten, ReviewStatus status);
 
     @Query("SELECT new com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewDTO(" +
             "r.id, u.id, u.nickname, k.id, k.name, r.workYear, r.oneLineComment, " +
@@ -30,7 +30,7 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.deletedAt IS NULL")
     Page<WorkReviewDTO> findReviewsWithUserInfo(
             @Param("kindergartenId") Long kindergartenId,
@@ -51,7 +51,7 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.user.id = :userId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.deletedAt IS NULL " +
             "ORDER BY r.createdAt DESC")
     Page<WorkReviewDTO> findMyReviews(
@@ -72,7 +72,7 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.benefitAndSalaryScore = :score " +
             "AND r.deletedAt IS NULL")
     Page<WorkReviewDTO> findByBenefitAndSalaryScore(
@@ -94,7 +94,7 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.workLifeBalanceScore = :score " +
             "AND r.deletedAt IS NULL")
     Page<WorkReviewDTO> findByWorkLifeBalanceScore(
@@ -116,7 +116,7 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.workEnvironmentScore = :score " +
             "AND r.deletedAt IS NULL")
     Page<WorkReviewDTO> findByWorkEnvironmentScore(
@@ -138,7 +138,7 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.managerScore = :score " +
             "AND r.deletedAt IS NULL")
     Page<WorkReviewDTO> findByManagerScore(
@@ -160,7 +160,7 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
             "WHERE r.kindergarten.id = :kindergartenId " +
-            "AND r.status = :reviewStatus " +
+            "AND r.reviewStatus = :reviewStatus " +
             "AND r.customerScore = :score " +
             "AND r.deletedAt IS NULL")
     Page<WorkReviewDTO> findByCustomerScore(
@@ -182,7 +182,7 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             "FROM kindergarten_work_review r " +
             "JOIN r.user u " +
             "JOIN r.kindergarten k " +
-            "WHERE r.status = :reviewStatus " +
+            "WHERE r.reviewStatus = :reviewStatus " +
             "AND r.deletedAt IS NULL")
     Page<WorkReviewDTO> findAllReviewsWithUserInfo(
             @Param("reviewStatus") ReviewStatus reviewStatus,
