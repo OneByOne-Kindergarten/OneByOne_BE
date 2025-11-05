@@ -91,6 +91,7 @@ public class KindergartenInternshipReview extends BaseEntity {
     public void markAsDeleted() {
         this.updatedAt = LocalDateTime.now();
         this.deletedAt = LocalDateTime.now();
+        this.reviewStatus = ReviewStatus.DELETED;
     }
 
     public void updateStatus(ReportStatus status) {
