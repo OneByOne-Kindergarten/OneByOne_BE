@@ -188,4 +188,6 @@ public interface KindergartenWorkReviewRepository extends JpaRepository<Kinderga
             @Param("reviewStatus") ReviewStatus reviewStatus,
             Pageable pageable
     );
+
+    int countByUserIdAndReviewStatus(Long userId, ReviewStatus status);
 }

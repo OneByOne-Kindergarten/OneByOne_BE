@@ -134,4 +134,6 @@ public interface KindergartenInternshipReviewRepository extends JpaRepository<Ki
         @Param("reviewStatus") ReviewStatus reviewStatus,
         Pageable pageable
     );
+
+    int countByUserIdAndReviewStatus(Long userId, ReviewStatus reviewStatus);
 }

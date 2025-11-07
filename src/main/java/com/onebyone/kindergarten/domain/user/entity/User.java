@@ -219,6 +219,11 @@ public class User extends BaseEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void unMarkAsReviewWriter() {
+        this.hasWrittenReview = false;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public boolean hasWrittenReview() {
         return this.hasWrittenReview != null && this.hasWrittenReview;
     }

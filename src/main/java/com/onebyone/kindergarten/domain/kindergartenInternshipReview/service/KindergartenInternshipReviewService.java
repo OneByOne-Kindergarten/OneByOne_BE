@@ -220,4 +220,22 @@ public class KindergartenInternshipReviewService {
         // 리뷰 소프트 삭제 (deletedAt 설정)
         review.markAsDeleted();
     }
+
+    public int countReviewsByUser(Long userId, ReviewStatus reviewStatus) {
+        return kindergartenInternshipReviewRepository.countByUserIdAndReviewStatus(userId, reviewStatus);
+    }
+
+    public void deleteWorkReview(Long reviewId, Long userId, UserRole role) {
+        // 리뷰 조회
+        KindergartenInternshipReview review = kindergartenInternshipReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
+
+        // 작성자 또는 관리자 권한 확인
+        if (!review.getUser().getId().equals(userId) && role.equals(UserRole.ADMIN)) {
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
+        }
+
+        // 리뷰 소프트 삭제 (deletedAt 설정)
+        review.markAsDeleted();
+    }
 }
