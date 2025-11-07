@@ -231,21 +231,21 @@ public class KindergartenWorkReviewService {
     }
 
     /// 근무 리뷰 삭제 (소프트 삭제)
-    @Transactional
-    public void deleteWorkReview(Long reviewId, String email) {
+    public void deleteWorkReview(Long reviewId, Long userId, UserRole role) {
         // 리뷰 조회
         KindergartenWorkReview review = workReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_WORK_REVIEW));
-        
-        // 현재 사용자 조회
-        User currentUser = userService.getUserByEmail(email);
-        
+
         // 작성자 또는 관리자 권한 확인
-        if (!review.getUser().getEmail().equals(email) && !currentUser.getRole().equals(UserRole.ADMIN)) {
+        if (!review.getUser().getId().equals(userId) && role.equals(UserRole.ADMIN)) {
             throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
         
         // 리뷰 소프트 삭제 (deletedAt 설정)
         review.markAsDeleted();
+    }
+
+    public int countReviewsByUser(Long userId, ReviewStatus reviewStatus) {
+        return workReviewRepository.countByUserIdAndReviewStatus(userId, reviewStatus);
     }
 }

@@ -68,7 +68,7 @@ public class KindergartenInternshipReviewController {
             @PathVariable("internshipReviewId") Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenInternshipReviewService.deleteInternshipReview(id, userDetails.getUsername());
+        kindergartenFacade.deleteInternshipReview(id, userDetails.getUsername());
         return ResponseDto.success("실습 리뷰가 삭제되었습니다.");
     }
 

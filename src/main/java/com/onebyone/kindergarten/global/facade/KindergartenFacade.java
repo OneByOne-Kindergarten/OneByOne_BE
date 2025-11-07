@@ -9,7 +9,9 @@ import com.onebyone.kindergarten.domain.kindergartenWorkReview.service.Kindergar
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenInternshipReviewAggregateService;
 import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenWorkReviewAggregateService;
+import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.service.UserService;
+import com.onebyone.kindergarten.global.enums.ReviewStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +58,28 @@ public class KindergartenFacade {
         Kindergarten kindergarten = kindergartenWorkReviewService.modifyWorkReview(request, email);
 
         kindergartenWorkReviewAggregateService.updateOrCreateAggregate(kindergarten);
+    }
+
+    @Transactional
+    public void deleteWorkReview(Long reviewId, String username) {
+        User currentUser = userService.getUserByEmail(username);
+        kindergartenWorkReviewService.deleteWorkReview(reviewId, currentUser.getId(), currentUser.getRole());
+        int workReviewCount = kindergartenWorkReviewService.countReviewsByUser(currentUser.getId(), ReviewStatus.ACCEPTED);
+        int internshipReviewCount = kindergartenInternshipReviewService.countReviewsByUser(currentUser.getId(), ReviewStatus.ACCEPTED);
+        if (workReviewCount + internshipReviewCount == 0) {
+            currentUser.unMarkAsReviewWriter();
+        }
+    }
+
+    @Transactional
+    public void deleteInternshipReview(Long reviewId, String username) {
+        User currentUser = userService.getUserByEmail(username);
+        kindergartenInternshipReviewService.deleteWorkReview(reviewId, currentUser.getId(), currentUser.getRole());
+        int workReviewCount = kindergartenWorkReviewService.countReviewsByUser(currentUser.getId(), ReviewStatus.ACCEPTED);
+        int internshipReviewCount = kindergartenInternshipReviewService.countReviewsByUser(currentUser.getId(), ReviewStatus.ACCEPTED);
+        if (workReviewCount + internshipReviewCount == 0) {
+            currentUser.unMarkAsReviewWriter();
+        }
     }
 }
 

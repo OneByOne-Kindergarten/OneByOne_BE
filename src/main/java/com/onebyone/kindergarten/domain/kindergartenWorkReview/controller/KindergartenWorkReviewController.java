@@ -68,7 +68,7 @@ public class KindergartenWorkReviewController {
             @PathVariable("workReviewId") Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenWorkReviewService.deleteWorkReview(id, userDetails.getUsername());
+        kindergartenFacade.deleteWorkReview(id, userDetails.getUsername());
         return ResponseDto.success("근무 리뷰가 삭제되었습니다.");
     }
 
