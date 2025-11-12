@@ -231,7 +231,7 @@ public class KindergartenInternshipReviewService {
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
 
         // 작성자 또는 관리자 권한 확인
-        if (!review.getUser().getId().equals(userId) && role.equals(UserRole.ADMIN)) {
+        if (!review.getUser().getId().equals(userId) && !role.equals(UserRole.ADMIN)) {
             throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
 
