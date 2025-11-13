@@ -71,7 +71,7 @@ public class CommunityController {
     }
 
     @GetMapping("/top")
-    @Operation(summary = "인기 게시글 TOP 10 조회", description = "좋아요 수와 조회수를 기준으로 인기 게시글 TOP 10을 조회합니다.")
+    @Operation(summary = "인기 게시글 TOP 10 조회", description = "좋아요 수, 조회수, 최신도를 기반으로 한 점수로 인기 게시글 TOP 10을 조회합니다.")
     public ResponseDto<List<CommunityPostResponseDTO>> getTopPosts() {
         return ResponseDto.success(communityService.getTopPosts());
     }
