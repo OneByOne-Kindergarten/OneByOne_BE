@@ -33,7 +33,7 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
            "JOIN FETCH p.communityCategory " +
            "WHERE p.deletedAt IS NULL " +
            "ORDER BY " +
-           "((p.likeCount * 2 + p.viewCount * 0.1) * " +
+           "((p.likeCount * 3 + p.viewCount * 0.05) * " +
            "(1.0 / (1.0 + (FUNCTION('DATEDIFF', CURRENT_DATE, CAST(p.createdAt AS date)) / 7.0)))) DESC " +
            "LIMIT 10")
     List<CommunityPost> findTop10WithUserOrderByLikeCountDescViewCountDesc();
