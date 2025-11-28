@@ -138,4 +138,8 @@ public class Kindergarten extends BaseEntity {
         dto.setName(this.name);
         return dto;
     }
+
+    public void updateSubRegion(SubRegion subRegion) {
+        this.subRegion = subRegion;
+    }
 }
