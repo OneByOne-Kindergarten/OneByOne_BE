@@ -16,7 +16,12 @@ import java.util.List;
 
 @Repository
 public interface KindergartenInternshipReviewRepository extends JpaRepository<KindergartenInternshipReview, Long> {
-    boolean existsByUserAndKindergarten(User user, Kindergarten kindergarten);
+    @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
+           "FROM kindergarten_internship_review r " +
+           "WHERE r.user = :user " +
+           "AND r.kindergarten = :kindergarten " +
+           "AND r.deletedAt IS NULL")
+    boolean existsByUserAndKindergarten(@Param("user") User user, @Param("kindergarten") Kindergarten kindergarten);
 
     List<KindergartenInternshipReview> findByKindergartenAndReviewStatus(Kindergarten kindergarten, ReviewStatus status);
 

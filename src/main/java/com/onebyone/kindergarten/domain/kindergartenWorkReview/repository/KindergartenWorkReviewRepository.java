@@ -14,7 +14,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface KindergartenWorkReviewRepository extends JpaRepository<KindergartenWorkReview, Long> {
-    boolean existsByUserAndKindergarten(User user, Kindergarten kindergarten);
+    @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
+           "FROM kindergarten_work_review r " +
+           "WHERE r.user = :user " +
+           "AND r.kindergarten = :kindergarten " +
+           "AND r.deletedAt IS NULL")
+    boolean existsByUserAndKindergarten(@Param("user") User user, @Param("kindergarten") Kindergarten kindergarten);
 
     List<KindergartenWorkReview> findByKindergartenAndReviewStatus(Kindergarten kindergarten, ReviewStatus status);
 
