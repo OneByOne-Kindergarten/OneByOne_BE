@@ -1,8 +1,10 @@
 package com.onebyone.kindergarten.domain.address.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 @Table(name = "sub_region")
 public class SubRegion {
     @Id
@@ -19,4 +21,8 @@ public class SubRegion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private SubRegion parent; // 장안구 parent (수원시)
+
+    public Long getRegionId() {
+        return region != null ? region.getRegionId() : null;
+    }
 }
