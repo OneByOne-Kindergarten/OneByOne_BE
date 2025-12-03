@@ -1,7 +1,8 @@
 package com.onebyone.kindergarten.domain.kindergatens.service;
 
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSimpleDTO;
+import com.onebyone.kindergarten.domain.address.entity.SubRegion;
+import com.onebyone.kindergarten.domain.address.repository.SubRegionRepository;
+import com.onebyone.kindergarten.domain.kindergatens.dto.*;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.kindergatens.entity.KindergartenInternshipReviewAggregate;
 import com.onebyone.kindergarten.domain.kindergatens.entity.KindergartenWorkReviewAggregate;
@@ -15,8 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSearchDTO;
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenResponseDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +27,7 @@ public class KindergartenService {
     private final KindergartenRepository kindergartenRepository;
     private final KindergartenInternshipReviewAggregateRepository kindergartenInternshipReviewAggregateRepository;
     private final KindergartenWorkReviewAggregateRepository kindergartenWorkReviewAggregateRepository;
+    private final SubRegionRepository subRegionRepository;
 
     /// 유치원 정보 저장
     @Transactional
@@ -136,4 +136,26 @@ public class KindergartenService {
     public KindergartenSimpleDTO getSimpleKindergarten(Long id) {
         return kindergartenRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.ENTITY_NOT_FOUND_EXCEPTION)).toSimpleDTO();}
+
+    public List<KindergartenResponseDTO> getKindergartenByRegion(Long regionId, Long subRegionId) {
+        if (regionId == null) {
+            throw new BusinessException(ErrorCodes.REGION_NOT_FOUND_EXCEPTION);
+        }
+
+        SubRegion subRegion = subRegionRepository.findBySubRegionId(subRegionId);
+
+        if (subRegion == null) {
+            return kindergartenRepository.findAllByRegionIdWithFetch(regionId).stream().map(
+                    KindergartenResponseDTO::from
+            ).toList();
+        }
+
+        if (!regionId.equals(subRegion.getRegionId())) {
+            throw new BusinessException(ErrorCodes.REGION_NOT_MATCHED_WITH_SUB_REGION);
+        }
+
+        return kindergartenRepository.findAllByRegionIdAndSubRegionIdWithFetch(regionId, subRegionId).stream().map(
+                KindergartenResponseDTO::from
+        ).toList();
+    }
 }

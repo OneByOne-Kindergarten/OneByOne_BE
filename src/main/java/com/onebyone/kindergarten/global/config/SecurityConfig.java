@@ -46,6 +46,7 @@ public class SecurityConfig {
                                                                 "/users/temporary-password",
                                                                 "/users/check-email-certification",
                                                                 "/v3/api-docs/**",
+                                                                "/address",
                                                                 "/community/**",
                                                                 "/swagger-resources/**",
                                                                 "/sample/v2/sample",
