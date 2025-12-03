@@ -55,4 +55,17 @@ public interface KindergartenRepository extends JpaRepository<Kindergarten, Long
             @Param("longitude") double longitude,
             @Param("radiusKm") double radiusKm
     );
+
+    @Query("SELECT k FROM Kindergarten k " +
+            "LEFT JOIN FETCH k.kindergartenWorkReviewAggregate w " +
+            "LEFT JOIN FETCH k.kindergartenInternshipReviewAggregate i " +
+            "WHERE k.regionId = :regionId")
+    List<Kindergarten> findAllByRegionIdWithFetch(@Param("regionId") Long regionId);
+
+    @Query("SELECT k FROM Kindergarten k " +
+            "LEFT JOIN FETCH k.kindergartenWorkReviewAggregate w " +
+            "LEFT JOIN FETCH k.kindergartenInternshipReviewAggregate i " +
+            "WHERE k.regionId = :regionId " +
+            "AND k.subRegionId = :subRegionId")
+    List<Kindergarten> findAllByRegionIdAndSubRegionIdWithFetch(@Param("regionId") Long regionId, @Param("subRegionId") Long subRegionId);
 }

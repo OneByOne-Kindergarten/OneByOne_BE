@@ -1,6 +1,5 @@
 package com.onebyone.kindergarten.domain.kindergatens.entity;
 
-import com.onebyone.kindergarten.domain.address.entity.SubRegion;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.entity.KindergartenWorkReview;
 import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
@@ -96,9 +95,11 @@ public class Kindergarten extends BaseEntity {
     @JoinColumn(name = "kindergarten_work_review_aggregate_id")
     private KindergartenWorkReviewAggregate kindergartenWorkReviewAggregate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sub_region_id")
-    private SubRegion subRegion;
+    @Column(name = "region_id")
+    private Long regionId;
+
+    @Column(name = "sub_region_id")
+    private Long subRegionId;
 
     /// 유치원 정보 업데이트
     public void update(KindergartenDTO kindergartenDTO) {
@@ -139,7 +140,11 @@ public class Kindergarten extends BaseEntity {
         return dto;
     }
 
-    public void updateSubRegion(SubRegion subRegion) {
-        this.subRegion = subRegion;
+    public void updateRegion(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    public void updateSubRegion(Long subRegionId) {
+        this.subRegionId = subRegionId;
     }
 }

@@ -4,7 +4,8 @@ import com.onebyone.kindergarten.domain.address.repository.RegionRepository;
 import com.onebyone.kindergarten.domain.address.repository.SubRegionRepository;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.kindergatens.repository.KindergartenRepository;
-import com.onebyone.kindergarten.global.batch.processor.KindergartenAddressProcessor;
+import com.onebyone.kindergarten.global.batch.processor.KindergartenRegionProcessor;
+import com.onebyone.kindergarten.global.batch.processor.KindergartenSubRegionProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -34,13 +35,56 @@ public class BatchConfig {
     private final SubRegionRepository subRegionRepository;
 
     @Bean
-    public KindergartenAddressProcessor processor() {
-//        return new KindergartenAddressProcessor();
-        return KindergartenAddressProcessor.create(regionRepository, subRegionRepository);
+    public KindergartenRegionProcessor regionProcessor() {
+        return KindergartenRegionProcessor.create(regionRepository);
     }
 
     @Bean
-    public RepositoryItemReader<Kindergarten> kindergartenReader() {
+    public RepositoryItemReader<Kindergarten> kindergartenRegionReader() {
+        RepositoryItemReader<Kindergarten> reader = new RepositoryItemReader<>();
+        reader.setRepository(kindergartenRepository);
+        reader.setMethodName("findAll");
+        reader.setPageSize(100);
+
+        Map<String, Sort.Direction> sorts = new HashMap<>();
+        sorts.put("id", Sort.Direction.ASC);
+        reader.setSort(sorts);
+
+        return reader;
+    }
+
+    @Bean
+    public RepositoryItemWriter<Kindergarten> kindergartenRegionWriter() {
+        RepositoryItemWriter<Kindergarten> writer = new RepositoryItemWriter<>();
+        writer.setRepository(kindergartenRepository);
+        return writer;
+    }
+
+    @Bean Step regionStep() {
+        return new StepBuilder("RegionStep", jobRepository)
+                .<Kindergarten, Kindergarten>chunk(100, transactionManager)
+                .reader(kindergartenSubRegionReader())
+                .processor(regionProcessor())
+                .writer(kindergartenSubRegionWriter())
+                .build();
+    }
+
+    @Bean
+    public Job regionJob() {
+        return new JobBuilder("regionJob", jobRepository)
+                .listener(new RunIdIncrementer())
+                .start(regionStep())
+                .build();
+    }
+
+    @Bean
+    public KindergartenSubRegionProcessor subRegionProcessor() {
+//        return new KindergartenAddressProcessor();
+        return KindergartenSubRegionProcessor.create(regionRepository, subRegionRepository);
+    }
+
+    @Bean
+    public RepositoryItemReader<Kindergarten> kindergartenSubRegionReader() {
 //        JpaPagingItemReader<Kindergarten> reader = new JpaPagingItemReader<>();
 //        reader.setEntityManagerFactory(entityManagerFactory);
 //        reader.setMet
@@ -57,26 +101,28 @@ public class BatchConfig {
     }
 
     @Bean
-    public RepositoryItemWriter<Kindergarten> kindergartenWriter() {
+    public RepositoryItemWriter<Kindergarten> kindergartenSubRegionWriter() {
         RepositoryItemWriter<Kindergarten> writer = new RepositoryItemWriter<>();
         writer.setRepository(kindergartenRepository);
         return writer;
     }
 
     @Bean
-    public Step step1() {
-        return new StepBuilder("AddressStep", jobRepository)
+    public Step subRegionStep() {
+        return new StepBuilder("SubRegionStep", jobRepository)
                 .<Kindergarten, Kindergarten>chunk(100, transactionManager)
-                .reader(kindergartenReader())
-                .processor(processor())
-                .writer(kindergartenWriter())
+                .reader(kindergartenSubRegionReader())
+                .processor(subRegionProcessor())
+                .writer(kindergartenSubRegionWriter())
                 .build();
     }
+
     @Bean
-    public Job Job() {
-        return new JobBuilder("AddressJob", jobRepository)
+    public Job subRegionJob() {
+        return new JobBuilder("SubRegionJob", jobRepository)
                 .listener(new RunIdIncrementer())
-                .start(step1())
+                .start(subRegionStep())
                 .build();
     }
+
 }

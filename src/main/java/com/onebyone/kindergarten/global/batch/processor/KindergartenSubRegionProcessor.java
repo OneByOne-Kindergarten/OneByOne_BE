@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class KindergartenAddressProcessor implements ItemProcessor<Kindergarten, Kindergarten> {
+public class KindergartenSubRegionProcessor implements ItemProcessor<Kindergarten, Kindergarten> {
     private final RegionRepository regionRepository;
     private final SubRegionRepository subRegionRepository;
 
@@ -66,11 +66,11 @@ public class KindergartenAddressProcessor implements ItemProcessor<Kindergarten,
             return item;
         }
 
-        item.updateSubRegion(subRegionEntity);
+        item.updateSubRegion(subRegionEntity.getSubRegionId());
         return item;
     }
 
-    public static KindergartenAddressProcessor create(RegionRepository regionRepository, SubRegionRepository subRegionRepository) {
+    public static KindergartenSubRegionProcessor create(RegionRepository regionRepository, SubRegionRepository subRegionRepository) {
         Map<String, Long> cityMap = regionRepository.findAll()
                 .stream()
                 .collect(Collectors.toMap(r -> r.getName(), r -> r.getRegionId()));
@@ -82,6 +82,6 @@ public class KindergartenAddressProcessor implements ItemProcessor<Kindergarten,
                         Collectors.toMap(SubRegion::getName, s -> s)
                 ));
 
-        return new KindergartenAddressProcessor(regionRepository, subRegionRepository, cityMap, subRegionMap);
+        return new KindergartenSubRegionProcessor(regionRepository, subRegionRepository, cityMap, subRegionMap);
     }
 }

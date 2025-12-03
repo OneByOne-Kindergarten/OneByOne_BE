@@ -56,6 +56,9 @@ public enum ErrorCodes {
     INVALID_REPORT_INTERNSHIP_REVIEW_TARGET("E0050", "존재하지 않는 실습 신고 리뷰입니다."),
     INVALID_REPORT_WORK_REVIEW_TARGET("E0051", "존재하지 않는 근무 신고 리뷰입니다."),
     BATCH_NOT_ADMIN_CANNOT_USE("E0052", "관리자가 아니면 배치를 사용할 수 없습니다."),
+    REGION_NOT_FOUND_EXCEPTION("E0053", "해당 행정구역 데이터가 존재하지 않습니다."),
+    SUB_REGION_NOT_FOUND_EXCEPTION("E0054", "해당 시군구 데이터가 존재하지 않습니다."),
+    REGION_NOT_MATCHED_WITH_SUB_REGION("E0055", "해당 행정구역에 연결될 시군구를 찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR("E9999","알 수 없는 에러 발생");
 
     private final String code;

@@ -1,7 +1,6 @@
 package com.onebyone.kindergarten.domain.kindergatens.controller;
 
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenDTO;
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSimpleDTO;
+import com.onebyone.kindergarten.domain.kindergatens.dto.*;
 import com.onebyone.kindergarten.domain.kindergatens.service.KindergartenService;
 import com.onebyone.kindergarten.global.common.ResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenSearchDTO;
-import com.onebyone.kindergarten.domain.kindergatens.dto.KindergartenResponseDTO;
 import com.onebyone.kindergarten.global.common.PageResponseDTO;
 
 import java.util.List;
@@ -74,4 +71,11 @@ public class KindergartenController {
         return kindergartenService.getSimpleKindergarten(id);
     }
 
+    @GetMapping("/region")
+    @Operation(summary = "유치원 지역 조회", description = "지역 내의 유치원을 조회합니다.")
+    public List<KindergartenResponseDTO> getKindergartenByRegion(
+            @RequestParam("regionId") Long regionId, @RequestParam(value = "subRegionId", required = false) Long subRegionId
+    ) {
+        return kindergartenService.getKindergartenByRegion(regionId, subRegionId);
+    }
 }
