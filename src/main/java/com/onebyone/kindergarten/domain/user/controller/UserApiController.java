@@ -181,7 +181,7 @@ public class UserApiController {
     @PostMapping("/email-certification")
     public ResponseEntity<String> emailCertification(
             @RequestBody EmailCertificationRequestDTO request) {
-        boolean isSent = userFacade.emailCertification(request.getEmail());
+        boolean isSent = userFacade.emailCertification(request);
 
         if (isSent) {
             return ResponseEntity.ok("인증번호가 성공적으로 발송되었습니다.");
@@ -195,14 +195,8 @@ public class UserApiController {
     @PostMapping("/check-email-certification")
     public ResponseEntity<String> checkEmailCertification(
             @RequestBody CheckEmailCertificationRequestDTO request) {
-        boolean isChecked = userService.checkEmailCertification(request);
-
-        if (isChecked) {
-            return ResponseEntity.ok("이메일 인증에 성공했습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.SC_BAD_REQUEST)
-                    .body("이메일 인증에 실패했습니다.");
-        }
+        userService.checkEmailCertification(request);
+        return ResponseEntity.ok("이메일 인증에 성공했습니다.");
     }
 
     @Operation(summary = "유저-14 유저 역할 변경", description = "사용자의 역할(교사, 예비교사) 수정합니다.")
@@ -214,13 +208,13 @@ public class UserApiController {
         return ResponseEntity.ok("권한이 변경되었습니다.");
     }
 
-    @Operation(summary = "유저-15 비밀번호 재설정", description = "유저의 비밀번호를 임시 비밀번호로 변경합니다.")
+    @Operation(summary = "유저-15 이메일 검증 및 임시 비밀번호 발급", description = "유저의 비밀번호를 임시 비밀번호로 변경합니다.")
     @PatchMapping("/temporary-password")
-    public ResponseEntity<String> updateTemporaryPassword(
+    public ResponseEntity<String> updateTemporaryPasswordCertification(
             @RequestBody UpdateTemporaryPasswordRequestDTO request) {
-        boolean isSended = userFacade.updateTemporaryPassword(request.getEmail());
+        boolean isSent = userFacade.updateTemporaryPasswordCertification(request);
 
-        if (isSended) {
+        if (isSent) {
             return ResponseEntity.ok("임시 비밀번호 변경이 완료되었습니다.");
         } else {
             return ResponseEntity.status(HttpStatus.SC_BAD_REQUEST)

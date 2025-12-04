@@ -1,11 +1,9 @@
 package com.onebyone.kindergarten.domain.user.entity;
 
+import com.onebyone.kindergarten.domain.user.enums.EmailCertificationType;
 import com.onebyone.kindergarten.global.common.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +20,9 @@ public class EmailCertification extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long emailCertificationId;
+
+    @Enumerated(EnumType.STRING)
+    private EmailCertificationType type;
 
     private String email;
 

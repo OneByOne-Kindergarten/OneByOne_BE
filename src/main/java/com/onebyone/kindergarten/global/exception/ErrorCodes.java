@@ -59,6 +59,8 @@ public enum ErrorCodes {
     REGION_NOT_FOUND_EXCEPTION("E0053", "해당 행정구역 데이터가 존재하지 않습니다."),
     SUB_REGION_NOT_FOUND_EXCEPTION("E0054", "해당 시군구 데이터가 존재하지 않습니다."),
     REGION_NOT_MATCHED_WITH_SUB_REGION("E0055", "해당 행정구역에 연결될 시군구를 찾을 수 없습니다."),
+    NOT_FOUND_CERTIFICATION("E0056", "인증 내역이 존재하지 않습니다."),
+    CERTIFICATION_CODE_MISMATCH("E0057", "인증 코드가 일치하지 않습니다."),
     INTERNAL_SERVER_ERROR("E9999","알 수 없는 에러 발생");
 
     private final String code;

@@ -7,6 +7,7 @@ import com.onebyone.kindergarten.domain.user.dto.response.KakaoUserResponse;
 import com.onebyone.kindergarten.domain.user.dto.response.NaverUserResponse;
 import com.onebyone.kindergarten.domain.user.entity.EmailCertification;
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.domain.user.enums.EmailCertificationType;
 import com.onebyone.kindergarten.domain.user.enums.NotificationSetting;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.repository.EmailCertificationRepository;
@@ -361,17 +362,14 @@ public class UserService {
     }
 
     @Transactional
-    public void saveCertification(String email, String certification) {
-        if (userRepository.existsByEmail(email)) {
+    public void saveSignUpCertification(EmailCertificationRequestDTO request, String certification) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
         }
 
-        if (emailCertificationRepository.existsByEmail(email)) {
-            throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL_CERTIFICATION);
-        }
-
         EmailCertification emailCert = EmailCertification.builder()
-                .email(email)
+                .email(request.getEmail())
+                .type(EmailCertificationType.EMAIL)
                 .code(certification)
                 .isCertificated(false)
                 .build();
@@ -380,22 +378,31 @@ public class UserService {
     }
 
     @Transactional
-    public boolean checkEmailCertification(CheckEmailCertificationRequestDTO request) {
+    public void savePasswordCertification(EmailCertificationRequestDTO request, String certification) {
+        if (!userRepository.existsByEmail(request.getEmail())) {
+            throw new BusinessException(ErrorCodes.NOT_FOUND_USER);
+        }
+
+        EmailCertification passwordCert = EmailCertification.builder()
+                .email(request.getEmail())
+                .type(EmailCertificationType.TEMPORARY_PASSWORD)
+                .code(certification)
+                .isCertificated(false)
+                .build();
+
+        emailCertificationRepository.save(passwordCert);
+    }
+
+    @Transactional
+    public void checkEmailCertification(CheckEmailCertificationRequestDTO request) {
         EmailCertification emailCertification = emailCertificationRepository
-                .findByEmail(request.getEmail());
+                .findByEmailAndCodeAndTypeAndDeletedAtIsNull(request.getEmail(), request.getCertification(), EmailCertificationType.EMAIL);
 
         if (emailCertification == null) {
             throw new BusinessException(ErrorCodes.NOT_FOUND_EMAIL);
         }
 
-        if (emailCertification.getCode().equals(request.getCertification())) {
-            emailCertification.completeCertification();
-            emailCertificationRepository.save(emailCertification);
-            return true;
-        } else {
-            return false;
-        }
-
+        emailCertification.completeCertification();
     }
 
     @Transactional
@@ -409,13 +416,16 @@ public class UserService {
         user.changePassword(passwordEncoder.encode(number));
     }
 
-    public void checkEmailCertificationByTemporaryPassword(String email) {
+    public void checkEmailCertificationByTemporaryPassword(String email, String code) {
         EmailCertification emailCertification = emailCertificationRepository
-                .findById(email)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+                .findByEmailAndCodeAndTypeAndDeletedAtIsNull(email, code, EmailCertificationType.TEMPORARY_PASSWORD);
 
-        if (!emailCertification.isCertificated()) {
-            throw new BusinessException(ErrorCodes.NOT_FOUND_EXCEPTION_BY_TEMPORARY_PASSWORD_EXCEPTION);
+        if (emailCertification == null) {
+            throw new BusinessException(ErrorCodes.NOT_FOUND_CERTIFICATION);
+        }
+
+        if (!emailCertification.getCode().equals(code)) {
+            throw new BusinessException(ErrorCodes.CERTIFICATION_CODE_MISMATCH);
         }
     }
 

@@ -2,6 +2,9 @@ package com.onebyone.kindergarten.global.facade;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
 import com.onebyone.kindergarten.domain.communityComments.service.CommunityCommentService;
+import com.onebyone.kindergarten.domain.user.dto.request.EmailCertificationRequestDTO;
+import com.onebyone.kindergarten.domain.user.dto.request.UpdateTemporaryPasswordRequestDTO;
+import com.onebyone.kindergarten.domain.user.enums.EmailCertificationType;
 import com.onebyone.kindergarten.global.feignClient.KakaoApiClient;
 import com.onebyone.kindergarten.global.feignClient.KakaoAuthClient;
 import com.onebyone.kindergarten.global.feignClient.NaverApiClient;
@@ -171,18 +174,27 @@ public class UserFacade {
     }
 
     @Transactional
-    public boolean emailCertification(String email) {
+    public boolean emailCertification(EmailCertificationRequestDTO request) {
         String code = createNumber();
-        userService.saveCertification(email, code);
-        return emailProvider.sendCertificationMail(email, code);
+
+        EmailCertificationType certificationType = request.getCertificationType();
+        if (EmailCertificationType.EMAIL.equals(certificationType)) {
+            userService.saveSignUpCertification(request, code);
+        } else if (EmailCertificationType.TEMPORARY_PASSWORD.equals(certificationType)){
+            userService.savePasswordCertification(request, code);
+        } else {
+            userService.saveSignUpCertification(request, code);
+        }
+
+        return emailProvider.sendCertificationMail(request.getEmail(), code);
     }
 
     @Transactional
-    public boolean updateTemporaryPassword(String email) {
+    public boolean updateTemporaryPasswordCertification(UpdateTemporaryPasswordRequestDTO request) {
         String number = createNumber();
-        userService.checkEmailCertificationByTemporaryPassword(email);
-        userService.updateTemporaryPassword(email, number);
-        return emailProvider.sendTemporaryPasswordMail(email, number);
+        userService.checkEmailCertificationByTemporaryPassword(request.getEmail(), request.getCode());
+        userService.updateTemporaryPassword(request.getEmail(), number);
+        return emailProvider.sendTemporaryPasswordMail(request.getEmail(), number);
     }
 
     public String createNumber() {
