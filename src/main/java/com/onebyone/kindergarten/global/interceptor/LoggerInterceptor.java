@@ -19,8 +19,15 @@ public class LoggerInterceptor implements HandlerInterceptor {
 
         log.debug("============================================ start ============================================");
         log.debug("[{}] request Uri : {}", uuid, request.getRequestURI());
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        log.debug("[{}] method : {}", uuid, request.getMethod());
+        log.debug("[{}] userAgent : {}", uuid, request.getHeader("User-Agent"));
 
+        String query = request.getQueryString();
+        if (query != null) {
+            log.debug("[{}] query : {}", uuid, query);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             log.debug("[{}] email : {}", uuid, auth.getName());
         }
