@@ -118,11 +118,11 @@ public class KindergartenWorkReviewService {
 
             // 알림 발송 - 본인 글이 아닌 경우
             if (!review.getUser().getId().equals(user.getId())) {
-                notificationTemplateService.sendLikeNotification(
+                notificationTemplateService.sendReviewLikeNotification(
                         review.getUser().getId(),
                         user,
                         review.getOneLineComment(),
-                        review.getId()
+                        review.getKindergarten().getId()
                 );
             }
         }

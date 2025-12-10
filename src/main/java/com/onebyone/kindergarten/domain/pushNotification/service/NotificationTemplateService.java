@@ -74,7 +74,7 @@ public class NotificationTemplateService {
     }
 
     /**
-     * 좋아요 알림을 발송합니다.
+     * 게시글 좋아요 알림을 발송합니다.
      */
     @Transactional
     public void sendLikeNotification(Long targetUserId, User actionUser, String contentTitle, Long targetId) {
@@ -85,7 +85,24 @@ public class NotificationTemplateService {
             if (existingNotification.isPresent()) {
                 handleGroupedLikeNotification(existingNotification.get(), actionUser);
             } else {
-                createNewLikeNotification(targetUserId, actionUser, targetId, groupKey);
+                createNewLikeNotification(targetUserId, actionUser, targetId, groupKey, NotificationType.LIKE);
+            }
+        }
+    }
+
+    /**
+     * 리뷰 좋아요 알림을 발송합니다.
+     */
+    @Transactional
+    public void sendReviewLikeNotification(Long targetUserId, User actionUser, String contentTitle, Long targetId) {
+        if (!targetUserId.equals(actionUser.getId())) {
+            String groupKey = "REVIEW_LIKE_" + targetId;
+            LocalDateTime sinceTime = LocalDateTime.now().minus(GROUP_TIME_WINDOW);
+            Optional<PushNotification> existingNotification = findGroupableNotification(targetUserId, groupKey, sinceTime);
+            if (existingNotification.isPresent()) {
+                handleGroupedLikeNotification(existingNotification.get(), actionUser);
+            } else {
+                createNewLikeNotification(targetUserId, actionUser, targetId, groupKey, NotificationType.REVIEW);
             }
         }
     }
@@ -285,20 +302,20 @@ public class NotificationTemplateService {
     /**
      * 새로운 좋아요 알림 생성
      */
-    private void createNewLikeNotification(Long targetUserId, User actionUser, Long targetId, String groupKey) {
+    private void createNewLikeNotification(Long targetUserId, User actionUser, Long targetId, String groupKey, NotificationType type) {
         String message = String.format(SINGLE_LIKE_MESSAGE, LIKE_EMOJI, actionUser.getNickname());
 
         PushNotificationEvent event = createNotificationEvent(
                 targetUserId,
                 "좋아요 알림",
                 message,
-                NotificationType.LIKE,
+                type,
                 targetId,
                 groupKey
         );
 
         notificationEventPublisher.publish(event);
-        log.debug("좋아요 알림 발송: 대상자={}", targetUserId);
+        log.debug("좋아요 알림 발송: 대상자={}, 타입={}", targetUserId, type);
     }
 
     /**
