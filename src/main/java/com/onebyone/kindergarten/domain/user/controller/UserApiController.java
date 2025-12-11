@@ -102,8 +102,8 @@ public class UserApiController {
 
         Claims claim = jwtProvider.getClaimFromRefreshToken(refreshToken);
 
-        String newAccessToken = jwtProvider.generateAccessToken(Long.valueOf(claim.getSubject()), (UserRole) claim.get("role"));
-        String newRefreshToken = jwtProvider.generateAccessToken(Long.valueOf(claim.getSubject()), (UserRole) claim.get("role"));
+        String newAccessToken = jwtProvider.generateAccessToken(Long.valueOf(claim.getSubject()), UserRole.valueOf(claim.get("role", String.class)));
+        String newRefreshToken = jwtProvider.generateAccessToken(Long.valueOf(claim.getSubject()), UserRole.valueOf(claim.get("role", String.class)));
 
         return ReIssueResponseDTO.builder()
                 .accessToken(newAccessToken)
