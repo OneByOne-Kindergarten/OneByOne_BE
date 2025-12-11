@@ -27,42 +27,42 @@ public class KindergartenFacade {
 
 
     @Transactional
-    public void createInternshipReview(CreateInternshipReviewRequestDTO request, String email) {
-        Kindergarten kindergarten = kindergartenInternshipReviewService.createInternshipReview(request, email);
+    public void createInternshipReview(CreateInternshipReviewRequestDTO request, Long userId) {
+        Kindergarten kindergarten = kindergartenInternshipReviewService.createInternshipReview(request, userId);
 
         kindergartenInternshipReviewAggregateService.updateOrCreateAggregate(kindergarten);
         
         /// 사용자 리뷰 작성 플래그 업데이트
-        userService.markUserAsReviewWriter(email);
+        userService.markUserAsReviewWriter(userId);
     }
 
     @Transactional
-    public void modifyInternshipReview(ModifyInternshipReviewRequestDTO request, String email) {
-        Kindergarten kindergarten = kindergartenInternshipReviewService.modifyInternshipReview(request, email);
+    public void modifyInternshipReview(ModifyInternshipReviewRequestDTO request, Long userId) {
+        Kindergarten kindergarten = kindergartenInternshipReviewService.modifyInternshipReview(request, userId);
 
         kindergartenInternshipReviewAggregateService.updateOrCreateAggregate(kindergarten);
     }
 
     @Transactional
-    public void createWorkReview(CreateWorkReviewRequestDTO request, String email) {
-        Kindergarten kindergarten = kindergartenWorkReviewService.createWorkReview(request, email);
+    public void createWorkReview(CreateWorkReviewRequestDTO request, Long userId) {
+        Kindergarten kindergarten = kindergartenWorkReviewService.createWorkReview(request, userId);
 
         kindergartenWorkReviewAggregateService.updateOrCreateAggregate(kindergarten);
         
         /// 사용자 리뷰 작성 플래그 업데이트
-        userService.markUserAsReviewWriter(email);
+        userService.markUserAsReviewWriter(userId);
     }
 
     @Transactional
-    public void modifyWorkReview(ModifyWorkReviewRequestDTO request, String email) {
-        Kindergarten kindergarten = kindergartenWorkReviewService.modifyWorkReview(request, email);
+    public void modifyWorkReview(ModifyWorkReviewRequestDTO request, Long userId) {
+        Kindergarten kindergarten = kindergartenWorkReviewService.modifyWorkReview(request, userId);
 
         kindergartenWorkReviewAggregateService.updateOrCreateAggregate(kindergarten);
     }
 
     @Transactional
-    public void deleteWorkReview(Long reviewId, String username) {
-        User currentUser = userService.getUserByEmail(username);
+    public void deleteWorkReview(Long reviewId, Long userId) {
+        User currentUser = userService.getUserById(userId);
         kindergartenWorkReviewService.deleteWorkReview(reviewId, currentUser.getId(), currentUser.getRole());
         int workReviewCount = kindergartenWorkReviewService.countReviewsByUser(currentUser.getId(), ReviewStatus.ACCEPTED);
         int internshipReviewCount = kindergartenInternshipReviewService.countReviewsByUser(currentUser.getId(), ReviewStatus.ACCEPTED);
@@ -72,8 +72,8 @@ public class KindergartenFacade {
     }
 
     @Transactional
-    public void deleteInternshipReview(Long reviewId, String username) {
-        User currentUser = userService.getUserByEmail(username);
+    public void deleteInternshipReview(Long reviewId, Long userId) {
+        User currentUser = userService.getUserById(userId);
         kindergartenInternshipReviewService.deleteWorkReview(reviewId, currentUser.getId(), currentUser.getRole());
         int workReviewCount = kindergartenWorkReviewService.countReviewsByUser(currentUser.getId(), ReviewStatus.ACCEPTED);
         int internshipReviewCount = kindergartenInternshipReviewService.countReviewsByUser(currentUser.getId(), ReviewStatus.ACCEPTED);

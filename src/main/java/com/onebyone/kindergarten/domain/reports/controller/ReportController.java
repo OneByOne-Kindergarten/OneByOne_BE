@@ -30,7 +30,7 @@ public class ReportController {
             @Valid @RequestBody CreateReportRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(reportService.createReport(dto, userDetails.getUsername()));
+        return ResponseDto.success(reportService.createReport(dto, Long.valueOf(userDetails.getUsername())));
     }
 
     @GetMapping("/my")
@@ -39,7 +39,7 @@ public class ReportController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return new PageResponseDTO<>(reportService.getMyReports(userDetails.getUsername(), pageable));
+        return new PageResponseDTO<>(reportService.getMyReports(Long.valueOf(userDetails.getUsername()), pageable));
     }
 
 }

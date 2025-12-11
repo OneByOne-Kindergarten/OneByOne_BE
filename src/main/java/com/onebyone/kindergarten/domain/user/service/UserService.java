@@ -37,20 +37,23 @@ public class UserService {
     private final EmailCertificationRepository emailCertificationRepository;
 
     @Transactional
-    public String signUp(SignUpRequestDTO request) {
+    public JwtUserInfoDto signUp(SignUpRequestDTO request) {
         if (isExistedEmail(request.getEmail())) {
             throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
         }
 
-        EmailCertification emailCertification = emailCertificationRepository.findByEmail(request.getEmail());
-        if (emailCertification == null || !emailCertification.isCertificated()) {
-            throw new BusinessException(ErrorCodes.FAILED_EMAIL_CERTIFICATION_EXCEPTION);
-        }
+//        EmailCertification emailCertification = emailCertificationRepository.findByEmail(request.getEmail());
+//        if (emailCertification == null || !emailCertification.isCertificated()) {
+//            throw new BusinessException(ErrorCodes.FAILED_EMAIL_CERTIFICATION_EXCEPTION);
+//        }
 
         String encodedPassword = encodePassword(request.getPassword());
         User user = userRepository.save(request.toEntity(encodedPassword));
 
-        return user.getEmail();
+        return new JwtUserInfoDto(
+            user.getId(),
+            user.getRole()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -63,7 +66,7 @@ public class UserService {
     }
 
     @Transactional
-    public String signIn(SignInRequestDTO request) {
+    public JwtUserInfoDto signIn(SignInRequestDTO request) {
         // 먼저 활성 사용자 확인
         Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail());
         if (activeUser.isPresent()) {
@@ -75,8 +78,11 @@ public class UserService {
             if (request.getFcmToken() != null) {
                 user.updateFcmToken(request.getFcmToken());
             }
-            
-            return user.getEmail();
+
+            return new JwtUserInfoDto(
+                    user.getId(),
+                    user.getRole()
+            );
         }
         
         // 탈퇴된 사용자 확인 및 복구
@@ -93,16 +99,19 @@ public class UserService {
             if (request.getFcmToken() != null) {
                 user.updateFcmToken(request.getFcmToken());
             }
-            
-            return user.getEmail();
+
+            return new JwtUserInfoDto(
+                    user.getId(),
+                    user.getRole()
+            );
         }
 
         throw new BusinessException(ErrorCodes.NOT_FOUND_EMAIL);
     }
 
     @Transactional
-    public void changeNickname(String email, ModifyUserNicknameRequestDTO request) {
-        User user = findUser(email);
+    public void changeNickname(Long userId, ModifyUserNicknameRequestDTO request) {
+        User user = getUserById(userId);
         
         // 현재 닉네임과 동일한지 확인
         if (user.getNickname().equals(request.getNewNickname())) {
@@ -113,8 +122,8 @@ public class UserService {
     }
 
     @Transactional
-    public void changePassword(String email, ModifyUserPasswordRequestDTO request) {
-        User user = findUser(email);
+    public void changePassword(Long userId, ModifyUserPasswordRequestDTO request) {
+        User user = getUserById(userId);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCodes.INVALID_PASSWORD_ERROR);
@@ -123,14 +132,9 @@ public class UserService {
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
     }
 
-    private User findUser(String email) {
-        return userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
-    }
-
     @Transactional
-    public void withdraw(String email) {
-        User user = findUser(email);
+    public void withdraw(Long userId) {
+        User user = getUserById(userId);
         user.withdraw();
     }
 
@@ -149,13 +153,18 @@ public class UserService {
         user.updateCareer(String.valueOf(careerMonths));
     }
 
-    public UserDTO getUser(String email) {
-        return UserDTO.from(userRepository.findUserWithKindergarten(email)
+    public User getUserById(Long userId) {
+        return userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+    }
+
+    public UserDTO getUserToDTO(Long userId) {
+        return UserDTO.from(userRepository.findIdWithKindergarten(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL)));
     }
 
     @Transactional
-    public String signUpByKakao(KakaoUserResponse userResponse) {
+    public User signUpByKakao(KakaoUserResponse userResponse) {
         String email = userResponse.getKakao_account().getEmail();
 
         String nickname;
@@ -176,7 +185,7 @@ public class UserService {
         // 활성 사용자 확인
         Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(email);
         if (activeUser.isPresent()) {
-            return email;
+            return activeUser.get();
         }
 
         // 탈퇴된 사용자 확인 및 복구
@@ -189,8 +198,8 @@ public class UserService {
             if (userResponse.getKakao_account().getProfile() != null) {
                 user.updateProfileImageUrl(userResponse.getKakao_account().getProfile().getProfile_image_url());
             }
-            
-            return user.getEmail();
+
+            return user;
         }
 
         // 새로운 사용자 생성
@@ -205,31 +214,17 @@ public class UserService {
 
         userRepository.save(user);
 
-        return user.getEmail();
+        return user;
     }
 
     @Transactional
-    public String signUpByKakao(KakaoUserResponse userResponse, String fcmToken) {
-        String email = signUpByKakao(userResponse);
-        
-        // FCM 토큰이 있으면 업데이트
-        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-            User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
-            user.updateFcmToken(fcmToken);
-        }
-        
-        return email;
-    }
-
-    @Transactional
-    public String signUpByNaver(NaverUserResponse userResponse) {
+    public User signUpByNaver(NaverUserResponse userResponse) {
         String email = userResponse.getResponse().getEmail();
 
         // 활성 사용자 확인
         Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(email);
         if (activeUser.isPresent()) {
-            return email;
+            return activeUser.get();
         }
 
         // 탈퇴된 사용자 확인 및 복구
@@ -243,7 +238,7 @@ public class UserService {
                 user.updateProfileImageUrl(userResponse.getResponse().getProfile_image());
             }
             
-            return user.getEmail();
+            return user;
         }
 
         // 새로운 사용자 생성
@@ -271,25 +266,11 @@ public class UserService {
 
         userRepository.save(user);
 
-        return user.getEmail();
+        return user;
     }
 
     @Transactional
-    public String signUpByNaver(NaverUserResponse userResponse, String fcmToken) {
-        String email = signUpByNaver(userResponse);
-        
-        // FCM 토큰이 있으면 업데이트
-        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-            User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
-            user.updateFcmToken(fcmToken);
-        }
-        
-        return email;
-    }
-
-    @Transactional
-    public String signUpByApple(AppleUserResponse userResponse) {
+    public User signUpByApple(AppleUserResponse userResponse) {
         String appleUserId = userResponse.getSub();
         String providedEmail = userResponse.getEmail();
 
@@ -311,7 +292,7 @@ public class UserService {
         // 활성 사용자 확인
         Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(systemEmail);
         if (activeUser.isPresent()) {
-            return systemEmail;
+            return activeUser.get();
         }
 
         // 탈퇴된 사용자 확인 및 복구
@@ -319,7 +300,7 @@ public class UserService {
         if (deletedUser.isPresent()) {
             User user = deletedUser.get();
             user.restore();
-            return user.getEmail();
+            return user;
         }
 
         // 새로운 사용자 생성
@@ -338,26 +319,12 @@ public class UserService {
 
         userRepository.save(user);
 
-        return user.getEmail();
+        return user;
     }
 
     @Transactional
-    public String signUpByApple(AppleUserResponse userResponse, String fcmToken) {
-        String email = signUpByApple(userResponse);
-        
-        // FCM 토큰이 있으면 업데이트
-        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-            User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
-            user.updateFcmToken(fcmToken);
-        }
-        
-        return email;
-    }
-
-    @Transactional
-    public void updateHomeShortcut(String email, HomeShortcutsDto homeShortcutsDto) {
-        User user = findUser(email);
+    public void updateHomeShortcut(Long userId, HomeShortcutsDto homeShortcutsDto) {
+        User user = getUserById(userId);
         user.updateHomeShortcut(homeShortcutsDto.toJson());
     }
 
@@ -406,13 +373,13 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUserRole(String email, UpdateUserRoleRequestDTO request) {
-        User user = findUser(email);
+    public void updateUserRole(Long userId, UpdateUserRoleRequestDTO request) {
+        User user = getUserById(userId);
         user.updateUserRole(request.getRole());
     }
 
     public void updateTemporaryPassword(String email, String number) {
-        User user = findUser(email);
+        User user = getUserByEmail(email);
         user.changePassword(passwordEncoder.encode(number));
     }
 
@@ -430,9 +397,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public NotificationSettingsDTO getNotificationSettings(String email) {
-        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+    public NotificationSettingsDTO getNotificationSettings(Long userId) {
+        User user = getUserById(userId);
         
         return NotificationSettingsDTO.builder()
                 .allNotificationsEnabled(user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS))
@@ -442,9 +408,8 @@ public class UserService {
     }
 
     @Transactional
-    public NotificationSettingsDTO updateNotificationSettings(String email, NotificationSettingsDTO request) {
-        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+    public NotificationSettingsDTO updateNotificationSettings(Long userId, NotificationSettingsDTO request) {
+        User user = getUserById(userId);
         
         Set<NotificationSetting> enabledSettings = new HashSet<>();
         if (request.isAllNotificationsEnabled()) {
@@ -463,8 +428,8 @@ public class UserService {
     }
 
     @Transactional
-    public void markUserAsReviewWriter(String email) {
-        User user = getUserByEmail(email);
+    public void markUserAsReviewWriter(Long userId) {
+        User user = getUserById(userId);
         if (!user.hasWrittenReview()) {
             user.markAsReviewWriter();
         }
@@ -495,17 +460,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public AdminUserResponseDTO getUserById(Long userId) {
+    public AdminUserResponseDTO getUserToAdminDTO(Long userId) {
         User user = userRepository.findByIdWithKindergarten(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + userId));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
         return AdminUserResponseDTO.from(user);
     }
 
     /// 관리자용 - 유저 상태 변경
     @Transactional
-    public void updateUserStatus(Long userId, UpdateUserStatusRequestDTO request, String adminEmail) {
+    public void updateUserStatus(Long userId, UpdateUserStatusRequestDTO request) {
         // 관리자 권한 확인
-        User admin = getUserByEmail(adminEmail);
+        User admin = getUserById(userId);
         if (!admin.getRole().equals(UserRole.ADMIN)) {
             throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }

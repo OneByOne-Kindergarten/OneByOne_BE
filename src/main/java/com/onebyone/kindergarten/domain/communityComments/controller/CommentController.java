@@ -23,7 +23,7 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        commentService.deleteComment(commentId, userDetails.getUsername());
+        commentService.deleteComment(commentId, Long.valueOf(userDetails.getUsername()));
         return ResponseDto.success("댓글이 삭제되었습니다.");
     }
 } 

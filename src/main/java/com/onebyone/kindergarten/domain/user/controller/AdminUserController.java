@@ -50,7 +50,7 @@ public class AdminUserController {
     public ResponseDto<AdminUserResponseDTO> getUserDetail(
             @PathVariable Long userId
     ) {
-        AdminUserResponseDTO user = userService.getUserById(userId);
+        AdminUserResponseDTO user = userService.getUserToAdminDTO(userId);
         return ResponseDto.success(user);
     }
 
@@ -61,7 +61,7 @@ public class AdminUserController {
             @Valid @RequestBody UpdateUserStatusRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        userService.updateUserStatus(userId, request, userDetails.getUsername());
+        userService.updateUserStatus(userId, request);
         return ResponseDto.success("유저 상태가 변경되었습니다.");
     }
 }

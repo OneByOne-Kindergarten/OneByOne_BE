@@ -34,7 +34,7 @@ public class CommunityCommentController {
             @Valid @RequestBody CreateCommentRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(commentService.createComment(postId, dto, userDetails.getUsername()));
+        return ResponseDto.success(commentService.createComment(postId, dto, Long.valueOf(userDetails.getUsername())));
     }
 
     @GetMapping
@@ -62,7 +62,7 @@ public class CommunityCommentController {
             @PageableDefault(size = 30, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        String email = userDetails != null ? userDetails.getUsername() : null;
-        return new PageResponseDTO<>(commentService.getAllCommentsWithReplies(postId, pageable, email));
+        Long userId = userDetails != null ? Long.valueOf(userDetails.getUsername()) : null;
+        return new PageResponseDTO<>(commentService.getAllCommentsWithReplies(postId, pageable, userId));
     }
 }

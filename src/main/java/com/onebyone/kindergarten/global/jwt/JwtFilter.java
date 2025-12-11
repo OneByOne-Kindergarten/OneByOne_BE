@@ -35,29 +35,27 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String requestURI = request.getRequestURI();
-
-        if (requestURI.startsWith("/users/reissue")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        if (requestURI.startsWith("/users/kakao/callback") || 
-            requestURI.startsWith("/users/naver/callback") || 
-            requestURI.startsWith("/users/apple/callback")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String jwt = resolveToken(request);
 
         if (StringUtils.hasText(jwt) ) {
             Map<String, Object> map = jwtProvider.validateTokenWithError(jwt);
 
             if ((boolean) map.get("isValid")) {
-                Authentication authentication = jwtProvider.getAuthentication(jwt);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                filterChain.doFilter(request, response);
+                Map<String, Object> authenticationMap = jwtProvider.getAuthentication(jwt);
+
+                if ((boolean) authenticationMap.get("isValid")) {
+                    Authentication authentication = (Authentication) authenticationMap.get("authentication");
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    filterChain.doFilter(request, response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+
+                    ErrorResponse errorResponse = ErrorResponse.buildError((ErrorCodes) authenticationMap.get("errorCode"));
+                    response.getWriter().write(
+                            "{\"code\": \"" + errorResponse.getCode() + "\", \"message\": \"" + errorResponse.getMessage() + "\"}"
+                    );
+                }
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json;charset=UTF-8");

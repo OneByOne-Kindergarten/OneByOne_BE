@@ -39,10 +39,10 @@ public class CommunityService {
 
     /// 게시글 생성
     @Transactional
-    public CommunityPostResponseDTO createPost(CreateCommunityPostRequestDTO request, String email) {
+    public CommunityPostResponseDTO createPost(CreateCommunityPostRequestDTO request, Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 커뮤니티 카테고리 조회 또는 생성
         CommunityCategory communityCategory = communityCategoryRepository.findByCategoryName(request.getCommunityCategoryName())
@@ -65,12 +65,12 @@ public class CommunityService {
     }
 
     /// 게시글 목록 조회
-    public Page<CommunityPostResponseDTO> getPosts(CommunitySearchDTO searchDTO, Pageable pageable, String email) {
+    public Page<CommunityPostResponseDTO> getPosts(CommunitySearchDTO searchDTO, Pageable pageable, Long userId) {
 
         // 차단된 사용자 ID 목록 가져오기
         List<Long> blockedUserIds = Collections.emptyList();
-        if (email != null) {
-            User user = userService.getUserByEmail(email);
+        if (userId != null) {
+            User user = userService.getUserById(userId);
             blockedUserIds = userBlockRepository.findBlockedUserIdsByUserId(user.getId());
         }
 
@@ -109,17 +109,17 @@ public class CommunityService {
 
     /// 게시글 삭제 (소프트 삭제)
     @Transactional
-    public void deletePost(Long postId, String email) {
+    public void deletePost(Long postId, Long userId) {
 
         // 게시글 조회 (작성자 정보 포함)
         CommunityPost post = communityRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
         
         // 현재 사용자 조회
-        User currentUser = userService.getUserByEmail(email);
+        User currentUser = userService.getUserById(userId);
         
         // 작성자 또는 관리자 권한 확인
-        if (!post.getUser().getEmail().equals(email) && !currentUser.getRole().equals(UserRole.ADMIN)) {
+        if (!post.getUser().getId().equals(userId) && !currentUser.getRole().equals(UserRole.ADMIN)) {
             throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
         

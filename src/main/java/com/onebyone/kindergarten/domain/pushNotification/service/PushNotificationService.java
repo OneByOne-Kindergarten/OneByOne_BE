@@ -8,11 +8,11 @@ import com.onebyone.kindergarten.domain.pushNotification.entity.PushNotification
 import com.onebyone.kindergarten.domain.pushNotification.repository.PushNotificationRepository;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
+import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +41,7 @@ public class PushNotificationService {
     private final FirebaseMessaging firebaseMessaging;
     private final PushNotificationRepository pushNotificationRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     /// 알림 전송 여부 확인 ( 내부 메서드 )
     private boolean shouldSendNotification(User user, NotificationType type) {
@@ -349,11 +350,10 @@ public class PushNotificationService {
 
     /// 현재 로그인한 사용자의 알림 조회
     @Transactional(readOnly = true)
-    public List<PushNotificationResponseDTO> getUserNotificationByUserDetails(UserDetails userDetails) {
+    public List<PushNotificationResponseDTO> getUserNotificationByUserDetails(Long userId) {
 
         // 사용자 조회
-        User user = userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
+        User user = userService.getUserById(userId);
 
         // 모든 알림 조회
         return pushNotificationRepository.findByUserOrderByCreatedAtDesc(user)
@@ -365,11 +365,10 @@ public class PushNotificationService {
 
     /// 사용자의 읽지 않은 알림 조회
     @Transactional(readOnly = true)
-    public List<PushNotificationResponseDTO> getUnreadNotificationsByUserDetails(UserDetails userDetails) {
+    public List<PushNotificationResponseDTO> getUnreadNotificationsByUserDetails(Long userId) {
 
         // 사용자 조회
-        User user = userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
+        User user = userService.getUserById(userId);
 
         // 읽지 않은 알림 조회
         return pushNotificationRepository.findByUserAndIsReadFalseOrderByCreatedAtDesc(user)
@@ -393,11 +392,10 @@ public class PushNotificationService {
 
     /// 사용자의 모든 알림 읽음 표시
     @Transactional
-    public void markAllAsRead(UserDetails userDetails) {
+    public void markAllAsRead(Long userId) {
 
         // 사용자 조회
-        User user = userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
+        User user = userService.getUserById(userId);
 
         // 모든 알림 읽음 처리
         pushNotificationRepository.markAllAsRead(user, LocalDateTime.now());
@@ -405,11 +403,10 @@ public class PushNotificationService {
 
     /// 읽지 않은 알림 개수 조회
     @Transactional(readOnly = true)
-    public Long countUnreadNotifications(UserDetails userDetails) {
+    public Long countUnreadNotifications(Long userId) {
 
         // 사용자 조회
-        User user = userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
+        User user = userService.getUserById(userId);
 
         // 읽지 않은 알림 개수 조회
         return pushNotificationRepository.countByUserAndIsReadFalse(user);

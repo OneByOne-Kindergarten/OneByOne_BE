@@ -27,13 +27,13 @@ public class KindergartenWorkHistoryController {
     public ResponseDto<KindergartenWorkHistoryResponse> addCertification(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody KindergartenWorkHistoryRequest request) {
-       return ResponseDto.success(kindergartenWorkHistoryFacade.addCertification(userDetails.getUsername(), request));
+       return ResponseDto.success(kindergartenWorkHistoryFacade.addCertification(Long.valueOf(userDetails.getUsername()), request));
     }
 
     @GetMapping
     @Operation(summary = "유치원 근무 이력 조회", description = "유치원 근무 이력을 조회합니다.")
     public ResponseDto<List<KindergartenWorkHistoryResponse>> getCertification(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseDto.success(workHistoryService.getCertification(userDetails.getUsername()));
+        return ResponseDto.success(workHistoryService.getCertification(Long.valueOf(userDetails.getUsername())));
     }
 
     @DeleteMapping("/{certificationId}")
@@ -41,7 +41,7 @@ public class KindergartenWorkHistoryController {
     public ResponseDto<Void> deleteCertification(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long certificationId) {
-        kindergartenWorkHistoryFacade.deleteCertification(userDetails.getUsername(), certificationId);
+        kindergartenWorkHistoryFacade.deleteCertification(Long.valueOf(userDetails.getUsername()), certificationId);
         return ResponseDto.success(null);
     }
 } 

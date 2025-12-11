@@ -38,7 +38,7 @@ public class CommunityController {
             @Valid @RequestBody CreateCommunityPostRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(communityService.createPost(request, userDetails.getUsername()));
+        return ResponseDto.success(communityService.createPost(request, Long.valueOf(userDetails.getUsername())));
     }
 
     @DeleteMapping("/{id}")
@@ -47,7 +47,7 @@ public class CommunityController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        communityFacade.deletePost(id, userDetails.getUsername());
+        communityFacade.deletePost(id, Long.valueOf(userDetails.getUsername()));
         return ResponseDto.success("게시글이 삭제되었습니다.");
     }
 
@@ -58,8 +58,8 @@ public class CommunityController {
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        String email = userDetails != null ? userDetails.getUsername() : null;
-        return new PageResponseDTO<>(communityService.getPosts(searchDTO, pageable, email));
+        Long userId = userDetails != null ? Long.valueOf(userDetails.getUsername()) : null;
+        return new PageResponseDTO<>(communityService.getPosts(searchDTO, pageable, userId));
     }
 
     @GetMapping("/{id}")
@@ -82,7 +82,7 @@ public class CommunityController {
             @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(communityLikeService.toggleLike(postId, userDetails.getUsername()));
+        return ResponseDto.success(communityLikeService.toggleLike(postId, Long.valueOf(userDetails.getUsername())));
     }
 
     @GetMapping("/{postId}/like")
@@ -91,6 +91,6 @@ public class CommunityController {
             @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(communityLikeService.getLikeInfo(postId, userDetails.getUsername()));
+        return ResponseDto.success(communityLikeService.getLikeInfo(postId, Long.valueOf(userDetails.getUsername())));
     }
 }

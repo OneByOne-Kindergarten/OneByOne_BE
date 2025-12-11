@@ -37,6 +37,11 @@ public class SecurityConfig {
                 "/notice/**"
         ));
 
+        private final List<String> adminOriginList = new ArrayList<>(Arrays.asList(
+                "/admin/**",
+                "/address/batch/**"
+        ));
+
         @Bean
         public BCryptPasswordEncoder bCryptPasswordEncoder() {
                 return new BCryptPasswordEncoder();
@@ -55,7 +60,7 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(permitOriginList.toArray(new String[0]))
                                                 .permitAll()
-                                                .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 전용 API
+                                                .requestMatchers(adminOriginList.toArray(new String[0])).hasRole("ADMIN") // 관리자 전용 API
                                                 .anyRequest().authenticated() // 나머지 요청은 인증된 사용자만 접근 가능
                                 )
                                 .exceptionHandling(ex -> ex

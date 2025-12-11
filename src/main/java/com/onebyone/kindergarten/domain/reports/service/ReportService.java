@@ -40,10 +40,10 @@ public class ReportService {
 
     /// 신고 생성 (사용자)
     @Transactional
-    public ReportResponseDTO createReport(CreateReportRequestDTO dto, String email) {
+    public ReportResponseDTO createReport(CreateReportRequestDTO dto, Long userId) {
 
         // 사용자 조회
-        User reporter = userService.getUserByEmail(email);
+        User reporter = userService.getUserById(userId);
 
         // 신고 대상 존재 여부 확인을 위한 메서드 추가
         validateReportTarget(dto.getTargetType(), dto.getTargetId());
@@ -62,10 +62,10 @@ public class ReportService {
     }
 
     /// 내 신고 목록 조회 (사용자)
-    public Page<ReportResponseDTO> getMyReports(String email, Pageable pageable) {
+    public Page<ReportResponseDTO> getMyReports(Long userId, Pageable pageable) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 신고 목록 조회
         return reportRepository.findDtosByReporter(user, pageable);

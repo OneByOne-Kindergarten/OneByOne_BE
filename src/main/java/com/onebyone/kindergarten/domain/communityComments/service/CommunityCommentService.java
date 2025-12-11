@@ -39,10 +39,10 @@ public class CommunityCommentService {
 
     /// 댓글 작성 (원댓글 또는 대댓글)
     @Transactional
-    public CommentResponseDTO createComment(Long postId, CreateCommentRequestDTO dto, String email) {
+    public CommentResponseDTO createComment(Long postId, CreateCommentRequestDTO dto, Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
         
         // 게시글 조회 (작성자 정보를 포함)
         CommunityPost post = postRepository.findByIdWithUser(postId)
@@ -113,12 +113,12 @@ public class CommunityCommentService {
     }
     
     /// 게시글의 모든 댓글과 대댓글 목록 조회 (계층 구조로 정렬)
-    public Page<CommentResponseDTO> getAllCommentsWithReplies(Long postId, Pageable pageable, String email) {
+    public Page<CommentResponseDTO> getAllCommentsWithReplies(Long postId, Pageable pageable, Long userId) {
 
         // 차단된 사용자 ID 목록 조회
         List<Long> blockedUserIds = Collections.emptyList();
-        if (email != null) {
-            User user = userService.getUserByEmail(email);
+        if (userId != null) {
+            User user = userService.getUserById(userId);
             blockedUserIds = userBlockRepository.findBlockedUserIdsByUserId(user.getId());
             if (blockedUserIds == null) {
                 blockedUserIds = Collections.emptyList();
@@ -144,16 +144,16 @@ public class CommunityCommentService {
 
     /// 댓글 삭제 (소프트 삭제)
     @Transactional
-    public void deleteComment(Long commentId, String email) {
+    public void deleteComment(Long commentId, Long userId) {
         // 댓글 조회 (작성자 정보 포함)
         CommunityComment comment = commentRepository.findByIdWithUser(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_COMMENT));
         
         // 현재 사용자 조회
-        User currentUser = userService.getUserByEmail(email);
+        User currentUser = userService.getUserById(userId);
         
         // 작성자 또는 관리자 권한 확인
-        if (!comment.getUser().getEmail().equals(email) && !currentUser.getRole().equals(UserRole.ADMIN)) {
+        if (!comment.getUser().getId().equals(userId) && !currentUser.getRole().equals(UserRole.ADMIN)) {
             throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
         }
 

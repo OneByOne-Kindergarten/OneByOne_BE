@@ -28,7 +28,7 @@ public class KindergartenInternshipReviewController {
             @RequestBody CreateInternshipReviewRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenFacade.createInternshipReview(request, userDetails.getUsername());
+        kindergartenFacade.createInternshipReview(request, Long.valueOf(userDetails.getUsername()));
     }
 
     @Operation(summary = "실습리뷰-02 리뷰 수정", description = "리뷰 수정")
@@ -37,7 +37,7 @@ public class KindergartenInternshipReviewController {
             @RequestBody ModifyInternshipReviewRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenFacade.modifyInternshipReview(request, userDetails.getUsername());
+        kindergartenFacade.modifyInternshipReview(request, Long.valueOf(userDetails.getUsername()));
     }
 
     @Operation(summary = "실습리뷰-03 리뷰 좋아요", description = "리뷰 좋아요")
@@ -46,7 +46,7 @@ public class KindergartenInternshipReviewController {
             @PathVariable("internshipReviewId") long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenInternshipReviewService.likeInternshipReview(id, userDetails.getUsername());
+        kindergartenInternshipReviewService.likeInternshipReview(id, Long.valueOf(userDetails.getUsername()));
     }
 
     @Operation(summary = "실습리뷰-04 리뷰 페이징 조회", description = "리뷰 페이징 조회 (정렬: LATEST-최신순, POPULAR-인기순)")
@@ -68,7 +68,7 @@ public class KindergartenInternshipReviewController {
             @PathVariable("internshipReviewId") Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenFacade.deleteInternshipReview(id, userDetails.getUsername());
+        kindergartenFacade.deleteInternshipReview(id, Long.valueOf(userDetails.getUsername()));
         return ResponseDto.success("실습 리뷰가 삭제되었습니다.");
     }
 

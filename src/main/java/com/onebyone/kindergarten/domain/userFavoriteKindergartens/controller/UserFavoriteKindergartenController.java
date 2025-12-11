@@ -34,7 +34,7 @@ public class UserFavoriteKindergartenController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return ResponseDto.success(
-                favoriteService.toggleFavorite(userDetails.getUsername(), request.getKindergartenId())
+                favoriteService.toggleFavorite(Long.valueOf(userDetails.getUsername()), request.getKindergartenId())
         );
     }
 
@@ -44,7 +44,7 @@ public class UserFavoriteKindergartenController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return ResponseDto.success(
-                favoriteService.getMyFavorites(userDetails.getUsername())
+                favoriteService.getMyFavorites(Long.valueOf(userDetails.getUsername()))
         );
     }
 
@@ -55,7 +55,7 @@ public class UserFavoriteKindergartenController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return ResponseDto.success(
-                favoriteService.isFavorite(userDetails.getUsername(), kindergartenId)
+                favoriteService.isFavorite(Long.valueOf(userDetails.getUsername()), kindergartenId)
         );
     }
 }

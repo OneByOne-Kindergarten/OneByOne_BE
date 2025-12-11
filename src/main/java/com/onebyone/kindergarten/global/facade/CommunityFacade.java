@@ -11,8 +11,8 @@ public class CommunityFacade {
     private final CommunityService communityService;
 
     @Transactional
-    public void deletePost(Long id, String username) {
-        communityService.deletePost(id, username);
+    public void deletePost(Long id, Long userId) {
+        communityService.deletePost(id, userId);
         communityService.refreshTopPostsCache();
     }
 

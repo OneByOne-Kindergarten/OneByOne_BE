@@ -39,8 +39,8 @@ public class KindergartenWorkReviewService {
     private final KindergartenWorkReviewRepository kindergartenWorkReviewRepository;
 
     @Transactional
-    public Kindergarten createWorkReview(CreateWorkReviewRequestDTO request, String email) {
-        User user = userService.getUserByEmail(email);
+    public Kindergarten createWorkReview(CreateWorkReviewRequestDTO request, Long userId) {
+        User user = userService.getUserById(userId);
         Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
 
         boolean exists = workReviewRepository.existsByUserAndKindergarten(user, kindergarten);
@@ -74,8 +74,8 @@ public class KindergartenWorkReviewService {
     }
 
     @Transactional
-    public Kindergarten modifyWorkReview(ModifyWorkReviewRequestDTO request, String email) {
-        User user = userService.getUserByEmail(email);
+    public Kindergarten modifyWorkReview(ModifyWorkReviewRequestDTO request, Long userId) {
+        User user = userService.getUserById(userId);
         Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
 
         KindergartenWorkReview review = workReviewRepository.findById(request.getWorkReviewId())
@@ -94,8 +94,8 @@ public class KindergartenWorkReviewService {
     }
 
     @Transactional
-    public void likeWorkReview(long reviewId, String email) {
-        User user = userService.getUserByEmail(email);
+    public void likeWorkReview(long reviewId, Long userId) {
+        User user = userService.getUserById(userId);
 
         KindergartenWorkReview review = workReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_WORK_REVIEW));
@@ -191,12 +191,11 @@ public class KindergartenWorkReviewService {
     }
 
     /// 내가 작성한 근무 리뷰 조회
-    public WorkReviewPagedResponseDTO getMyReviews(String email, int page, int size) {
-        User user = userService.getUserByEmail(email);
+    public WorkReviewPagedResponseDTO getMyReviews(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<WorkReviewDTO> reviewPage = workReviewRepository.findMyReviews(
-                user.getId(),
+                userId,
                 ReviewStatus.ACCEPTED,
                 pageable
         );

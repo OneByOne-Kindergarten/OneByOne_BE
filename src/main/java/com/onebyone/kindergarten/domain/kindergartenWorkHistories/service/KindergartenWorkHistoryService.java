@@ -37,10 +37,10 @@ public class KindergartenWorkHistoryService {
     }
 
     /// 유치원 근무 이력 조회
-    public List<KindergartenWorkHistoryResponse> getCertification(String email) {
+    public List<KindergartenWorkHistoryResponse> getCertification(Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 유치원 근무 이력 조회
         return workHistoryRepository.findDtosByUser(user);

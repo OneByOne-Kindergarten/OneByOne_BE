@@ -28,7 +28,7 @@ public class KindergartenWorkReviewController {
             @RequestBody CreateWorkReviewRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenFacade.createWorkReview(request, userDetails.getUsername());
+        kindergartenFacade.createWorkReview(request, Long.valueOf(userDetails.getUsername()));
     }
 
     @Operation(summary = "근무리뷰-02 리뷰 수정", description = "리뷰 수정")
@@ -37,7 +37,7 @@ public class KindergartenWorkReviewController {
             @RequestBody ModifyWorkReviewRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenFacade.modifyWorkReview(request, userDetails.getUsername());
+        kindergartenFacade.modifyWorkReview(request, Long.valueOf(userDetails.getUsername()));
     }
 
     @Operation(summary = "근무리뷰-03 리뷰 좋아요", description = "리뷰 좋아요")
@@ -46,7 +46,7 @@ public class KindergartenWorkReviewController {
             @PathVariable("workReviewId") long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenWorkReviewService.likeWorkReview(id, userDetails.getUsername());
+        kindergartenWorkReviewService.likeWorkReview(id, Long.valueOf(userDetails.getUsername()));
     }
 
     @Operation(summary = "근무리뷰-04 리뷰 페이징 조회", description = "리뷰 페이징 조회 (정렬: LATEST-최신순, POPULAR-인기순)")
@@ -68,7 +68,7 @@ public class KindergartenWorkReviewController {
             @PathVariable("workReviewId") Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        kindergartenFacade.deleteWorkReview(id, userDetails.getUsername());
+        kindergartenFacade.deleteWorkReview(id, Long.valueOf(userDetails.getUsername()));
         return ResponseDto.success("근무 리뷰가 삭제되었습니다.");
     }
 

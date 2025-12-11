@@ -22,9 +22,9 @@ public class KindergartenWorkHistoryFacade {
     private final KindergartenWorkHistoryService kindergartenWorkHistoryService;
 
     @Transactional
-    public KindergartenWorkHistoryResponse addCertification(String email, KindergartenWorkHistoryRequest request) {
+    public KindergartenWorkHistoryResponse addCertification(Long userId, KindergartenWorkHistoryRequest request) {
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 유치원 이름으로 유치원 조회
         Kindergarten kindergarten = kindergartenService.getKindergartenByName(request.getKindergartenName());
@@ -34,8 +34,8 @@ public class KindergartenWorkHistoryFacade {
     }
 
     @Transactional
-    public void deleteCertification(String email, Long certificationId) {
-        User user = userService.getUserByEmail(email);
+    public void deleteCertification(Long userId, Long certificationId) {
+        User user = userService.getUserById(userId);
         KindergartenWorkHistory workHistory = kindergartenWorkHistoryService.getKindergartenWorkHistory(certificationId);
 
         // 유치원 근무 이력 소유자 확인

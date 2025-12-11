@@ -9,7 +9,6 @@ import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +20,8 @@ public class UserBlockService {
     private final UserService userService;
 
     @Transactional
-    public void blockUser(UserDetails userDetails, String targetUserEmail) {
-        String email = userDetails.getUsername();
-        User user = userService.getUserByEmail(email);
+    public void blockUser(Long userId, String targetUserEmail) {
+        User user = userService.getUserById(userId);
         
         User targetUser = userService.getUserByEmail(targetUserEmail);
         validateBlockRequest(user.getId(), targetUser.getId());
@@ -37,9 +35,9 @@ public class UserBlockService {
     }
 
     @Transactional
-    public void unblockUser(UserDetails userDetails, String targetUserEmail) {
-        String email = userDetails.getUsername();
-        User user = userService.getUserByEmail(email);
+    public void unblockUser(Long userId, String targetUserEmail) {
+        User user = userService.getUserById(userId);
+
         User targetUser = userService.getUserByEmail(targetUserEmail);
         userBlockRepository.deleteByUserIdAndBlockedUserId(user.getId(), targetUser.getId());
     }
@@ -53,9 +51,8 @@ public class UserBlockService {
         }
     }
 
-    public List<BlockedUserResponseDto> getBlockedUsers(UserDetails userDetails) {
-        String email = userDetails.getUsername();
-        User user = userService.getUserByEmail(email);
+    public List<BlockedUserResponseDto> getBlockedUsers(Long userId) {
+        User user = userService.getUserById(userId);
         return userBlockRepository.findBlockedUsersByUserId(user.getId());
     }
 }

@@ -1,5 +1,6 @@
 package com.onebyone.kindergarten.global.jwt;
 
+import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.service.CustomUserDetailService;
 import com.onebyone.kindergarten.global.exception.*;
 import io.jsonwebtoken.*;
@@ -9,14 +10,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Date;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -29,12 +31,14 @@ public class JwtProvider {
     private final Long accessTokenValidationMs = 30 * 60 * 1000L;
     private final Long refreshTokenValidationMs = 15 * 24 * 60 * 60 * 1000L;
 
-    public String generateAccessToken(String email) {
+    public String generateAccessToken(Long userId, UserRole role) {
 
         Claims claims = Jwts.claims()
-                .setSubject(email)
+                .setSubject(String.valueOf(userId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidationMs));
+
+        claims.put("role", String.valueOf(role));
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
@@ -44,12 +48,14 @@ public class JwtProvider {
     }
 
     // RefreshToken 생성
-    public String generateRefreshToken(String email) {
+    public String generateRefreshToken(Long userId, UserRole role) {
 
         Claims claims = Jwts.claims()
-                .setSubject(email)
+                .setSubject(String.valueOf(userId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidationMs));
+
+        claims.put("role", String.valueOf(role));
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
@@ -95,6 +101,9 @@ public class JwtProvider {
         } catch (IllegalArgumentException e) {
             result.put("isValid", false);
             result.put("errorCode", ErrorCodes.INVALID_TOKEN_ILLEGAL);
+        } catch (Exception e) {
+            result.put("isValid", false);
+            result.put("errorCode", ErrorCodes.INTERNAL_SERVER_ERROR);
         }
 
         return result;
@@ -114,25 +123,39 @@ public class JwtProvider {
     }
 
     // JWT Claims으로 User 객체를 생성하여 Authentication 객체를 반환
-    public Authentication getAuthentication(String token) {
+    public Map<String, Object> getAuthentication(String token) {
+        Map<String, Object> result = new HashMap<>();
 
         // JWT에서 Claims 가져오기
         Claims claims = getClaims(token);
-        String email = claims.getSubject();
+        String userId = claims.getSubject();
+        String role = claims.get("role", String.class);
 
-        if (email == null) {
-            throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
-        }
+        if (userId == null || role == null) {
+            result.put("isValid", false);
+            result.put("errorCode", ErrorCodes.INVALID_TOKEN_ILLEGAL);
+            return result;        }
 
-        UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        List<GrantedAuthority> grantedAuthorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+
+        UserDetails userDetails = User
+                .withUsername(userId)
+                .password("")
+                .authorities(grantedAuthorities)
+                .build();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
+        result.put("isValid", true);
+        result.put("authentication", authentication);
+        return result;
     }
 
-    public String getEmailFromRefreshToken(String refreshToken) {
+    public Claims getClaimFromRefreshToken(String refreshToken) {
         if (!validateToken(refreshToken)) {
             throw new BusinessException(ErrorCodes.INVALID_TOKEN_ILLEGAL);
         }
 
-        return getClaims(refreshToken).getSubject(); // email
+        return getClaims(refreshToken);
     }
 }

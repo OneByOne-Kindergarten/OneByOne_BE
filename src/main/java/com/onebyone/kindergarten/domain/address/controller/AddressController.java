@@ -26,7 +26,7 @@ public class AddressController {
     public void kindergartenRegionBatch(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        addressFacade.regionBatch(userDetails.getUsername());
+        addressFacade.regionBatch(Long.valueOf(userDetails.getUsername()));
     }
 
     @PostMapping("/batch/sub-region")
@@ -34,7 +34,7 @@ public class AddressController {
     public void kindergartenSubRegionBatch(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        addressFacade.subRegionBatch(userDetails.getUsername());
+        addressFacade.subRegionBatch(Long.valueOf(userDetails.getUsername()));
     }
 
     @GetMapping

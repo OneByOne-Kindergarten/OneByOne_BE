@@ -35,8 +35,8 @@ public class KindergartenInternshipReviewService {
     private final KindergartenInternshipReviewRepository kindergartenInternshipReviewRepository;
     private final KindergartenInternshipReviewLikeHistoryRepository kindergartenInternshipReviewLikeHistoryRepository;
 
-    public Kindergarten createInternshipReview(CreateInternshipReviewRequestDTO request, String email) {
-        User user = userService.getUserByEmail(email);
+    public Kindergarten createInternshipReview(CreateInternshipReviewRequestDTO request, Long userId) {
+        User user = userService.getUserById(userId);
 
         Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
 
@@ -66,8 +66,8 @@ public class KindergartenInternshipReviewService {
         return kindergarten;
     }
 
-    public Kindergarten modifyInternshipReview(ModifyInternshipReviewRequestDTO request, String email) {
-        User user = userService.getUserByEmail(email);
+    public Kindergarten modifyInternshipReview(ModifyInternshipReviewRequestDTO request, Long userId) {
+        User user = userService.getUserById(userId);
         Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
 
         KindergartenInternshipReview review = kindergartenInternshipReviewRepository
@@ -89,8 +89,8 @@ public class KindergartenInternshipReviewService {
     }
 
     @Transactional
-    public void likeInternshipReview(long reviewId, String email) {
-        User user = userService.getUserByEmail(email);
+    public void likeInternshipReview(long reviewId, Long userId) {
+        User user = userService.getUserById(userId);
 
         KindergartenInternshipReview review = kindergartenInternshipReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
@@ -163,8 +163,8 @@ public class KindergartenInternshipReviewService {
     }
 
     /// 내가 작성한 실습 리뷰 조회
-    public InternshipReviewPagedResponseDTO getMyReviews(String email, int page, int size) {
-        User user = userService.getUserByEmail(email);
+    public InternshipReviewPagedResponseDTO getMyReviews(Long userId, int page, int size) {
+        User user = userService.getUserById(userId);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<InternshipReviewDTO> reviewPage = kindergartenInternshipReviewRepository.findMyReviews(

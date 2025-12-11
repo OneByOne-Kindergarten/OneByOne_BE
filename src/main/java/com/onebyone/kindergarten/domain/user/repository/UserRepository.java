@@ -17,8 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
-    @Query("SELECT u FROM user u LEFT JOIN FETCH u.Kindergarten WHERE u.email = :email AND u.deletedAt IS NULL")
-    Optional<User> findUserWithKindergarten(@Param("email") String email);
+    @Query("SELECT u FROM user u LEFT JOIN FETCH u.Kindergarten WHERE u.id = :userId AND u.deletedAt IS NULL")
+    Optional<User> findIdWithKindergarten(@Param("userId") Long userId);
 
     Optional<User> findByEmailAndDeletedAtIsNotNull(String email);
 
@@ -73,4 +73,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /// 모든 활성 사용자 조회
     @Query("SELECT u FROM user u WHERE u.deletedAt IS NULL")
     List<User> findAllActiveUsers();
+
+    Optional<User> findByIdAndDeletedAtIsNull(Long userId);
 }

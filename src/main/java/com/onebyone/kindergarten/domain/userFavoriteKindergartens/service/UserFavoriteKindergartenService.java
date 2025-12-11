@@ -25,10 +25,10 @@ public class UserFavoriteKindergartenService {
 
     /// 유치원 즐겨찾기 토글
     @Transactional
-    public FavoriteToggleResponseDTO toggleFavorite(String email, Long kindergartenId) {
+    public FavoriteToggleResponseDTO toggleFavorite(Long userId, Long kindergartenId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
         
         // 즐겨찾기 존재 여부 확인 및 삭제 시도
         boolean existed = favoriteRepository.existsByUserAndKindergartenId(user, kindergartenId);
@@ -49,10 +49,10 @@ public class UserFavoriteKindergartenService {
     }
 
     /// 즐겨찾기 목록 조회
-    public List<KindergartenResponseDTO> getMyFavorites(String email) {
+    public List<KindergartenResponseDTO> getMyFavorites(Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 즐겨찾기 목록 조회
         List<UserFavoriteKindergarten> favorites = favoriteRepository.findByUser(user);
@@ -62,10 +62,10 @@ public class UserFavoriteKindergartenService {
     }
 
     /// 즐겨찾기 상태 확인
-    public boolean isFavorite(String email, Long kindergartenId) {
+    public boolean isFavorite(Long userId, Long kindergartenId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 유치원 존재 여부 확인
         return favoriteRepository.existsByUserAndKindergartenId(user, kindergartenId);

@@ -26,7 +26,7 @@ public class UserBlockController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody UserBlockRequestDto request
     ) {
-        userBlockService.blockUser(userDetails, request.getTargetUserEmail());
+        userBlockService.blockUser(Long.valueOf(userDetails.getUsername()), request.getTargetUserEmail());
         return ResponseDto.success(null);
     }
 
@@ -36,7 +36,7 @@ public class UserBlockController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String targetUserEmail
     ) {
-        userBlockService.unblockUser(userDetails, targetUserEmail);
+        userBlockService.unblockUser(Long.valueOf(userDetails.getUsername()), targetUserEmail);
         return ResponseDto.success(null);
     }
 
@@ -45,7 +45,7 @@ public class UserBlockController {
     public ResponseDto<List<BlockedUserResponseDto>> getBlockedUsers(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(userBlockService.getBlockedUsers(userDetails));
+        return ResponseDto.success(userBlockService.getBlockedUsers(Long.valueOf(userDetails.getUsername())));
     }
 
 }

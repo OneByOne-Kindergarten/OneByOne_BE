@@ -26,8 +26,8 @@ public class AddressFacade {
     private final Job subRegionJob;
     private final Job regionJob;
 
-    public void regionBatch(String username){
-        UserDTO user = userService.getUser(username);
+    public void regionBatch(Long userId){
+        UserDTO user = userService.getUserToDTO(userId);
 
         if (!UserRole.ADMIN.name().equals(user.getRole())) {
             throw new BusinessException(ErrorCodes.BATCH_NOT_ADMIN_CANNOT_USE);
@@ -45,8 +45,8 @@ public class AddressFacade {
         }
     }
 
-    public void subRegionBatch(String username){
-        UserDTO user = userService.getUser(username);
+    public void subRegionBatch(Long userId){
+        UserDTO user = userService.getUserToDTO(userId);
 
         if (!UserRole.ADMIN.name().equals(user.getRole())) {
             throw new BusinessException(ErrorCodes.BATCH_NOT_ADMIN_CANNOT_USE);

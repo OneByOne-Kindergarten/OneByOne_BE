@@ -25,10 +25,10 @@ public class CommunityLikeService {
     private final NotificationTemplateService notificationTemplateService;
 
     /// 게시글 좋아요 상태 조회 및 좋아요 수 조회
-    public CommunityLikeResponseDTO getLikeInfo(Long postId, String email) {
+    public CommunityLikeResponseDTO getLikeInfo(Long postId, Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
         
         // 한 번의 쿼리로 좋아요 상태와 개수를 함께 조회
         return communityLikeRepository.findLikeInfo(postId, user)
@@ -37,9 +37,9 @@ public class CommunityLikeService {
 
     /// 게시글 좋아요/좋아요 취소 토글
     @Transactional
-    public CommunityLikeResponseDTO toggleLike(Long postId, String email) {
+    public CommunityLikeResponseDTO toggleLike(Long postId, Long userId) {
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 게시글 존재 여부와 좋아요 여부를 한 번에 확인
         return communityLikeRepository.findByUserAndPostId(user, postId)

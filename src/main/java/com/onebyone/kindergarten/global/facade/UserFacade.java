@@ -2,8 +2,10 @@ package com.onebyone.kindergarten.global.facade;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
 import com.onebyone.kindergarten.domain.communityComments.service.CommunityCommentService;
+import com.onebyone.kindergarten.domain.user.dto.JwtUserInfoDto;
 import com.onebyone.kindergarten.domain.user.dto.request.EmailCertificationRequestDTO;
 import com.onebyone.kindergarten.domain.user.dto.request.UpdateTemporaryPasswordRequestDTO;
+import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.EmailCertificationType;
 import com.onebyone.kindergarten.global.feignClient.KakaoApiClient;
 import com.onebyone.kindergarten.global.feignClient.KakaoAuthClient;
@@ -55,10 +57,10 @@ public class UserFacade {
     private String naverClientSecret;
 
     public SignUpResponseDTO signUp(SignUpRequestDTO request) {
-        String email = userService.signUp(request);
+        JwtUserInfoDto dto = userService.signUp(request);
 
-        String accessToken = jwtProvider.generateAccessToken(email);
-        String refreshToken = jwtProvider.generateRefreshToken(email);
+        String accessToken = jwtProvider.generateAccessToken(dto.getUserId(), dto.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(dto.getUserId(), dto.getRole());
 
         return SignUpResponseDTO.builder()
                 .accessToken(accessToken)
@@ -67,10 +69,10 @@ public class UserFacade {
     }
 
     public SignInResponseDTO signIn(SignInRequestDTO request) {
-        String email = userService.signIn(request);
+        JwtUserInfoDto dto = userService.signIn(request);
 
-        String accessToken = jwtProvider.generateAccessToken(email);
-        String refreshToken = jwtProvider.generateRefreshToken(email);
+        String accessToken = jwtProvider.generateAccessToken(dto.getUserId(), dto.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(dto.getUserId(), dto.getRole());
 
         return SignInResponseDTO.builder()
                 .accessToken(accessToken)
@@ -78,6 +80,7 @@ public class UserFacade {
                 .build();
     }
 
+    @Transactional
     public SignInResponseDTO kakaoLogin(String code, String fcmToken) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
@@ -96,10 +99,15 @@ public class UserFacade {
         String kakaoAccessToken = tokenResponse.getAccess_token();
 
         KakaoUserResponse userResponse = kakaoApiClient.getUserInfo("Bearer " + kakaoAccessToken);
-        String email = userService.signUpByKakao(userResponse, fcmToken);
 
-        String accessToken = jwtProvider.generateAccessToken(email);
-        String refreshToken = jwtProvider.generateRefreshToken(email);
+        User user = userService.signUpByKakao(userResponse);
+
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            user.updateFcmToken(fcmToken);
+        }
+
+        String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId(), user.getRole());
 
         return SignInResponseDTO.builder()
                 .accessToken(accessToken)
@@ -107,6 +115,7 @@ public class UserFacade {
                 .build();
     }
 
+    @Transactional
     public SignInResponseDTO naverLogin(String code, String state, String fcmToken) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
@@ -125,10 +134,14 @@ public class UserFacade {
         NaverTokenResponse response = naverAuthClient.getAccessToken(params);
 
         NaverUserResponse userResponse = naverApiClient.getUserInfo("Bearer " + response.getAccess_token());
-        String email = userService.signUpByNaver(userResponse, fcmToken);
+        User user = userService.signUpByNaver(userResponse);
 
-        String accessToken = jwtProvider.generateAccessToken(email);
-        String refreshToken = jwtProvider.generateRefreshToken(email);
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            user.updateFcmToken(fcmToken);
+        }
+
+        String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId(), user.getRole());
 
         return SignInResponseDTO.builder()
                 .accessToken(accessToken)
@@ -147,10 +160,14 @@ public class UserFacade {
 
         // Apple ID Token 검증 및 사용자 정보 추출
         AppleUserResponse userResponse = appleAuthService.verifyIdToken(idToken);
-        String email = userService.signUpByApple(userResponse, fcmToken);
+        User user = userService.signUpByApple(userResponse);
 
-        String accessToken = jwtProvider.generateAccessToken(email);
-        String refreshToken = jwtProvider.generateRefreshToken(email);
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            user.updateFcmToken(fcmToken);
+        }
+
+        String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId(), user.getRole());
 
         return SignInResponseDTO.builder()
                 .accessToken(accessToken)
@@ -158,19 +175,20 @@ public class UserFacade {
                 .build();
     }
 
-    public PageCommunityCommentsResponseDTO getWroteMyCommunityComments(String username, int page, int size) {
-        UserDTO user = userService.getUser(username);
+    public PageCommunityCommentsResponseDTO getWroteMyCommunityComments(Long userId, int page, int size) {
+        UserDTO user = userService.getUserToDTO(userId);
         return communityCommentService.getWroteMyCommunityComments(user.getUserId(), page, size);
     }
 
     /// 내가 작성한 실습 리뷰 조회
-    public InternshipReviewPagedResponseDTO getMyInternshipReviews(String username, int page, int size) {
-        return kindergartenInternshipReviewService.getMyReviews(username, page, size);
+    public InternshipReviewPagedResponseDTO getMyInternshipReviews(Long userId, int page, int size) {
+        return kindergartenInternshipReviewService.getMyReviews(userId, page, size);
     }
 
     /// 내가 작성한 근무 리뷰 조회
-    public WorkReviewPagedResponseDTO getMyWorkReviews(String username, int page, int size) {
-        return kindergartenWorkReviewService.getMyReviews(username, page, size);
+    public WorkReviewPagedResponseDTO getMyWorkReviews(Long userId, int page, int size) {
+        AdminUserResponseDTO user = userService.getUserToAdminDTO(userId);
+        return kindergartenWorkReviewService.getMyReviews(user.getId(), page, size);
     }
 
     @Transactional

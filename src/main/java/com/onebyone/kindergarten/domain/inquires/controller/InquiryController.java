@@ -31,7 +31,7 @@ public class InquiryController {
             @Valid @RequestBody CreateInquiryRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(inquiryService.createInquiry(dto, userDetails.getUsername()));
+        return ResponseDto.success(inquiryService.createInquiry(dto, Long.valueOf(userDetails.getUsername())));
     }
 
     @GetMapping("/{id}")
@@ -40,7 +40,7 @@ public class InquiryController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(inquiryService.getInquiry(id, userDetails.getUsername()));
+        return ResponseDto.success(inquiryService.getInquiry(id, Long.valueOf(userDetails.getUsername())));
     }
 
     @GetMapping("/my")
@@ -49,7 +49,7 @@ public class InquiryController {
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return new PageResponseDTO<>(inquiryService.getUserInquiries(userDetails.getUsername(), pageable));
+        return new PageResponseDTO<>(inquiryService.getUserInquiries(Long.valueOf(userDetails.getUsername()), pageable));
     }
 
     @GetMapping("/all")
@@ -58,7 +58,7 @@ public class InquiryController {
             @PageableDefault Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return new PageResponseDTO<>(inquiryService.getAllInquiries(userDetails.getUsername(), pageable));
+        return new PageResponseDTO<>(inquiryService.getAllInquiries(Long.valueOf(userDetails.getUsername()), pageable));
     }
 
     @GetMapping("/status/{status}")
@@ -68,7 +68,7 @@ public class InquiryController {
             @PageableDefault Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return new PageResponseDTO<>(inquiryService.getInquiriesByStatus(status, userDetails.getUsername(), pageable));
+        return new PageResponseDTO<>(inquiryService.getInquiriesByStatus(status, Long.valueOf(userDetails.getUsername()), pageable));
     }
 
     @PostMapping("/{id}/answer")
@@ -78,7 +78,7 @@ public class InquiryController {
             @Valid @RequestBody AnswerInquiryRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(inquiryService.answerInquiry(id, dto, userDetails.getUsername()));
+        return ResponseDto.success(inquiryService.answerInquiry(id, dto, Long.valueOf(userDetails.getUsername())));
     }
 
     @PostMapping("/{id}/close")
@@ -87,6 +87,6 @@ public class InquiryController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseDto.success(inquiryService.closeInquiry(id, userDetails.getUsername()));
+        return ResponseDto.success(inquiryService.closeInquiry(id, Long.valueOf(userDetails.getUsername())));
     }
 }

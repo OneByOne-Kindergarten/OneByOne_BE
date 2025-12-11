@@ -1,6 +1,7 @@
 package com.onebyone.kindergarten.domain.user.controller;
 
 import com.onebyone.kindergarten.domain.communityComments.dto.response.PageCommunityCommentsResponseDTO;
+import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.global.facade.UserFacade;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewPagedResponseDTO;
 import com.onebyone.kindergarten.domain.kindergartenWorkReview.dto.WorkReviewPagedResponseDTO;
@@ -17,6 +18,7 @@ import com.onebyone.kindergarten.global.common.ResponseDto;
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import com.onebyone.kindergarten.global.jwt.JwtProvider;
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +35,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-@Tag(name = "User API", description = "유저 API")
+@Tag(name = "유저 API", description = "유저 API")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class UserApiController {
     @Operation(summary = "유저-01 회원가입", description = "계정 생성합니다.")
     @PostMapping("/sign-up")
     public SignUpResponseDTO signUp(
-            @RequestBody @Valid final SignUpRequestDTO request) {
+            @RequestBody SignUpRequestDTO request) {
         return userFacade.signUp(request);
     }
 
@@ -61,7 +63,7 @@ public class UserApiController {
     public void changePassword(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody ModifyUserPasswordRequestDTO request) {
-        userService.changePassword(userDetails.getUsername(), request);
+        userService.changePassword(Long.valueOf(userDetails.getUsername()), request);
     }
 
     @Operation(summary = "유저-04 닉네임 변경", description = "닉네임 변경입니다.")
@@ -69,21 +71,21 @@ public class UserApiController {
     public void changeNickname(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody ModifyUserNicknameRequestDTO request) {
-        userService.changeNickname(userDetails.getUsername(), request);
+        userService.changeNickname(Long.valueOf(userDetails.getUsername()), request);
     }
 
     @Operation(summary = "유저-05 회원탈퇴", description = "회원 탈퇴입니다.")
     @PostMapping("/withdraw")
     public void withdraw(
             @AuthenticationPrincipal UserDetails userDetails) {
-        userService.withdraw(userDetails.getUsername());
+        userService.withdraw(Long.valueOf(userDetails.getUsername()));
     }
 
     @Operation(summary = "유저-06 유저정보", description = "유저 조회입니다.")
     @GetMapping
     public GetUserResponseDTO getUser(
             @AuthenticationPrincipal UserDetails userDetails) {
-        return new GetUserResponseDTO(userService.getUser(userDetails.getUsername()));
+        return new GetUserResponseDTO(userService.getUserToDTO(Long.valueOf(userDetails.getUsername())));
     }
 
     @Operation(summary = "유저-07 토큰 재발급", description = "토큰 재발급입니다.")
@@ -98,10 +100,10 @@ public class UserApiController {
 
         String refreshToken = authHeader.substring(7);
 
-        String email = jwtProvider.getEmailFromRefreshToken(refreshToken);
+        Claims claim = jwtProvider.getClaimFromRefreshToken(refreshToken);
 
-        String newAccessToken = jwtProvider.generateAccessToken(email);
-        String newRefreshToken = jwtProvider.generateRefreshToken(email);
+        String newAccessToken = jwtProvider.generateAccessToken(Long.valueOf(claim.getSubject()), (UserRole) claim.get("role"));
+        String newRefreshToken = jwtProvider.generateAccessToken(Long.valueOf(claim.getSubject()), (UserRole) claim.get("role"));
 
         return ReIssueResponseDTO.builder()
                 .accessToken(newAccessToken)
@@ -165,7 +167,7 @@ public class UserApiController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return userFacade.getWroteMyCommunityComments(userDetails.getUsername(), page, size);
+        return userFacade.getWroteMyCommunityComments(Long.valueOf(userDetails.getUsername()), page, size);
     }
 
     @Operation(summary = "유저-11 홈 바로가기 정보 업데이트", description = "사용자의 홈 바로가기 정보를 업데이트합니다.")
@@ -173,7 +175,7 @@ public class UserApiController {
     public UpdateHomeShortcutsResponseDTO updateHomeShortcut(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody HomeShortcutsDto request) {
-        userService.updateHomeShortcut(userDetails.getUsername(), request);
+        userService.updateHomeShortcut(Long.valueOf(userDetails.getUsername()), request);
         return UpdateHomeShortcutsResponseDTO.success();
     }
 
@@ -204,7 +206,7 @@ public class UserApiController {
     public ResponseEntity<String> updateUserRole(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody UpdateUserRoleRequestDTO request) {
-        userService.updateUserRole(userDetails.getUsername(), request);
+        userService.updateUserRole(Long.valueOf(userDetails.getUsername()), request);
         return ResponseEntity.ok("권한이 변경되었습니다.");
     }
 
@@ -228,7 +230,7 @@ public class UserApiController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return userFacade.getMyInternshipReviews(userDetails.getUsername(), page, size);
+        return userFacade.getMyInternshipReviews(Long.valueOf(userDetails.getUsername()), page, size);
     }
 
     @Operation(summary = "유저-017 내가 작성한 근무 리뷰 조회", description = "내가 작성한 근무 리뷰를 조회합니다.")
@@ -237,13 +239,15 @@ public class UserApiController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return userFacade.getMyWorkReviews(userDetails.getUsername(), page, size);
+        return userFacade.getMyWorkReviews(Long.valueOf(userDetails.getUsername()), page, size);
     }
 
     @Operation(summary = "유저-018 알림 설정 조회", description = "사용자의 알림 설정을 조회합니다.")
     @GetMapping("/notification-settings")
-    public ResponseDto<NotificationSettingsDTO> getNotificationSettings(@AuthenticationPrincipal UserDetails userDetails) {
-        NotificationSettingsDTO settings = userService.getNotificationSettings(userDetails.getUsername());
+    public ResponseDto<NotificationSettingsDTO> getNotificationSettings(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        NotificationSettingsDTO settings = userService.getNotificationSettings(Long.valueOf(userDetails.getUsername()));
         return ResponseDto.success(settings);
     }
 
@@ -252,7 +256,7 @@ public class UserApiController {
     public ResponseDto<NotificationSettingsDTO> updateNotificationSettings(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody NotificationSettingsDTO request) {
-        NotificationSettingsDTO updatedSettings = userService.updateNotificationSettings(userDetails.getUsername(), request);
+        NotificationSettingsDTO updatedSettings = userService.updateNotificationSettings(Long.valueOf(userDetails.getUsername()), request);
         return ResponseDto.success(updatedSettings);
     }
 

@@ -29,10 +29,10 @@ public class InquiryService {
 
     /// 문의 생성
     @Transactional
-    public InquiryResponseDTO createInquiry(CreateInquiryRequestDTO dto, String email) {
+    public InquiryResponseDTO createInquiry(CreateInquiryRequestDTO dto, Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 문의 생성
         Inquiry inquiry = Inquiry.builder()
@@ -46,10 +46,10 @@ public class InquiryService {
     }
 
     /// 문의 조회 (단일)
-    public InquiryResponseDTO getInquiry(Long id, String email) {
+    public InquiryResponseDTO getInquiry(Long id, Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 문의 조회
         Inquiry inquiry = inquiryRepository.findByIdWithUser(id)
@@ -64,20 +64,20 @@ public class InquiryService {
     }
 
     /// 내 문의 목록 조회
-    public Page<InquiryResponseDTO> getUserInquiries(String email, Pageable pageable) {
+    public Page<InquiryResponseDTO> getUserInquiries(Long userId, Pageable pageable) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 문의 목록 조회
         return inquiryRepository.findDtosByUser(user, pageable);
     }
     
     /// 모든 문의 목록 조회 (관리자 전용)
-    public Page<InquiryResponseDTO> getAllInquiries(String email, Pageable pageable) {
+    public Page<InquiryResponseDTO> getAllInquiries(Long userId, Pageable pageable) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 관리자 권한 체크
         if (!user.getRole().equals(UserRole.ADMIN)) {
@@ -88,10 +88,10 @@ public class InquiryService {
     }
     
     /// 상태별 문의 목록 조회 (관리자 전용)
-    public Page<InquiryResponseDTO> getInquiriesByStatus(InquiryStatus status, String email, Pageable pageable) {
+    public Page<InquiryResponseDTO> getInquiriesByStatus(InquiryStatus status, Long userId, Pageable pageable) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
 
         // 관리자 권한 체크
         if (!user.getRole().equals(UserRole.ADMIN)) {
@@ -103,10 +103,10 @@ public class InquiryService {
     
     /// 문의 답변 (관리자 전용)
     @Transactional
-    public InquiryResponseDTO answerInquiry(Long id, AnswerInquiryRequestDTO dto, String email) {
+    public InquiryResponseDTO answerInquiry(Long id, AnswerInquiryRequestDTO dto, Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
         
         // 관리자 권한 체크
         if (!user.getRole().equals(UserRole.ADMIN)) {
@@ -132,10 +132,10 @@ public class InquiryService {
     
     /// 문의 마감 (관리자 전용)
     @Transactional
-    public InquiryResponseDTO closeInquiry(Long id, String email) {
+    public InquiryResponseDTO closeInquiry(Long id, Long userId) {
 
         // 사용자 조회
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserById(userId);
         
         // 관리자 권한 체크
         if (!user.getRole().equals(UserRole.ADMIN)) {
