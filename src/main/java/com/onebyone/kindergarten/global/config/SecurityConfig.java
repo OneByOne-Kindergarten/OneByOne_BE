@@ -15,12 +15,27 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
         private final JwtEntryPoint jwtEntryPoint;
         private final JwtFilter jwtFilter;
+
+        private final List<String> permitOriginList = new ArrayList<>(Arrays.asList(
+                "/users/sign-up", "/users/sign-in", "/users/reissue",
+                "/users/email-certification", "/users/temporary-password", "/users/check-email-certification",
+                "/users/kakao/callback", "/users/naver/callback", "/users/apple/callback",
+                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**",
+                "/kindergarten/*/simple",
+                "/address",
+                "/community/**",
+                "/notice/**"
+        ));
 
         @Bean
         public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -38,20 +53,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                                .requestMatchers("/", "/h2-console/**", "/users/sign-up",
-                                                                "/users/sign-in", "/swagger-ui/**", "/users/reissue",
-                                                                "/users/kakao/callback", "/users/naver/callback",
-                                                                "/users/apple/callback",
-                                                                "/kindergarten/*/simple", "/users/email-certification",
-                                                                "/users/temporary-password",
-                                                                "/users/check-email-certification",
-                                                                "/v3/api-docs/**",
-                                                                "/address",
-                                                                "/community/**",
-                                                                "/swagger-resources/**",
-                                                                "/sample/v2/sample",
-                                                                "/webjars/**",
-                                                                "/notice/**")
+                                                .requestMatchers(permitOriginList.toArray(new String[0]))
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 전용 API
                                                 .anyRequest().authenticated() // 나머지 요청은 인증된 사용자만 접근 가능
