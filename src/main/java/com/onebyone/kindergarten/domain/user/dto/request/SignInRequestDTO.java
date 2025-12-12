@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class SignInRequestDTO {
-    private String email;
-    private String password;
-    private String fcmToken;
+  private String email;
+  private String password;
+  private String fcmToken;
 }

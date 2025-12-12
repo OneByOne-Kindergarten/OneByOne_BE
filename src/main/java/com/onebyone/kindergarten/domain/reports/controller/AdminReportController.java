@@ -20,32 +20,27 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdminReportController {
 
-    private final ReportService reportService;
+  private final ReportService reportService;
 
-    @PatchMapping("/{reportId}/status")
-    @Operation(summary = "신고 처리", description = "신고를 처리합니다.")
-    public ResponseDto<ReportResponseDTO> processReport(
-            @PathVariable Long reportId,
-            @RequestParam ReportStatus status
-    ) {
-        return ResponseDto.success(reportService.processReport(reportId, status));
-    }
+  @PatchMapping("/{reportId}/status")
+  @Operation(summary = "신고 처리", description = "신고를 처리합니다.")
+  public ResponseDto<ReportResponseDTO> processReport(
+      @PathVariable Long reportId, @RequestParam ReportStatus status) {
+    return ResponseDto.success(reportService.processReport(reportId, status));
+  }
 
-    @GetMapping
-    @Operation(summary = "전체 신고 목록 조회", description = "모든 신고 내역을 조회합니다.")
-    public PageResponseDTO<ReportResponseDTO> getAllReports(
-            ReportSearchDTO searchDTO,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        return new PageResponseDTO<>(reportService.getAllReports(searchDTO, pageable));
-    }
+  @GetMapping
+  @Operation(summary = "전체 신고 목록 조회", description = "모든 신고 내역을 조회합니다.")
+  public PageResponseDTO<ReportResponseDTO> getAllReports(
+      ReportSearchDTO searchDTO,
+      @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+          Pageable pageable) {
+    return new PageResponseDTO<>(reportService.getAllReports(searchDTO, pageable));
+  }
 
-    @GetMapping("/{reportId}")
-    @Operation(summary = "신고 상세 조회", description = "신고 상세 내역을 조회합니다.")
-    public ResponseDto<ReportResponseDTO> getReportDetail(
-            @PathVariable Long reportId
-    ) {
-        return ResponseDto.success(reportService.getReportDetail(reportId));
-    }
-
-} 
+  @GetMapping("/{reportId}")
+  @Operation(summary = "신고 상세 조회", description = "신고 상세 내역을 조회합니다.")
+  public ResponseDto<ReportResponseDTO> getReportDetail(@PathVariable Long reportId) {
+    return ResponseDto.success(reportService.getReportDetail(reportId));
+  }
+}

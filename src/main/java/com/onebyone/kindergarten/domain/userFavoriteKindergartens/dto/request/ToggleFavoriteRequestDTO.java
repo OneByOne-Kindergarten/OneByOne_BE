@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class ToggleFavoriteRequestDTO {
-    private Long kindergartenId;
+  private Long kindergartenId;
 }

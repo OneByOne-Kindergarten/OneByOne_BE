@@ -9,32 +9,38 @@ import lombok.Getter;
 
 @Getter
 public class SignUpRequestDTO {
-    private String email;
-    private String password;
-    private UserProvider provider;
-    private String nickname;
-    private UserRole role;
-    private String profileImageUrl;
+  private String email;
+  private String password;
+  private UserProvider provider;
+  private String nickname;
+  private UserRole role;
+  private String profileImageUrl;
 
-    @Builder
-    public SignUpRequestDTO(String email, String password, UserProvider provider, String nickname, UserRole role, String profileImageUrl) {
-        this.email = email;
-        this.password = password;
-        this.provider = provider;
-        this.nickname = nickname;
-        this.role = role;
-        this.profileImageUrl = profileImageUrl;
-    }
+  @Builder
+  public SignUpRequestDTO(
+      String email,
+      String password,
+      UserProvider provider,
+      String nickname,
+      UserRole role,
+      String profileImageUrl) {
+    this.email = email;
+    this.password = password;
+    this.provider = provider;
+    this.nickname = nickname;
+    this.role = role;
+    this.profileImageUrl = profileImageUrl;
+  }
 
-    public User toEntity(String encodedPassword) {
-        return User.builder()
-                .email(email)
-                .password(encodedPassword)
-                .provider(provider)
-                .nickname(nickname)
-                .role(role)
-                .status(UserStatus.ACTIVE)
-                .profileImageUrl(profileImageUrl)
-                .build();
-    }
+  public User toEntity(String encodedPassword) {
+    return User.builder()
+        .email(email)
+        .password(encodedPassword)
+        .provider(provider)
+        .nickname(nickname)
+        .role(role)
+        .status(UserStatus.ACTIVE)
+        .profileImageUrl(profileImageUrl)
+        .build();
+  }
 }

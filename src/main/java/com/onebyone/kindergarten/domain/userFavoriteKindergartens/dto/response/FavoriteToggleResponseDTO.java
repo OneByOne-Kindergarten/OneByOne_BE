@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class FavoriteToggleResponseDTO {
-    private final boolean isFavorite;
+  private final boolean isFavorite;
 
-    public FavoriteToggleResponseDTO(boolean isFavorite) {
-        this.isFavorite = isFavorite;
-    }
-} 
+  public FavoriteToggleResponseDTO(boolean isFavorite) {
+    this.isFavorite = isFavorite;
+  }
+}

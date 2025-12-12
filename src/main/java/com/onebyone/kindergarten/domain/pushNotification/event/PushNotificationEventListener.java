@@ -14,28 +14,29 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PushNotificationEventListener {
-    private final PushNotificationService pushNotificationService;
+  private final PushNotificationService pushNotificationService;
 
-    /// 푸시 알림 이벤트 처리 메소드
-    /// 이벤트를 수신하면 알림 정보를 DB에 저장하고, 이후 스케줄러가 주기적으로 미전송 알림을 발송
-    @Async
-    @EventListener
-    public void handlePushNotificationEvent(PushNotificationEvent event) {
-        try {
-            log.debug("푸시 알림 이벤트 수신: userId={}, title={}", event.getUserId(), event.getTitle());
-            PushNotificationRequestDTO requestDTO = PushNotificationRequestDTO.builder()
-                    .userId(event.getUserId())
-                    .title(event.getTitle())
-                    .message(event.getMessage())
-                    .type(event.getType())
-                    .targetId(event.getTargetId())
-                    .groupKey(event.getGroupKey())
-                    .groupCount(event.getGroupCount())
-                    .build();
-            pushNotificationService.savePushNotification(requestDTO);
-            log.info("푸시 알림 이벤트 처리 완료: userId={}, title={}", event.getUserId(), event.getTitle());
-        } catch (Exception e) {
-            log.error("푸시 알림 이벤트 처리 중 오류 발생: {}", e.getMessage(), e);
-        }
+  /// 푸시 알림 이벤트 처리 메소드
+  /// 이벤트를 수신하면 알림 정보를 DB에 저장하고, 이후 스케줄러가 주기적으로 미전송 알림을 발송
+  @Async
+  @EventListener
+  public void handlePushNotificationEvent(PushNotificationEvent event) {
+    try {
+      log.debug("푸시 알림 이벤트 수신: userId={}, title={}", event.getUserId(), event.getTitle());
+      PushNotificationRequestDTO requestDTO =
+          PushNotificationRequestDTO.builder()
+              .userId(event.getUserId())
+              .title(event.getTitle())
+              .message(event.getMessage())
+              .type(event.getType())
+              .targetId(event.getTargetId())
+              .groupKey(event.getGroupKey())
+              .groupCount(event.getGroupCount())
+              .build();
+      pushNotificationService.savePushNotification(requestDTO);
+      log.info("푸시 알림 이벤트 처리 완료: userId={}, title={}", event.getUserId(), event.getTitle());
+    } catch (Exception e) {
+      log.error("푸시 알림 이벤트 처리 중 오류 발생: {}", e.getMessage(), e);
     }
-} 
+  }
+}

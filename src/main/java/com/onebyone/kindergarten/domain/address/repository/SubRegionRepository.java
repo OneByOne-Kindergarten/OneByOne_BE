@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SubRegionRepository extends JpaRepository<SubRegion,Long> {
-    SubRegion findBySubRegionId(Long subRegionId);
+public interface SubRegionRepository extends JpaRepository<SubRegion, Long> {
+  SubRegion findBySubRegionId(Long subRegionId);
 }

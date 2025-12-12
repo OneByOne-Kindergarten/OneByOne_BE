@@ -13,20 +13,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailService implements UserDetailsService{
-    private final UserRepository userRepository;
+public class CustomUserDetailService implements UserDetailsService {
+  private final UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    User user =
+        userRepository
+            .findByEmailAndDeletedAtIsNull(email)
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(email)
-                .password(user.getPassword())
-                .roles(
-                        user.getRole() == UserRole.ADMIN ? "ADMIN" : "USER"
-                )
-                .build();
-    }
+    return org.springframework.security.core.userdetails.User.builder()
+        .username(email)
+        .password(user.getPassword())
+        .roles(user.getRole() == UserRole.ADMIN ? "ADMIN" : "USER")
+        .build();
+  }
 }

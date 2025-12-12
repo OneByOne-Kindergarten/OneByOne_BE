@@ -8,6 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReportSearchDTO {
-    private ReportStatus status;
-    private ReportTargetType targetType;
-} 
+  private ReportStatus status;
+  private ReportTargetType targetType;
+}

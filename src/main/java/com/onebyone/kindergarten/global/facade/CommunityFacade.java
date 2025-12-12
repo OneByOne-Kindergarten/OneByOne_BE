@@ -8,12 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CommunityFacade {
-    private final CommunityService communityService;
+  private final CommunityService communityService;
 
-    @Transactional
-    public void deletePost(Long id, String username) {
-        communityService.deletePost(id, username);
-        communityService.refreshTopPostsCache();
-    }
-
+  @Transactional
+  public void deletePost(Long id, Long userId) {
+    communityService.deletePost(id, userId);
+    communityService.refreshTopPostsCache();
+  }
 }

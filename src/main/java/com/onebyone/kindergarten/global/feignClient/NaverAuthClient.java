@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "naverApiClinet", url = "${oauth.naver.url.auth}")
 public interface NaverAuthClient {
-    @PostMapping(value = "/oauth2.0/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    NaverTokenResponse getAccessToken(@RequestParam MultiValueMap<String, String> request);
+  @PostMapping(value = "/oauth2.0/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  NaverTokenResponse getAccessToken(@RequestParam MultiValueMap<String, String> request);
 }

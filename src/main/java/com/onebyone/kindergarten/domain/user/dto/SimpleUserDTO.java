@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class SimpleUserDTO {
-    private Long userId;
-    private String nickname;
+  private Long userId;
+  private String nickname;
 
-    public SimpleUserDTO(Long userId, String nickname) {
-        this.userId = userId;
-        this.nickname = nickname;
-    }
+  public SimpleUserDTO(Long userId, String nickname) {
+    this.userId = userId;
+    this.nickname = nickname;
+  }
 }
