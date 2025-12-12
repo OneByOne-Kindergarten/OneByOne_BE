@@ -41,11 +41,11 @@ public class UserService {
       throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
     }
 
-    //        EmailCertification emailCertification =
-    // emailCertificationRepository.findByEmail(request.getEmail());
-    //        if (emailCertification == null || !emailCertification.isCertificated()) {
-    //            throw new BusinessException(ErrorCodes.FAILED_EMAIL_CERTIFICATION_EXCEPTION);
-    //        }
+    EmailCertification emailCertification =
+        emailCertificationRepository.findByEmail(request.getEmail());
+    if (emailCertification == null || !emailCertification.isCertificated()) {
+      throw new BusinessException(ErrorCodes.FAILED_EMAIL_CERTIFICATION_EXCEPTION);
+    }
 
     String encodedPassword = encodePassword(request.getPassword());
     User user = userRepository.save(request.toEntity(encodedPassword));
