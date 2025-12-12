@@ -44,9 +44,9 @@ public class CommunityLikeService {
 
     // 게시글 조회
     CommunityPost post =
-            communityRepository
-                    .findById(postId)
-                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
+        communityRepository
+            .findById(postId)
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
 
     // 게시글 존재 여부와 좋아요 여부를 한 번에 확인
     return communityLikeRepository
