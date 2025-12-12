@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class JwtUserInfoDto {
-    private Long userId;
-    private UserRole role;
+  private Long userId;
+  private UserRole role;
 }

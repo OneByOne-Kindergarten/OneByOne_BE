@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class ModifyUserNicknameRequestDTO {
-    private String newNickname;
+  private String newNickname;
 }

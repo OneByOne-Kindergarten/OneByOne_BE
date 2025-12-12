@@ -7,12 +7,9 @@ import lombok.Getter;
 
 @Getter
 public class CreateReportRequestDTO {
-    @NotNull
-    private Long targetId;
-    
-    @NotNull
-    private ReportTargetType targetType;
-    
-    @NotBlank
-    private String reason;
-} 
+  @NotNull private Long targetId;
+
+  @NotNull private ReportTargetType targetType;
+
+  @NotBlank private String reason;
+}

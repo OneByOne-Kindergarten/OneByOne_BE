@@ -19,48 +19,50 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class AddressFacade {
-    Logger logger = LoggerFactory.getLogger(AddressFacade.class);
+  Logger logger = LoggerFactory.getLogger(AddressFacade.class);
 
-    private final UserService userService;
-    private final JobLauncher jobLauncher;
-    private final Job subRegionJob;
-    private final Job regionJob;
+  private final UserService userService;
+  private final JobLauncher jobLauncher;
+  private final Job subRegionJob;
+  private final Job regionJob;
 
-    public void regionBatch(Long userId){
-        UserDTO user = userService.getUserToDTO(userId);
+  public void regionBatch(Long userId) {
+    UserDTO user = userService.getUserToDTO(userId);
 
-        if (!UserRole.ADMIN.name().equals(user.getRole())) {
-            throw new BusinessException(ErrorCodes.BATCH_NOT_ADMIN_CANNOT_USE);
-        }
-
-        try{
-            JobParameters params = new JobParametersBuilder()
-                    .addLong("time", System.currentTimeMillis()) // 중복 실행 방지
-                    .toJobParameters();
-
-            jobLauncher.run(regionJob, params);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw new BusinessException(ErrorCodes.INTERNAL_SERVER_ERROR);
-        }
+    if (!UserRole.ADMIN.name().equals(user.getRole())) {
+      throw new BusinessException(ErrorCodes.BATCH_NOT_ADMIN_CANNOT_USE);
     }
 
-    public void subRegionBatch(Long userId){
-        UserDTO user = userService.getUserToDTO(userId);
+    try {
+      JobParameters params =
+          new JobParametersBuilder()
+              .addLong("time", System.currentTimeMillis()) // 중복 실행 방지
+              .toJobParameters();
 
-        if (!UserRole.ADMIN.name().equals(user.getRole())) {
-            throw new BusinessException(ErrorCodes.BATCH_NOT_ADMIN_CANNOT_USE);
-        }
-
-        try{
-            JobParameters params = new JobParametersBuilder()
-                    .addLong("time", System.currentTimeMillis()) // 중복 실행 방지
-                    .toJobParameters();
-
-            jobLauncher.run(subRegionJob, params);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw new BusinessException(ErrorCodes.INTERNAL_SERVER_ERROR);
-        }
+      jobLauncher.run(regionJob, params);
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+      throw new BusinessException(ErrorCodes.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  public void subRegionBatch(Long userId) {
+    UserDTO user = userService.getUserToDTO(userId);
+
+    if (!UserRole.ADMIN.name().equals(user.getRole())) {
+      throw new BusinessException(ErrorCodes.BATCH_NOT_ADMIN_CANNOT_USE);
+    }
+
+    try {
+      JobParameters params =
+          new JobParametersBuilder()
+              .addLong("time", System.currentTimeMillis()) // 중복 실행 방지
+              .toJobParameters();
+
+      jobLauncher.run(subRegionJob, params);
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+      throw new BusinessException(ErrorCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

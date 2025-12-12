@@ -1,8 +1,8 @@
 package com.onebyone.kindergarten.domain.kindergartenInternshipReview.service;
 
+import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.CreateInternshipReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewDTO;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.InternshipReviewPagedResponseDTO;
-import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.CreateInternshipReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.dto.ModifyInternshipReviewRequestDTO;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReview;
 import com.onebyone.kindergarten.domain.kindergartenInternshipReview.entity.KindergartenInternshipReviewLikeHistory;
@@ -17,6 +17,7 @@ import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.enums.ReviewStatus;
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,217 +26,243 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class KindergartenInternshipReviewService {
-    private final UserService userService;
-    private final KindergartenService kindergartenService;
-    private final KindergartenInternshipReviewRepository kindergartenInternshipReviewRepository;
-    private final KindergartenInternshipReviewLikeHistoryRepository kindergartenInternshipReviewLikeHistoryRepository;
+  private final UserService userService;
+  private final KindergartenService kindergartenService;
+  private final KindergartenInternshipReviewRepository kindergartenInternshipReviewRepository;
+  private final KindergartenInternshipReviewLikeHistoryRepository
+      kindergartenInternshipReviewLikeHistoryRepository;
 
-    public Kindergarten createInternshipReview(CreateInternshipReviewRequestDTO request, Long userId) {
-        User user = userService.getUserById(userId);
+  public Kindergarten createInternshipReview(
+      CreateInternshipReviewRequestDTO request, Long userId) {
+    User user = userService.getUserById(userId);
 
-        Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
+    Kindergarten kindergarten =
+        kindergartenService.getKindergartenById(request.getKindergartenId());
 
-        boolean exists = kindergartenInternshipReviewRepository.existsByUserAndKindergarten(user, kindergarten);
-        if (exists) {
-            throw new BusinessException(ErrorCodes.ALREADY_EXIST_INTERNSHIP_REVIEW);
-        }
-
-        KindergartenInternshipReview review = KindergartenInternshipReview.builder()
-                .user(user)
-                .kindergarten(kindergarten)
-                .workType(request.getWorkType())
-                .oneLineComment(request.getOneLineComment())
-                .workEnvironmentComment(request.getWorkEnvironmentComment())
-                .workEnvironmentScore(request.getWorkEnvironmentScore())
-                .learningSupportComment(request.getLearningSupportComment())
-                .learningSupportScore(request.getLearningSupportScore())
-                .instructionTeacherComment(request.getInstructionTeacherComment())
-                .instructionTeacherScore(request.getInstructionTeacherScore())
-                .reviewStatus(ReviewStatus.ACCEPTED)
-                .likeCount(0)
-                .shareCount(0)
-                .build();
-
-        kindergartenInternshipReviewRepository.save(review);
-
-        return kindergarten;
+    boolean exists =
+        kindergartenInternshipReviewRepository.existsByUserAndKindergarten(user, kindergarten);
+    if (exists) {
+      throw new BusinessException(ErrorCodes.ALREADY_EXIST_INTERNSHIP_REVIEW);
     }
 
-    public Kindergarten modifyInternshipReview(ModifyInternshipReviewRequestDTO request, Long userId) {
-        User user = userService.getUserById(userId);
-        Kindergarten kindergarten = kindergartenService.getKindergartenById(request.getKindergartenId());
+    KindergartenInternshipReview review =
+        KindergartenInternshipReview.builder()
+            .user(user)
+            .kindergarten(kindergarten)
+            .workType(request.getWorkType())
+            .oneLineComment(request.getOneLineComment())
+            .workEnvironmentComment(request.getWorkEnvironmentComment())
+            .workEnvironmentScore(request.getWorkEnvironmentScore())
+            .learningSupportComment(request.getLearningSupportComment())
+            .learningSupportScore(request.getLearningSupportScore())
+            .instructionTeacherComment(request.getInstructionTeacherComment())
+            .instructionTeacherScore(request.getInstructionTeacherScore())
+            .reviewStatus(ReviewStatus.ACCEPTED)
+            .likeCount(0)
+            .shareCount(0)
+            .build();
 
-        KindergartenInternshipReview review = kindergartenInternshipReviewRepository
-                .findById(request.getInternshipReviewId())
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
+    kindergartenInternshipReviewRepository.save(review);
 
-        // 리뷰와 유치원이 다를 때
-        if (!review.getKindergarten().getId().equals(kindergarten.getId())) {
-            throw new BusinessException(ErrorCodes.INCORRECT_KINDERGARTEN_EXCEPTION);
-        }
+    return kindergarten;
+  }
 
-        // 리뷰 작성자가 다를 때
-        if (!review.getUser().getId().equals(user.getId())) {
-            throw new BusinessException(ErrorCodes.REVIEW_EDIT_NOT_OWNER);
-        }
+  public Kindergarten modifyInternshipReview(
+      ModifyInternshipReviewRequestDTO request, Long userId) {
+    User user = userService.getUserById(userId);
+    Kindergarten kindergarten =
+        kindergartenService.getKindergartenById(request.getKindergartenId());
 
-        review.updateReview(request);
-        return kindergarten;
+    KindergartenInternshipReview review =
+        kindergartenInternshipReviewRepository
+            .findById(request.getInternshipReviewId())
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
+
+    // 리뷰와 유치원이 다를 때
+    if (!review.getKindergarten().getId().equals(kindergarten.getId())) {
+      throw new BusinessException(ErrorCodes.INCORRECT_KINDERGARTEN_EXCEPTION);
     }
 
-    @Transactional
-    public void likeInternshipReview(long reviewId, Long userId) {
-        User user = userService.getUserById(userId);
-
-        KindergartenInternshipReview review = kindergartenInternshipReviewRepository.findById(reviewId)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
-
-        Optional<KindergartenInternshipReviewLikeHistory> existingLike = kindergartenInternshipReviewLikeHistoryRepository.findByUserAndInternshipReview(user, review);
-
-        if (existingLike.isPresent()) {
-            kindergartenInternshipReviewLikeHistoryRepository.delete(existingLike.get());
-            review.minusLikeCount();
-        } else {
-            KindergartenInternshipReviewLikeHistory newLike = KindergartenInternshipReviewLikeHistory.builder()
-                    .user(user)
-                    .internshipReview(review)
-                    .build();
-
-            kindergartenInternshipReviewLikeHistoryRepository.save(newLike);
-            review.plusLikeCount();
-        }
-
-        kindergartenInternshipReviewRepository.save(review);
+    // 리뷰 작성자가 다를 때
+    if (!review.getUser().getId().equals(user.getId())) {
+      throw new BusinessException(ErrorCodes.REVIEW_EDIT_NOT_OWNER);
     }
 
-    public InternshipReviewPagedResponseDTO getReviews(Long kindergartenId, int page, int size, InternshipReviewPagedResponseDTO.SortType sortType, InternshipReviewStarRatingType internshipReviewStarRatingType, int starRating) {
-        if (internshipReviewStarRatingType != InternshipReviewStarRatingType.ALL && starRating < 1 || starRating > 5) {
-            throw new BusinessException(ErrorCodes.ILLEGAL_ARGUMENT_STAR_RATING_EXCEPTION);
-        }
+    review.updateReview(request);
+    return kindergarten;
+  }
 
-        Pageable pageable;
+  @Transactional
+  public void likeInternshipReview(long reviewId, Long userId) {
+    User user = userService.getUserById(userId);
 
-        switch (sortType) {
-            case POPULAR:
-                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount", "createdAt"));
-                break;
-            case LATEST:
-            default:
-                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-                break;
-        }
+    KindergartenInternshipReview review =
+        kindergartenInternshipReviewRepository
+            .findById(reviewId)
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
 
-        Page<InternshipReviewDTO> reviewPage;
+    Optional<KindergartenInternshipReviewLikeHistory> existingLike =
+        kindergartenInternshipReviewLikeHistoryRepository.findByUserAndInternshipReview(
+            user, review);
 
-        switch (internshipReviewStarRatingType) {
-            case WORK_ENVIRONMENT:
-                reviewPage = kindergartenInternshipReviewRepository
-                        .findByWorkEnvironmentScore(
-                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
-                break;
-            case LEARNING_SUPPORT:
-                reviewPage = kindergartenInternshipReviewRepository
-                        .findByLearningSupportScore(
-                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
-                break;
-            case INSTRUCTION_TEACHER:
-                reviewPage = kindergartenInternshipReviewRepository
-                        .findByInstructionTeacherScore(
-                                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
-                break;
-            case ALL:
-            default:
-                reviewPage = kindergartenInternshipReviewRepository
-                        .findReviewsWithUserInfo(
-                                kindergartenId, ReviewStatus.ACCEPTED, pageable);
-                break;
-        }
+    if (existingLike.isPresent()) {
+      kindergartenInternshipReviewLikeHistoryRepository.delete(existingLike.get());
+      review.minusLikeCount();
+    } else {
+      KindergartenInternshipReviewLikeHistory newLike =
+          KindergartenInternshipReviewLikeHistory.builder()
+              .user(user)
+              .internshipReview(review)
+              .build();
 
-        return InternshipReviewPagedResponseDTO.builder()
-                .content(reviewPage.getContent())
-                .totalPages(reviewPage.getTotalPages())
-                .build();
+      kindergartenInternshipReviewLikeHistoryRepository.save(newLike);
+      review.plusLikeCount();
     }
 
-    /// 내가 작성한 실습 리뷰 조회
-    public InternshipReviewPagedResponseDTO getMyReviews(Long userId, int page, int size) {
-        User user = userService.getUserById(userId);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    kindergartenInternshipReviewRepository.save(review);
+  }
 
-        Page<InternshipReviewDTO> reviewPage = kindergartenInternshipReviewRepository.findMyReviews(
-                user.getId(),
-                ReviewStatus.ACCEPTED,
-                pageable
-        );
-
-        return InternshipReviewPagedResponseDTO.builder()
-                .content(reviewPage.getContent())
-                .totalPages(reviewPage.getTotalPages())
-                .build();
+  public InternshipReviewPagedResponseDTO getReviews(
+      Long kindergartenId,
+      int page,
+      int size,
+      InternshipReviewPagedResponseDTO.SortType sortType,
+      InternshipReviewStarRatingType internshipReviewStarRatingType,
+      int starRating) {
+    if (internshipReviewStarRatingType != InternshipReviewStarRatingType.ALL && starRating < 1
+        || starRating > 5) {
+      throw new BusinessException(ErrorCodes.ILLEGAL_ARGUMENT_STAR_RATING_EXCEPTION);
     }
 
-    /// 전체 실습 리뷰 조회 (유치원 상관없이)
-    public InternshipReviewPagedResponseDTO getAllReviews(int page, int size, InternshipReviewPagedResponseDTO.SortType sortType) {
-        Pageable pageable;
+    Pageable pageable;
 
-        switch (sortType) {
-            case POPULAR:
-                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount", "createdAt"));
-                break;
-            case LATEST:
-            default:
-                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-                break;
-        }
-
-        Page<InternshipReviewDTO> reviewPage = kindergartenInternshipReviewRepository
-                .findAllReviewsWithUserInfo(ReviewStatus.ACCEPTED, pageable);
-
-        return InternshipReviewPagedResponseDTO.builder()
-                .content(reviewPage.getContent())
-                .totalPages(reviewPage.getTotalPages())
-                .build();
+    switch (sortType) {
+      case POPULAR:
+        pageable =
+            PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount", "createdAt"));
+        break;
+      case LATEST:
+      default:
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        break;
     }
 
-    /// 실습 리뷰 삭제 (소프트 삭제)
-    @Transactional
-    public void deleteInternshipReview(Long reviewId, String email) {
-        // 리뷰 조회
-        KindergartenInternshipReview review = kindergartenInternshipReviewRepository.findById(reviewId)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
-        
-        // 현재 사용자 조회
-        User currentUser = userService.getUserByEmail(email);
-        
-        // 작성자 또는 관리자 권한 확인
-        if (!review.getUser().getEmail().equals(email) && !currentUser.getRole().equals(UserRole.ADMIN)) {
-            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
-        }
-        
-        // 리뷰 소프트 삭제 (deletedAt 설정)
-        review.markAsDeleted();
+    Page<InternshipReviewDTO> reviewPage;
+
+    switch (internshipReviewStarRatingType) {
+      case WORK_ENVIRONMENT:
+        reviewPage =
+            kindergartenInternshipReviewRepository.findByWorkEnvironmentScore(
+                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+        break;
+      case LEARNING_SUPPORT:
+        reviewPage =
+            kindergartenInternshipReviewRepository.findByLearningSupportScore(
+                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+        break;
+      case INSTRUCTION_TEACHER:
+        reviewPage =
+            kindergartenInternshipReviewRepository.findByInstructionTeacherScore(
+                kindergartenId, ReviewStatus.ACCEPTED, starRating, pageable);
+        break;
+      case ALL:
+      default:
+        reviewPage =
+            kindergartenInternshipReviewRepository.findReviewsWithUserInfo(
+                kindergartenId, ReviewStatus.ACCEPTED, pageable);
+        break;
     }
 
-    public int countReviewsByUser(Long userId, ReviewStatus reviewStatus) {
-        return kindergartenInternshipReviewRepository.countByUserIdAndReviewStatus(userId, reviewStatus);
+    return InternshipReviewPagedResponseDTO.builder()
+        .content(reviewPage.getContent())
+        .totalPages(reviewPage.getTotalPages())
+        .build();
+  }
+
+  /// 내가 작성한 실습 리뷰 조회
+  public InternshipReviewPagedResponseDTO getMyReviews(Long userId, int page, int size) {
+    User user = userService.getUserById(userId);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+    Page<InternshipReviewDTO> reviewPage =
+        kindergartenInternshipReviewRepository.findMyReviews(
+            user.getId(), ReviewStatus.ACCEPTED, pageable);
+
+    return InternshipReviewPagedResponseDTO.builder()
+        .content(reviewPage.getContent())
+        .totalPages(reviewPage.getTotalPages())
+        .build();
+  }
+
+  /// 전체 실습 리뷰 조회 (유치원 상관없이)
+  public InternshipReviewPagedResponseDTO getAllReviews(
+      int page, int size, InternshipReviewPagedResponseDTO.SortType sortType) {
+    Pageable pageable;
+
+    switch (sortType) {
+      case POPULAR:
+        pageable =
+            PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount", "createdAt"));
+        break;
+      case LATEST:
+      default:
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        break;
     }
 
-    public void deleteWorkReview(Long reviewId, Long userId, UserRole role) {
-        // 리뷰 조회
-        KindergartenInternshipReview review = kindergartenInternshipReviewRepository.findById(reviewId)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
+    Page<InternshipReviewDTO> reviewPage =
+        kindergartenInternshipReviewRepository.findAllReviewsWithUserInfo(
+            ReviewStatus.ACCEPTED, pageable);
 
-        // 작성자 또는 관리자 권한 확인
-        if (!review.getUser().getId().equals(userId) && !role.equals(UserRole.ADMIN)) {
-            throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
-        }
+    return InternshipReviewPagedResponseDTO.builder()
+        .content(reviewPage.getContent())
+        .totalPages(reviewPage.getTotalPages())
+        .build();
+  }
 
-        // 리뷰 소프트 삭제 (deletedAt 설정)
-        review.markAsDeleted();
+  /// 실습 리뷰 삭제 (소프트 삭제)
+  @Transactional
+  public void deleteInternshipReview(Long reviewId, String email) {
+    // 리뷰 조회
+    KindergartenInternshipReview review =
+        kindergartenInternshipReviewRepository
+            .findById(reviewId)
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
+
+    // 현재 사용자 조회
+    User currentUser = userService.getUserByEmail(email);
+
+    // 작성자 또는 관리자 권한 확인
+    if (!review.getUser().getEmail().equals(email)
+        && !currentUser.getRole().equals(UserRole.ADMIN)) {
+      throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
     }
+
+    // 리뷰 소프트 삭제 (deletedAt 설정)
+    review.markAsDeleted();
+  }
+
+  public int countReviewsByUser(Long userId, ReviewStatus reviewStatus) {
+    return kindergartenInternshipReviewRepository.countByUserIdAndReviewStatus(
+        userId, reviewStatus);
+  }
+
+  public void deleteWorkReview(Long reviewId, Long userId, UserRole role) {
+    // 리뷰 조회
+    KindergartenInternshipReview review =
+        kindergartenInternshipReviewRepository
+            .findById(reviewId)
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
+
+    // 작성자 또는 관리자 권한 확인
+    if (!review.getUser().getId().equals(userId) && !role.equals(UserRole.ADMIN)) {
+      throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
+    }
+
+    // 리뷰 소프트 삭제 (deletedAt 설정)
+    review.markAsDeleted();
+  }
 }

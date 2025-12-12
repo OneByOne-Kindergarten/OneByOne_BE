@@ -13,28 +13,26 @@ import lombok.NoArgsConstructor;
 @Table(
     // 유니크 제약 조건 추가
     uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_community_like",
-            columnNames = {"user_id", "post_id"}
-        )
-    }
-)
+      @UniqueConstraint(
+          name = "uk_community_like",
+          columnNames = {"user_id", "post_id"})
+    })
 public class CommunityLike extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private CommunityPost post;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "post_id", nullable = false)
+  private CommunityPost post;
 
-    @Builder
-    public CommunityLike(User user, CommunityPost post) {
-        this.user = user;
-        this.post = post;
-    }
+  @Builder
+  public CommunityLike(User user, CommunityPost post) {
+    this.user = user;
+    this.post = post;
+  }
 }

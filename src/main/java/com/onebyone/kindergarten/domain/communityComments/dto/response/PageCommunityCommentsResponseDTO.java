@@ -1,11 +1,10 @@
 package com.onebyone.kindergarten.domain.communityComments.dto.response;
 
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class PageCommunityCommentsResponseDTO {
-    private List<CommentResponseDTO> content;
-    private int totalPages;
+  private List<CommentResponseDTO> content;
+  private int totalPages;
 }

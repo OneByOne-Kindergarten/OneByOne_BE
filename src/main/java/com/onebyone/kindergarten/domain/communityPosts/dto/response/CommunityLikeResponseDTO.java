@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CommunityLikeResponseDTO {
-    private boolean liked;     // 좋아요 상태
-    private int likeCount;     // 좋아요 수
-} 
+  private boolean liked; // 좋아요 상태
+  private int likeCount; // 좋아요 수
+}

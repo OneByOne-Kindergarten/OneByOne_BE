@@ -23,132 +23,133 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class InquiryService {
 
-    private final InquiryRepository inquiryRepository;
-    private final UserService userService;
-    private final NotificationTemplateService notificationTemplateService;
+  private final InquiryRepository inquiryRepository;
+  private final UserService userService;
+  private final NotificationTemplateService notificationTemplateService;
 
-    /// 문의 생성
-    @Transactional
-    public InquiryResponseDTO createInquiry(CreateInquiryRequestDTO dto, Long userId) {
+  /// 문의 생성
+  @Transactional
+  public InquiryResponseDTO createInquiry(CreateInquiryRequestDTO dto, Long userId) {
 
-        // 사용자 조회
-        User user = userService.getUserById(userId);
+    // 사용자 조회
+    User user = userService.getUserById(userId);
 
-        // 문의 생성
-        Inquiry inquiry = Inquiry.builder()
-                .user(user)
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .build();
-        inquiryRepository.save(inquiry);
+    // 문의 생성
+    Inquiry inquiry =
+        Inquiry.builder().user(user).title(dto.getTitle()).content(dto.getContent()).build();
+    inquiryRepository.save(inquiry);
 
-        return InquiryResponseDTO.fromEntity(inquiry);
+    return InquiryResponseDTO.fromEntity(inquiry);
+  }
+
+  /// 문의 조회 (단일)
+  public InquiryResponseDTO getInquiry(Long id, Long userId) {
+
+    // 사용자 조회
+    User user = userService.getUserById(userId);
+
+    // 문의 조회
+    Inquiry inquiry =
+        inquiryRepository
+            .findByIdWithUser(id)
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INQUIRY));
+
+    // 본인 및 관리자 권한 체크
+    if (!inquiry.getUser().getId().equals(user.getId()) && !user.getRole().equals(UserRole.ADMIN)) {
+      throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_READ);
     }
 
-    /// 문의 조회 (단일)
-    public InquiryResponseDTO getInquiry(Long id, Long userId) {
+    return InquiryResponseDTO.fromEntity(inquiry);
+  }
 
-        // 사용자 조회
-        User user = userService.getUserById(userId);
+  /// 내 문의 목록 조회
+  public Page<InquiryResponseDTO> getUserInquiries(Long userId, Pageable pageable) {
 
-        // 문의 조회
-        Inquiry inquiry = inquiryRepository.findByIdWithUser(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INQUIRY));
+    // 사용자 조회
+    User user = userService.getUserById(userId);
 
-        // 본인 및 관리자 권한 체크
-        if (!inquiry.getUser().getId().equals(user.getId()) && !user.getRole().equals(UserRole.ADMIN)) {
-            throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_READ);
-        }
+    // 문의 목록 조회
+    return inquiryRepository.findDtosByUser(user, pageable);
+  }
 
-        return InquiryResponseDTO.fromEntity(inquiry);
+  /// 모든 문의 목록 조회 (관리자 전용)
+  public Page<InquiryResponseDTO> getAllInquiries(Long userId, Pageable pageable) {
+
+    // 사용자 조회
+    User user = userService.getUserById(userId);
+
+    // 관리자 권한 체크
+    if (!user.getRole().equals(UserRole.ADMIN)) {
+      throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_READ);
     }
 
-    /// 내 문의 목록 조회
-    public Page<InquiryResponseDTO> getUserInquiries(Long userId, Pageable pageable) {
+    return inquiryRepository.findAllDtosOrderByStatusAndCreatedAt(pageable);
+  }
 
-        // 사용자 조회
-        User user = userService.getUserById(userId);
+  /// 상태별 문의 목록 조회 (관리자 전용)
+  public Page<InquiryResponseDTO> getInquiriesByStatus(
+      InquiryStatus status, Long userId, Pageable pageable) {
 
-        // 문의 목록 조회
-        return inquiryRepository.findDtosByUser(user, pageable);
+    // 사용자 조회
+    User user = userService.getUserById(userId);
+
+    // 관리자 권한 체크
+    if (!user.getRole().equals(UserRole.ADMIN)) {
+      throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_READ);
     }
-    
-    /// 모든 문의 목록 조회 (관리자 전용)
-    public Page<InquiryResponseDTO> getAllInquiries(Long userId, Pageable pageable) {
 
-        // 사용자 조회
-        User user = userService.getUserById(userId);
+    return inquiryRepository.findDtosByStatus(status, pageable);
+  }
 
-        // 관리자 권한 체크
-        if (!user.getRole().equals(UserRole.ADMIN)) {
-            throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_READ);
-        }
+  /// 문의 답변 (관리자 전용)
+  @Transactional
+  public InquiryResponseDTO answerInquiry(Long id, AnswerInquiryRequestDTO dto, Long userId) {
 
-        return inquiryRepository.findAllDtosOrderByStatusAndCreatedAt(pageable);
+    // 사용자 조회
+    User user = userService.getUserById(userId);
+
+    // 관리자 권한 체크
+    if (!user.getRole().equals(UserRole.ADMIN)) {
+      throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_WRITE);
     }
-    
-    /// 상태별 문의 목록 조회 (관리자 전용)
-    public Page<InquiryResponseDTO> getInquiriesByStatus(InquiryStatus status, Long userId, Pageable pageable) {
 
-        // 사용자 조회
-        User user = userService.getUserById(userId);
+    // 문의 조회
+    Inquiry inquiry =
+        inquiryRepository
+            .findByIdWithUser(id)
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INQUIRY));
 
-        // 관리자 권한 체크
-        if (!user.getRole().equals(UserRole.ADMIN)) {
-            throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_READ);
-        }
+    // 답변 등록
+    inquiry.answerInquiry(dto.getAnswer());
 
-        return inquiryRepository.findDtosByStatus(status, pageable);
+    // 알림 발송
+    notificationTemplateService.sendInquiryAnswerNotification(
+        inquiry.getUser().getId(), inquiry.getTitle(), inquiry.getId());
+
+    return InquiryResponseDTO.fromEntity(inquiry);
+  }
+
+  /// 문의 마감 (관리자 전용)
+  @Transactional
+  public InquiryResponseDTO closeInquiry(Long id, Long userId) {
+
+    // 사용자 조회
+    User user = userService.getUserById(userId);
+
+    // 관리자 권한 체크
+    if (!user.getRole().equals(UserRole.ADMIN)) {
+      throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_READ);
     }
-    
-    /// 문의 답변 (관리자 전용)
-    @Transactional
-    public InquiryResponseDTO answerInquiry(Long id, AnswerInquiryRequestDTO dto, Long userId) {
 
-        // 사용자 조회
-        User user = userService.getUserById(userId);
-        
-        // 관리자 권한 체크
-        if (!user.getRole().equals(UserRole.ADMIN)) {
-            throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_WRITE);
-        }
+    // 문의 조회
+    Inquiry inquiry =
+        inquiryRepository
+            .findById(id)
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INQUIRY));
 
-        // 문의 조회
-        Inquiry inquiry = inquiryRepository.findByIdWithUser(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INQUIRY));
+    // 문의 마감
+    inquiry.closeInquiry();
 
-        // 답변 등록
-        inquiry.answerInquiry(dto.getAnswer());
-
-        // 알림 발송
-        notificationTemplateService.sendInquiryAnswerNotification(
-                inquiry.getUser().getId(),
-                inquiry.getTitle(),
-                inquiry.getId()
-        );
-
-        return InquiryResponseDTO.fromEntity(inquiry);
-    }
-    
-    /// 문의 마감 (관리자 전용)
-    @Transactional
-    public InquiryResponseDTO closeInquiry(Long id, Long userId) {
-
-        // 사용자 조회
-        User user = userService.getUserById(userId);
-        
-        // 관리자 권한 체크
-        if (!user.getRole().equals(UserRole.ADMIN)) {
-            throw new BusinessException(ErrorCodes.INQUIRY_NOT_ADMIN_CANNOT_READ);
-        }
-
-        // 문의 조회
-        Inquiry inquiry = inquiryRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INQUIRY));
-
-        // 문의 마감
-        inquiry.closeInquiry();
-
-        return InquiryResponseDTO.fromEntity(inquiry);
-    }
+    return InquiryResponseDTO.fromEntity(inquiry);
+  }
 }

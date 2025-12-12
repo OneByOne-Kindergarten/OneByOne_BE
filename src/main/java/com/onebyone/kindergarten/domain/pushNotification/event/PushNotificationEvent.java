@@ -9,16 +9,13 @@ import lombok.Setter;
 @Getter
 @RequiredArgsConstructor
 public class PushNotificationEvent {
-    private final Long userId;
-    private final String title;
-    private final String message;
-    private final NotificationType type;
-    private final Long targetId;
+  private final Long userId;
+  private final String title;
+  private final String message;
+  private final NotificationType type;
+  private final Long targetId;
 
-    /// 그룹화
-    @Setter
-    private String groupKey;
-    @Setter
-    private Integer groupCount = 1;
-
+  /// 그룹화
+  @Setter private String groupKey;
+  @Setter private Integer groupCount = 1;
 }

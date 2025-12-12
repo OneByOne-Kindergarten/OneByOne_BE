@@ -7,5 +7,5 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserBlockRequestDto {
-    private String targetUserEmail;
+  private String targetUserEmail;
 }

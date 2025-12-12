@@ -22,24 +22,24 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ReportController {
 
-    private final ReportService reportService;
+  private final ReportService reportService;
 
-    @PostMapping
-    @Operation(summary = "신고하기", description = "게시글이나 댓글을 신고합니다.")
-    public ResponseDto<ReportResponseDTO> createReport(
-            @Valid @RequestBody CreateReportRequestDTO dto,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        return ResponseDto.success(reportService.createReport(dto, Long.valueOf(userDetails.getUsername())));
-    }
+  @PostMapping
+  @Operation(summary = "신고하기", description = "게시글이나 댓글을 신고합니다.")
+  public ResponseDto<ReportResponseDTO> createReport(
+      @Valid @RequestBody CreateReportRequestDTO dto,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    return ResponseDto.success(
+        reportService.createReport(dto, Long.valueOf(userDetails.getUsername())));
+  }
 
-    @GetMapping("/my")
-    @Operation(summary = "내 신고 목록", description = "자신이 신고한 내역을 조회합니다.")
-    public PageResponseDTO<ReportResponseDTO> getMyReports(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        return new PageResponseDTO<>(reportService.getMyReports(Long.valueOf(userDetails.getUsername()), pageable));
-    }
-
+  @GetMapping("/my")
+  @Operation(summary = "내 신고 목록", description = "자신이 신고한 내역을 조회합니다.")
+  public PageResponseDTO<ReportResponseDTO> getMyReports(
+      @AuthenticationPrincipal UserDetails userDetails,
+      @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+          Pageable pageable) {
+    return new PageResponseDTO<>(
+        reportService.getMyReports(Long.valueOf(userDetails.getUsername()), pageable));
+  }
 }

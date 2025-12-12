@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name = "NaverApiClient", url = "${oauth.naver.url.api}")
 public interface NaverApiClient {
-    @GetMapping("/v1/nid/me")
-    NaverUserResponse getUserInfo(@RequestHeader("Authorization") String bearerToken);
+  @GetMapping("/v1/nid/me")
+  NaverUserResponse getUserInfo(@RequestHeader("Authorization") String bearerToken);
 }

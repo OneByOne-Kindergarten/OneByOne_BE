@@ -1,3 +1,7 @@
 package com.onebyone.kindergarten.domain.inquires.enums;
 
-public enum InquiryStatus { PENDING, ANSWERED, CLOSED }
+public enum InquiryStatus {
+  PENDING,
+  ANSWERED,
+  CLOSED
+}

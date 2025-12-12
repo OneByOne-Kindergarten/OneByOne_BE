@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetUserResponseDTO {
-    private UserDTO user;
+  private UserDTO user;
 }

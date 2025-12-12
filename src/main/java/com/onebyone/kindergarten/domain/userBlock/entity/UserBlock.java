@@ -12,21 +12,21 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserBlock extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id")
+  private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "blocked_user_id")
-    private User blockedUser;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "blocked_user_id")
+  private User blockedUser;
 
-    @Builder
-    public UserBlock(User user, User blockedUser) {
-        this.user = user;
-        this.blockedUser = blockedUser;
-    }
+  @Builder
+  public UserBlock(User user, User blockedUser) {
+    this.user = user;
+    this.blockedUser = blockedUser;
+  }
 }

@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 @EnableCaching
 public class CacheConfig {
 
-    /// TOP10 게시물 캐시
-    public static final String TOP_POSTS_CACHE = "topPostsCache";
+  /// TOP10 게시물 캐시
+  public static final String TOP_POSTS_CACHE = "topPostsCache";
 
-    @Bean
-    public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager(TOP_POSTS_CACHE);
-    }
-} 
+  @Bean
+  public CacheManager cacheManager() {
+    return new ConcurrentMapCacheManager(TOP_POSTS_CACHE);
+  }
+}

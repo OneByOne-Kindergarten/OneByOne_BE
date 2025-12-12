@@ -14,16 +14,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KindergartenInternshipReviewLikeHistory extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 리뷰 코드
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id; // 리뷰 코드
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user", nullable = false)
-    private User user; // 작성자
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user", nullable = false)
+  private User user; // 작성자
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "kindergarten", nullable = false)
-    private KindergartenInternshipReview internshipReview;
-
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "kindergarten", nullable = false)
+  private KindergartenInternshipReview internshipReview;
 }

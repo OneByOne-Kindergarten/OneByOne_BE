@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationSettingsDTO {
-    private boolean allNotificationsEnabled;
-    private boolean communityNotificationsEnabled;
-    private boolean eventNotificationsEnabled;
-} 
+  private boolean allNotificationsEnabled;
+  private boolean communityNotificationsEnabled;
+  private boolean eventNotificationsEnabled;
+}

@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class EmailCertificationRequestDTO {
-    String email;
-    EmailCertificationType certificationType;
+  String email;
+  EmailCertificationType certificationType;
 }

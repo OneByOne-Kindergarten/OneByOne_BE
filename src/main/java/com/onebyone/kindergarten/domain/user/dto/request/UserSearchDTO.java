@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSearchDTO {
-    private String email;
-    private String nickname;
-    private UserRole role;
-    private UserProvider provider;
-    private UserStatus status;
-    private String kindergartenName;
-    private Boolean hasWrittenReview;
-    private Boolean isRestoredUser;
+  private String email;
+  private String nickname;
+  private UserRole role;
+  private UserProvider provider;
+  private UserStatus status;
+  private String kindergartenName;
+  private Boolean hasWrittenReview;
+  private Boolean isRestoredUser;
 }

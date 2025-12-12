@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class KakaoAccount {
-    private String email;
-    private KakaoProfile profile;
+  private String email;
+  private KakaoProfile profile;
 }
