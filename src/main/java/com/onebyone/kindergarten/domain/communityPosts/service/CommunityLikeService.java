@@ -42,6 +42,12 @@ public class CommunityLikeService {
     // 사용자 조회
     User user = userService.getUserById(userId);
 
+    // 게시글 조회
+    CommunityPost post =
+            communityRepository
+                    .findById(postId)
+                    .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
+
     // 게시글 존재 여부와 좋아요 여부를 한 번에 확인
     return communityLikeRepository
         .findByUserAndPostId(user, postId)
@@ -49,28 +55,22 @@ public class CommunityLikeService {
             like -> {
               // 좋아요 취소
               communityLikeRepository.delete(like);
-              communityRepository.updateLikeCount(postId, -1);
-              return new CommunityLikeResponseDTO(false, like.getPost().getLikeCount() - 1);
+              post.decreaseLikeCount();
+              return new CommunityLikeResponseDTO(false, post.getLikeCount());
             })
         .orElseGet(
             () -> {
               // 게시글 존재 여부 확인 및 좋아요 추가
-              CommunityPost post =
-                  communityRepository
-                      .findById(postId)
-                      .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_POST));
-
               CommunityLike newLike = CommunityLike.builder().user(user).post(post).build();
               communityLikeRepository.save(newLike);
-              communityRepository.updateLikeCount(postId, 1);
-
+              post.increaseLikeCount();
               // 알림 발송 - 본인 글이 아니고 삭제된 게시글이 아닌 경우
               if (!post.getUser().getId().equals(user.getId()) && post.getDeletedAt() == null) {
                 notificationTemplateService.sendLikeNotification(
                     post.getUser().getId(), user, post.getTitle(), post.getId());
               }
 
-              return new CommunityLikeResponseDTO(true, post.getLikeCount() + 1);
+              return new CommunityLikeResponseDTO(true, post.getLikeCount());
             });
   }
 }
