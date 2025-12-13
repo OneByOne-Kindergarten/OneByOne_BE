@@ -339,42 +339,56 @@ public class UserService {
   }
 
   @Transactional
+  public void saveSignUpCertification(EmailCertificationRequestDTO request, String certification) {
+    String email = request.getEmail();
+
+    if (userRepository.existsByEmail(email)) {
+      throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
+    }
+
+    EmailCertification emailCert =
+        emailCertificationRepository.findByEmailAndType(email, EmailCertificationType.EMAIL);
+
+    if (emailCert == null) {
+      emailCert =
+          EmailCertification.builder().email(email).type(EmailCertificationType.EMAIL).build();
+    }
+
+    emailCert.updateCode(certification);
+    emailCert.markUncertificated();
+
+    emailCertificationRepository.save(emailCert);
+  }
+
+  @Transactional
   public void updateHomeShortcut(Long userId, HomeShortcutsDto homeShortcutsDto) {
     User user = getUserById(userId);
     user.updateHomeShortcut(homeShortcutsDto.toJson());
   }
 
   @Transactional
-  public void saveSignUpCertification(EmailCertificationRequestDTO request, String certification) {
-    if (userRepository.existsByEmail(request.getEmail())) {
-      throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
-    }
-
-    EmailCertification emailCert =
-        EmailCertification.builder()
-            .email(request.getEmail())
-            .type(EmailCertificationType.EMAIL)
-            .code(certification)
-            .isCertificated(false)
-            .build();
-
-    emailCertificationRepository.save(emailCert);
-  }
-
-  @Transactional
   public void savePasswordCertification(
       EmailCertificationRequestDTO request, String certification) {
+    String email = request.getEmail();
+
     if (!userRepository.existsByEmail(request.getEmail())) {
       throw new BusinessException(ErrorCodes.NOT_FOUND_USER);
     }
 
     EmailCertification passwordCert =
-        EmailCertification.builder()
-            .email(request.getEmail())
-            .type(EmailCertificationType.TEMPORARY_PASSWORD)
-            .code(certification)
-            .isCertificated(false)
-            .build();
+        emailCertificationRepository.findByEmailAndType(
+            email, EmailCertificationType.TEMPORARY_PASSWORD);
+
+    if (passwordCert == null) {
+      passwordCert =
+          EmailCertification.builder()
+              .email(email)
+              .type(EmailCertificationType.TEMPORARY_PASSWORD)
+              .build();
+    }
+
+    passwordCert.updateCode(certification);
+    passwordCert.markUncertificated();
 
     emailCertificationRepository.save(passwordCert);
   }

@@ -32,4 +32,12 @@ public class EmailCertification extends BaseEntity {
     this.isCertificated = true;
     this.updatedAt = LocalDateTime.now();
   }
+
+  public void updateCode(String code) {
+    this.code = code;
+  }
+
+  public void markUncertificated() {
+    this.isCertificated = false;
+  }
 }

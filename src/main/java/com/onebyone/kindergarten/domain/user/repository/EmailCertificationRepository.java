@@ -11,4 +11,7 @@ public interface EmailCertificationRepository extends JpaRepository<EmailCertifi
       String email, String code, EmailCertificationType type);
 
   boolean existsByEmail(String email);
+
+  EmailCertification findByEmailAndType(
+      String email, EmailCertificationType emailCertificationType);
 }
