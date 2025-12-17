@@ -76,4 +76,12 @@ public interface KindergartenRepository extends JpaRepository<Kindergarten, Long
           + "AND k.subRegionId = :subRegionId")
   List<Kindergarten> findAllByRegionIdAndSubRegionIdWithFetch(
       @Param("regionId") Long regionId, @Param("subRegionId") Long subRegionId);
+
+  @Query(
+      "SELECT k FROM Kindergarten k "
+          + "LEFT JOIN FETCH k.kindergartenWorkReviewAggregate w "
+          + "LEFT JOIN FETCH k.kindergartenInternshipReviewAggregate i "
+          + "WHERE k.regionId = :regionId "
+          + "AND k.subRegionId in :ids")
+  List<Kindergarten> findAllByRegionIdAndSubRegionIdInWithFetch(Long regionId, List<Long> ids);
 }
