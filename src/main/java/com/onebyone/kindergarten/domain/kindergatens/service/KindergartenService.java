@@ -151,16 +151,30 @@ public class KindergartenService {
       throw new BusinessException(ErrorCodes.REGION_NOT_FOUND_EXCEPTION);
     }
 
-    SubRegion subRegion = subRegionRepository.findBySubRegionId(subRegionId);
-
-    if (subRegion == null) {
+    if (subRegionId == null) {
       return kindergartenRepository.findAllByRegionIdWithFetch(regionId).stream()
           .map(KindergartenResponseDTO::from)
           .toList();
     }
+    SubRegion subRegion = subRegionRepository.findBySubRegionId(subRegionId);
+
+    if (subRegion == null) {
+      throw new BusinessException(ErrorCodes.SUB_REGION_NOT_FOUND_EXCEPTION);
+    }
 
     if (!regionId.equals(subRegion.getRegionId())) {
       throw new BusinessException(ErrorCodes.REGION_NOT_MATCHED_WITH_SUB_REGION);
+    }
+
+    List<SubRegion> allByParentId = subRegionRepository.findAllByParent(subRegion);
+
+    if (!allByParentId.isEmpty()) {
+      List<Long> ids = allByParentId.stream().map(SubRegion::getSubRegionId).toList();
+      return kindergartenRepository
+          .findAllByRegionIdAndSubRegionIdInWithFetch(regionId, ids)
+          .stream()
+          .map(KindergartenResponseDTO::from)
+          .toList();
     }
 
     return kindergartenRepository
