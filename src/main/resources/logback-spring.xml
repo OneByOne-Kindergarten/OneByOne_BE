@@ -4,7 +4,7 @@
     <!-- 콘솔 출력 공통 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[%thread] %-5level %logger[%method:%line] - %msg%n</pattern>
+            <pattern>[%X{uuid}] %-5level %logger[%method:%line] - %msg%n</pattern>
         </encoder>
     </appender>
 
