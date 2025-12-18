@@ -2,12 +2,9 @@ package com.onebyone.kindergarten.domain.kindergatens.dto;
 
 import com.onebyone.kindergarten.domain.kindergatens.entity.KindergartenInternshipReviewAggregate;
 import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -5,10 +5,10 @@ import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.global.enums.ReviewType;
 import java.time.LocalDate;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @NoArgsConstructor
 public class KindergartenWorkHistoryRequest {
   private String kindergartenName;

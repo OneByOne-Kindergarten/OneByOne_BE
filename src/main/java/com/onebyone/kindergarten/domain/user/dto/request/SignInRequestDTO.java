@@ -1,8 +1,8 @@
 package com.onebyone.kindergarten.domain.user.dto.request;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class SignInRequestDTO {
   private String email;
   private String password;
