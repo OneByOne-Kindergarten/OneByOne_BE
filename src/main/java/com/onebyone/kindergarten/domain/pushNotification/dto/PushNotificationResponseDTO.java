@@ -4,10 +4,10 @@ import com.onebyone.kindergarten.domain.pushNotification.entity.PushNotification
 import com.onebyone.kindergarten.domain.pushNotification.enums.NotificationType;
 import java.time.LocalDateTime;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
+@Data
 @Builder
-@Getter
 public class PushNotificationResponseDTO {
   private Long id;
   private Long userId;

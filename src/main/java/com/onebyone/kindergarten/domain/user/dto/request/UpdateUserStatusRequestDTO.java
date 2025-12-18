@@ -3,10 +3,10 @@ package com.onebyone.kindergarten.domain.user.dto.request;
 import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @NoArgsConstructor
 @Schema(description = "유저 상태 변경 요청 DTO")
 public class UpdateUserStatusRequestDTO {

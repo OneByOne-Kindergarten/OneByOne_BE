@@ -5,9 +5,9 @@ import com.onebyone.kindergarten.domain.user.entity.UserProvider;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class SignUpRequestDTO {
   private String email;
   private String password;

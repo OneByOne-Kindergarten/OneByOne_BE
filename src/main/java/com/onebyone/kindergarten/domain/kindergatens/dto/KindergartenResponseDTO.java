@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.onebyone.kindergarten.domain.kindergatens.entity.Kindergarten;
 import java.time.LocalDate;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class KindergartenResponseDTO {
   private final Long id;

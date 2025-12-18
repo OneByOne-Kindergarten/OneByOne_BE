@@ -4,9 +4,9 @@ import com.onebyone.kindergarten.domain.kindergartenWorkHistories.entity.Kinderg
 import com.onebyone.kindergarten.global.enums.ReviewType;
 import java.time.LocalDate;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 @Builder
 public class KindergartenWorkHistoryResponse {
   private Long id;

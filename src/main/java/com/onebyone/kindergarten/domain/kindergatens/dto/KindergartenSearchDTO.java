@@ -1,10 +1,8 @@
 package com.onebyone.kindergarten.domain.kindergatens.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class KindergartenSearchDTO {
   private String name; // 유치원 이름
 
