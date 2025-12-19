@@ -429,6 +429,8 @@ public class UserService {
     if (!emailCertification.getCode().equals(code)) {
       throw new BusinessException(ErrorCodes.CERTIFICATION_CODE_MISMATCH);
     }
+
+    emailCertification.completeCertification();
   }
 
   @Transactional(readOnly = true)
