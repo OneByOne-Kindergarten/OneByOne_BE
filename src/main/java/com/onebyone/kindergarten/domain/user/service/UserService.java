@@ -11,16 +11,21 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.EmailCertificationType;
 import com.onebyone.kindergarten.domain.user.enums.NotificationSetting;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
+import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import com.onebyone.kindergarten.domain.user.repository.EmailCertificationRepository;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -34,6 +39,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder passwordEncoder;
   private final EmailCertificationRepository emailCertificationRepository;
+  private static Logger logger = LoggerFactory.getLogger(UserService.class);
 
   @Transactional
   public JwtUserInfoDto signUp(SignUpRequestDTO request) {
@@ -55,7 +61,7 @@ public class UserService {
 
   @Transactional(readOnly = true)
   public boolean isExistedEmail(String email) {
-    return userRepository.findByEmailAndDeletedAtIsNull(email).isPresent();
+    return userRepository.findByEmail(email).isPresent();
   }
 
   private String encodePassword(String password) {
@@ -65,7 +71,8 @@ public class UserService {
   @Transactional
   public JwtUserInfoDto signIn(SignInRequestDTO request) {
     // 먼저 활성 사용자 확인
-    Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail());
+    Optional<User> activeUser =
+        userRepository.findByEmailAndStatus(request.getEmail(), UserStatus.ACTIVE);
     if (activeUser.isPresent()) {
       User user = activeUser.get();
       if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -81,7 +88,7 @@ public class UserService {
 
     // 탈퇴된 사용자 확인 및 복구
     Optional<User> deletedUser =
-        userRepository.findByEmailAndDeletedAtIsNotNull(request.getEmail());
+        userRepository.findByEmailAndStatus(request.getEmail(), UserStatus.DELETED);
     if (deletedUser.isPresent()) {
       User user = deletedUser.get();
       if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -132,7 +139,7 @@ public class UserService {
 
   public User getUserByEmail(String email) {
     return userRepository
-        .findByEmailAndDeletedAtIsNull(email)
+        .findByEmailAndStatus(email, UserStatus.ACTIVE)
         .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
   }
 
@@ -148,7 +155,7 @@ public class UserService {
 
   public User getUserById(Long userId) {
     return userRepository
-        .findByIdAndDeletedAtIsNull(userId)
+        .findByIdAndStatus(userId, UserStatus.ACTIVE)
         .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
   }
 
@@ -180,13 +187,13 @@ public class UserService {
     }
 
     // 활성 사용자 확인
-    Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(email);
+    Optional<User> activeUser = userRepository.findByEmailAndStatus(email, UserStatus.ACTIVE);
     if (activeUser.isPresent()) {
       return activeUser.get();
     }
 
     // 탈퇴된 사용자 확인 및 복구
-    Optional<User> deletedUser = userRepository.findByEmailAndDeletedAtIsNotNull(email);
+    Optional<User> deletedUser = userRepository.findByEmailAndStatus(email, UserStatus.DELETED);
     if (deletedUser.isPresent()) {
       User user = deletedUser.get();
       user.restore();
@@ -227,13 +234,13 @@ public class UserService {
     String email = userResponse.getResponse().getEmail();
 
     // 활성 사용자 확인
-    Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(email);
+    Optional<User> activeUser = userRepository.findByEmailAndStatus(email, UserStatus.ACTIVE);
     if (activeUser.isPresent()) {
       return activeUser.get();
     }
 
     // 탈퇴된 사용자 확인 및 복구
-    Optional<User> deletedUser = userRepository.findByEmailAndDeletedAtIsNotNull(email);
+    Optional<User> deletedUser = userRepository.findByEmailAndStatus(email, UserStatus.DELETED);
     if (deletedUser.isPresent()) {
       User user = deletedUser.get();
       user.restore();
@@ -304,13 +311,14 @@ public class UserService {
     }
 
     // 활성 사용자 확인
-    Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(systemEmail);
+    Optional<User> activeUser = userRepository.findByEmailAndStatus(systemEmail, UserStatus.ACTIVE);
     if (activeUser.isPresent()) {
       return activeUser.get();
     }
 
     // 탈퇴된 사용자 확인 및 복구
-    Optional<User> deletedUser = userRepository.findByEmailAndDeletedAtIsNotNull(systemEmail);
+    Optional<User> deletedUser =
+        userRepository.findByEmailAndStatus(systemEmail, UserStatus.DELETED);
     if (deletedUser.isPresent()) {
       User user = deletedUser.get();
       user.restore();
@@ -530,6 +538,15 @@ public class UserService {
 
     // 상태 변경
     targetUser.updateStatus(request.getStatus());
+  }
+
+  @Transactional
+  public void withdrawAfter30Days(LocalDateTime before30Days) {
+    List<User> users = userRepository.findAllByWithdrawAfter30Days(before30Days);
+
+    logger.debug("withdrawAfter30Days 대상 사용자 수: {}", users.size());
+
+    users.forEach(User::withdrawAfter30Days);
   }
 
   /// 경력 개월 수 계산

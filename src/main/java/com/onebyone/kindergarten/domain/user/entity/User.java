@@ -164,14 +164,8 @@ public class User extends BaseEntity {
   public void withdraw() {
     this.status = UserStatus.DELETED;
     this.deletedAt = LocalDateTime.now();
-    /// 랜덤 6자리 숫자 생성
-    String randomNum = String.format("%06d", (int) (Math.random() * 1000000));
-    this.nickname = "D_" + randomNum;
-    /// 개인정보 마스킹
-    this.profileImageUrl = null;
-    this.homeShortcut = null;
-    this.fcmToken = null;
     this.updatedAt = LocalDateTime.now();
+    this.fcmToken = null;
   }
 
   /// 현재 deletedAt 값을 previousDeletedAt에 저장
@@ -250,5 +244,17 @@ public class User extends BaseEntity {
     } else if (status == UserStatus.ACTIVE) {
       // TODO : 활성화 시 특별한 처리가 필요하다면 여기에 추가
     }
+  }
+
+  public void withdrawAfter30Days() {
+    this.nickname = "D_" + this.id;
+    this.profileImageUrl = null;
+    this.homeShortcut = null;
+    this.email = "deleted_" + this.id + "@deleted.user";
+    this.kakaoProviderId = null;
+    this.naverProviderId = null;
+    this.appleProviderId = null;
+    this.career = null;
+    this.status = UserStatus.ANONYMOUS;
   }
 }

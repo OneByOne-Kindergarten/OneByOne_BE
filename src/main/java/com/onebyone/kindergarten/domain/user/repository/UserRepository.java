@@ -1,6 +1,8 @@
 package com.onebyone.kindergarten.domain.user.repository;
 
 import com.onebyone.kindergarten.domain.user.entity.User;
+import com.onebyone.kindergarten.domain.user.enums.UserStatus;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -14,13 +16,11 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
   Boolean existsByEmail(String email);
 
-  Optional<User> findByEmailAndDeletedAtIsNull(String email);
+  Optional<User> findByEmailAndStatus(String email, UserStatus status);
 
   @Query(
-      "SELECT u FROM user u LEFT JOIN FETCH u.Kindergarten WHERE u.id = :userId AND u.deletedAt IS NULL")
+      "SELECT u FROM user u LEFT JOIN FETCH u.Kindergarten WHERE u.id = :userId AND u.status = 'ACTIVE'")
   Optional<User> findIdWithKindergarten(@Param("userId") Long userId);
-
-  Optional<User> findByEmailAndDeletedAtIsNotNull(String email);
 
   @Query("SELECT u FROM user u LEFT JOIN FETCH u.Kindergarten WHERE u.id = :id")
   Optional<User> findByIdWithKindergarten(@Param("id") Long id);
@@ -73,8 +73,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
       Pageable pageable);
 
   /// 모든 활성 사용자 조회
-  @Query("SELECT u FROM user u WHERE u.deletedAt IS NULL")
+  @Query("SELECT u FROM user u WHERE u.status = 'ACTIVE'")
   List<User> findAllActiveUsers();
 
-  Optional<User> findByIdAndDeletedAtIsNull(Long userId);
+  Optional<User> findByIdAndStatus(Long userId, UserStatus status);
+
+  @Query(
+      "SELECT u "
+          + "FROM user u "
+          + "WHERE u.deletedAt <= :before30Days "
+          + "AND u.status = 'DELETED' ")
+  List<User> findAllByWithdrawAfter30Days(@Param("before30Days") LocalDateTime before30Days);
+
+  Optional<Object> findByEmail(String email);
 }
