@@ -6,7 +6,6 @@ import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -20,7 +19,7 @@ public class WithdrawAfter30DaysJob extends QuartzJobBean {
   private static Logger log = LoggerFactory.getLogger(WithdrawAfter30DaysJob.class);
 
   @Override
-  protected void executeInternal(JobExecutionContext context){
+  protected void executeInternal(JobExecutionContext context) {
     try {
       log.info("===== 탈퇴 Job 실행 시작: {} =====", LocalDateTime.now());
 
