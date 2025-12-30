@@ -2,6 +2,7 @@ package com.onebyone.kindergarten.domain.user.service;
 
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
+import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import com.onebyone.kindergarten.domain.user.repository.UserRepository;
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
@@ -20,7 +21,7 @@ public class CustomUserDetailService implements UserDetailsService {
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
     User user =
         userRepository
-            .findByEmailAndDeletedAtIsNull(email)
+            .findByEmailAndStatus(email, UserStatus.ACTIVE)
             .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
 
     return org.springframework.security.core.userdetails.User.builder()

@@ -2,6 +2,7 @@ package com.onebyone.kindergarten.global.batch.config;
 
 import com.onebyone.kindergarten.global.batch.job.PushNotificationJob;
 import com.onebyone.kindergarten.global.batch.job.TopPostsCacheRefreshJob;
+import com.onebyone.kindergarten.global.batch.job.WithdrawAfter30DaysJob;
 import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,5 +83,29 @@ public class QuartzSchedulerConfig {
   /// 매일 새벽 6시에 실행되는 크론 표현식
   public CronScheduleBuilder topPostsCacheRefreshCronScheduler() {
     return CronScheduleBuilder.cronSchedule("0 0 6 * * ?");
+  }
+
+  @Bean
+  public JobDetail withdrawAfter30DaysJobDetail() {
+    return JobBuilder.newJob(WithdrawAfter30DaysJob.class)
+        .storeDurably()
+        .withIdentity("withdrawAfter30DaysJob")
+        .withDescription("매일 새벽 3시에 30일 지난 사용자 탈퇴 처리 Job Detail")
+        .build();
+  }
+
+  @Bean
+  public Trigger withdrawAfter30DaysTrigger() {
+    return TriggerBuilder.newTrigger()
+        .forJob(withdrawAfter30DaysJobDetail())
+        .withIdentity("withdrawAfter30DaysTrigger")
+        .withDescription("매일 새벽 3시에 30일 지난 사용자 탈퇴 처리 트리거")
+        .startNow()
+        .withSchedule(withdrawAfter30DaysCronScheduler())
+        .build();
+  }
+
+  public CronScheduleBuilder withdrawAfter30DaysCronScheduler() {
+    return CronScheduleBuilder.cronSchedule("0 0 3 * * ?");
   }
 }
