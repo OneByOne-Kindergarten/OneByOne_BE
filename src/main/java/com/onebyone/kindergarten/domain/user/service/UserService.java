@@ -31,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -70,42 +71,26 @@ public class UserService {
 
   @Transactional
   public JwtUserInfoDto signIn(SignInRequestDTO request) {
-    // 먼저 활성 사용자 확인
-    Optional<User> activeUser =
-        userRepository.findByEmailAndStatus(request.getEmail(), UserStatus.ACTIVE);
-    if (activeUser.isPresent()) {
-      User user = activeUser.get();
-      if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-        throw new BusinessException(ErrorCodes.INVALID_PASSWORD_ERROR);
-      }
+    User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
-      if (request.getFcmToken() != null) {
-        user.updateFcmToken(request.getFcmToken());
-      }
+    switch (user.getStatus()) {
+      case ACTIVE:
+        validatePassword(request.getPassword(), user);
+        updateFcmTokenIfPresent(request, user);
 
-      return new JwtUserInfoDto(user.getId(), user.getRole());
+        return new JwtUserInfoDto(user.getId(), user.getRole());
+      case DELETED:
+        validatePassword(request.getPassword(), user);
+        user.restore();
+        updateFcmTokenIfPresent(request, user);
+
+        return new JwtUserInfoDto(user.getId(), user.getRole());
+      case SUSPENDED:
+        throw new BusinessException(ErrorCodes.SUSPENDED_USER_EXCEPTION);
+      case ANONYMOUS:
+      default:
+        throw new BusinessException(ErrorCodes.LOGIN_NOT_ALLOWED_ANONYMOUS);
     }
-
-    // 탈퇴된 사용자 확인 및 복구
-    Optional<User> deletedUser =
-        userRepository.findByEmailAndStatus(request.getEmail(), UserStatus.DELETED);
-    if (deletedUser.isPresent()) {
-      User user = deletedUser.get();
-      if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-        throw new BusinessException(ErrorCodes.INVALID_PASSWORD_ERROR);
-      }
-
-      // 계정 복구
-      user.restore();
-
-      if (request.getFcmToken() != null) {
-        user.updateFcmToken(request.getFcmToken());
-      }
-
-      return new JwtUserInfoDto(user.getId(), user.getRole());
-    }
-
-    throw new BusinessException(ErrorCodes.NOT_FOUND_EMAIL);
   }
 
   @Transactional
@@ -123,10 +108,7 @@ public class UserService {
   @Transactional
   public void changePassword(Long userId, ModifyUserPasswordRequestDTO request) {
     User user = getUserById(userId);
-
-    if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-      throw new BusinessException(ErrorCodes.INVALID_PASSWORD_ERROR);
-    }
+    validatePassword(request.getNewPassword(), user);
 
     user.changePassword(passwordEncoder.encode(request.getNewPassword()));
   }
@@ -167,16 +149,35 @@ public class UserService {
   }
 
   @Transactional
-  public User signUpByKakao(KakaoUserResponse userResponse) {
+  public User signUpByKakao(KakaoUserResponse userResponse, String fcmToken) {
     String email = userResponse.getKakao_account().getEmail();
 
+    User user = userRepository.findByEmail(email).orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+
+    switch (user.getStatus()) {
+      case ACTIVE:
+        if (StringUtils.hasText(fcmToken)) {
+          user.updateFcmToken(fcmToken);
+        }
+        return user;
+      case DELETED:
+        user.restore();
+        if (StringUtils.hasText(fcmToken)) {
+          user.updateFcmToken(fcmToken);
+        }
+        return user;
+      case SUSPENDED:
+        throw new BusinessException(ErrorCodes.SUSPENDED_USER_EXCEPTION);
+    }
+
+    // 신규 가입자
     String nickname;
     if (userResponse.getKakao_account().getProfile() != null
-        && userResponse.getKakao_account().getProfile().getNickname() != null
-        && !userResponse.getKakao_account().getProfile().getNickname().trim().isEmpty()) {
+            && userResponse.getKakao_account().getProfile().getNickname() != null
+            && !userResponse.getKakao_account().getProfile().getNickname().trim().isEmpty()) {
       String originalNickname = userResponse.getKakao_account().getProfile().getNickname().trim();
       nickname =
-          originalNickname.length() > 10 ? originalNickname.substring(0, 10) : originalNickname;
+              originalNickname.length() > 10 ? originalNickname.substring(0, 10) : originalNickname;
     } else {
       // "카카오" (3글자) + ID 마지막 6자리 = 최대 9글자
       String idSuffix = String.valueOf(userResponse.getId());
@@ -184,27 +185,6 @@ public class UserService {
         idSuffix = idSuffix.substring(idSuffix.length() - 6);
       }
       nickname = "카카오" + idSuffix;
-    }
-
-    // 활성 사용자 확인
-    Optional<User> activeUser = userRepository.findByEmailAndStatus(email, UserStatus.ACTIVE);
-    if (activeUser.isPresent()) {
-      return activeUser.get();
-    }
-
-    // 탈퇴된 사용자 확인 및 복구
-    Optional<User> deletedUser = userRepository.findByEmailAndStatus(email, UserStatus.DELETED);
-    if (deletedUser.isPresent()) {
-      User user = deletedUser.get();
-      user.restore();
-
-      // 소셜 로그인 정보 업데이트
-      if (userResponse.getKakao_account().getProfile() != null) {
-        user.updateProfileImageUrl(
-            userResponse.getKakao_account().getProfile().getProfile_image_url());
-      }
-
-      return user;
     }
 
     // 새로운 사용자 생성
@@ -558,4 +538,17 @@ public class UserService {
         ? currentCareerMonths + (int) monthsBetween
         : currentCareerMonths - (int) monthsBetween;
   }
+
+  private void validatePassword(String rawPassword, User user) {
+    if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+      throw new BusinessException(ErrorCodes.INVALID_PASSWORD_ERROR);
+    }
+  }
+
+  private void updateFcmTokenIfPresent(SignInRequestDTO request, User user) {
+    if (request.getFcmToken() != null) {
+      user.updateFcmToken(request.getFcmToken());
+    }
+  }
+
 }

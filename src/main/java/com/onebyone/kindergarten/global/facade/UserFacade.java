@@ -98,11 +98,7 @@ public class UserFacade {
 
     KakaoUserResponse userResponse = kakaoApiClient.getUserInfo("Bearer " + kakaoAccessToken);
 
-    User user = userService.signUpByKakao(userResponse);
-
-    if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-      user.updateFcmToken(fcmToken);
-    }
+    User user = userService.signUpByKakao(userResponse, fcmToken);
 
     String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getRole());
     String refreshToken = jwtProvider.generateRefreshToken(user.getId(), user.getRole());
