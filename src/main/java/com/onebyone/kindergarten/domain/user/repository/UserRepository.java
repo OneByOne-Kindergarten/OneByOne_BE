@@ -4,7 +4,10 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.UserStatus;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -86,4 +89,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
   List<User> findAllByWithdrawAfter30Days(@Param("before30Days") LocalDateTime before30Days);
 
   Optional<Object> findByEmail(String email);
+
+  @Query("""
+      SELECT u.id, u.status
+      FROM user u
+      where u.id in :ids
+""")
+  List<Object[]> findStatusByIds(Set<Long> ids);
 }

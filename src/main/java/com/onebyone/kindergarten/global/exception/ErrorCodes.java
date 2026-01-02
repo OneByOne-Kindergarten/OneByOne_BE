@@ -62,6 +62,11 @@ public enum ErrorCodes {
   NOT_FOUND_CERTIFICATION("E0056", "인증 내역이 존재하지 않습니다."),
   CERTIFICATION_CODE_MISMATCH("E0057", "인증 코드가 일치하지 않습니다."),
   FAILED_WITHDRAW_EXCEPTION("E0058", "30일 지난 사용자 익명 처리에 실패했습니다."),
+  INVALID_CHAT_ROOM_MEMBER("E0059", "유효하지 않은 채팅방 사용자입니다."),
+  INVALID_CHAT_ROOM_TITLE("E0060", "유효하지 않은 채팅방 제목입니다."),
+  INVALID_CHAT_SELF("E0061", "사용자 자신과는 채팅할 수 없습니다"),
+  INVALID_CHAT_DUPLICATED_MEMBER("E0062", "중복된 사용자가 존재합니다"),
+  INVALID_USER_STATUS("E0063", "유효하지 않은 사용자 상태입니다."),
   INTERNAL_SERVER_ERROR("E9999", "알 수 없는 에러 발생");
 
   private final String code;

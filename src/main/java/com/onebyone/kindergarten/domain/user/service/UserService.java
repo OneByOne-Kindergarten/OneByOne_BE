@@ -19,10 +19,9 @@ import com.onebyone.kindergarten.global.exception.ErrorCodes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,11 +46,11 @@ public class UserService {
       throw new BusinessException(ErrorCodes.ALREADY_EXIST_EMAIL);
     }
 
-    EmailCertification emailCertification =
-        emailCertificationRepository.findByEmail(request.getEmail());
-    if (emailCertification == null || !emailCertification.isCertificated()) {
-      throw new BusinessException(ErrorCodes.FAILED_EMAIL_CERTIFICATION_EXCEPTION);
-    }
+//    EmailCertification emailCertification =
+//        emailCertificationRepository.findByEmail(request.getEmail());
+//    if (emailCertification == null || !emailCertification.isCertificated()) {
+//      throw new BusinessException(ErrorCodes.FAILED_EMAIL_CERTIFICATION_EXCEPTION);
+//    }
 
     String encodedPassword = encodePassword(request.getPassword());
     User user = userRepository.save(request.toEntity(encodedPassword));
@@ -557,5 +556,40 @@ public class UserService {
     return isAdding
         ? currentCareerMonths + (int) monthsBetween
         : currentCareerMonths - (int) monthsBetween;
+  }
+
+  public void validateUserStatus(Long userId, List<Long> userIds) {
+    // 자기 자신 제외
+    if (userIds.contains(userId)) {
+      throw new BusinessException(ErrorCodes.INVALID_CHAT_SELF);
+    }
+
+    // 중복 제거
+    Set<Long> uniqueIds = new HashSet<>(userIds);
+
+    logger.info("========== userIds: {} ==========",  userIds);
+    logger.info("========== uniqueIds: {} ==========",  uniqueIds);
+
+    if (uniqueIds.size() != userIds.size()) {
+      throw new BusinessException(ErrorCodes.INVALID_CHAT_DUPLICATED_MEMBER);
+    }
+
+    Map<Long, UserStatus> statusMap =
+            userRepository.findStatusByIds(uniqueIds)
+                    .stream()
+                    .collect(Collectors.toMap(
+                            row -> (Long) row[0],
+                            row -> (UserStatus) row[1]
+                    ));
+
+    logger.info("========== statusMap: {} ==========",  statusMap);
+
+    for (Long memberId : uniqueIds) {
+      UserStatus status = statusMap.get(memberId);
+      logger.info("========== status: {} ==========",  status);
+      if (status != UserStatus.ACTIVE) {
+        throw new BusinessException(ErrorCodes.INVALID_USER_STATUS);
+      }
+    }
   }
 }
