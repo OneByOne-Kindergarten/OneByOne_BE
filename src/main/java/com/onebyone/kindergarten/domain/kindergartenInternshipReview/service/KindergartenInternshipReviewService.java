@@ -225,7 +225,7 @@ public class KindergartenInternshipReviewService {
 
   /// 실습 리뷰 삭제 (소프트 삭제)
   @Transactional
-  public void deleteInternshipReview(Long reviewId, String email) {
+  public Kindergarten deleteInternshipReview(Long reviewId, Long userId, UserRole role) {
     // 리뷰 조회
     KindergartenInternshipReview review =
         kindergartenInternshipReviewRepository
@@ -233,16 +233,14 @@ public class KindergartenInternshipReviewService {
             .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_INTERNSHIP_REVIEW));
 
     // 현재 사용자 조회
-    User currentUser = userService.getUserByEmail(email);
-
-    // 작성자 또는 관리자 권한 확인
-    if (!review.getUser().getEmail().equals(email)
-        && !currentUser.getRole().equals(UserRole.ADMIN)) {
+    if (!review.getUser().getId().equals(userId) && !role.equals(UserRole.ADMIN)) {
       throw new BusinessException(ErrorCodes.UNAUTHORIZED_DELETE);
     }
 
     // 리뷰 소프트 삭제 (deletedAt 설정)
     review.markAsDeleted();
+
+    return review.getKindergarten();
   }
 
   public int countReviewsByUser(Long userId, ReviewStatus reviewStatus) {
