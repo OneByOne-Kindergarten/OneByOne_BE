@@ -239,7 +239,7 @@ public class KindergartenWorkReviewService {
   }
 
   /// 근무 리뷰 삭제 (소프트 삭제)
-  public void deleteWorkReview(Long reviewId, Long userId, UserRole role) {
+  public Kindergarten deleteWorkReview(Long reviewId, Long userId, UserRole role) {
     // 리뷰 조회
     KindergartenWorkReview review =
         workReviewRepository
@@ -253,6 +253,8 @@ public class KindergartenWorkReviewService {
 
     // 리뷰 소프트 삭제 (deletedAt 설정)
     review.markAsDeleted();
+
+    return review.getKindergarten();
   }
 
   public int countReviewsByUser(Long userId, ReviewStatus reviewStatus) {

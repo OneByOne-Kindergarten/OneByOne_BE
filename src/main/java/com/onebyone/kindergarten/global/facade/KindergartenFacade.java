@@ -65,8 +65,12 @@ public class KindergartenFacade {
   @Transactional
   public void deleteWorkReview(Long reviewId, Long userId) {
     User currentUser = userService.getUserById(userId);
-    kindergartenWorkReviewService.deleteWorkReview(
-        reviewId, currentUser.getId(), currentUser.getRole());
+    Kindergarten kindergarten =
+        kindergartenWorkReviewService.deleteWorkReview(
+            reviewId, currentUser.getId(), currentUser.getRole());
+
+    kindergartenWorkReviewAggregateService.updateOrCreateAggregate(kindergarten);
+
     int workReviewCount =
         kindergartenWorkReviewService.countReviewsByUser(
             currentUser.getId(), ReviewStatus.ACCEPTED);
@@ -81,8 +85,12 @@ public class KindergartenFacade {
   @Transactional
   public void deleteInternshipReview(Long reviewId, Long userId) {
     User currentUser = userService.getUserById(userId);
-    kindergartenInternshipReviewService.deleteWorkReview(
-        reviewId, currentUser.getId(), currentUser.getRole());
+    Kindergarten kindergarten =
+        kindergartenInternshipReviewService.deleteInternshipReview(
+            reviewId, currentUser.getId(), currentUser.getRole());
+
+    kindergartenInternshipReviewAggregateService.updateOrCreateAggregate(kindergarten);
+
     int workReviewCount =
         kindergartenWorkReviewService.countReviewsByUser(
             currentUser.getId(), ReviewStatus.ACCEPTED);
