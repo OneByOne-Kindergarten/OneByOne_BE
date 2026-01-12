@@ -158,13 +158,6 @@ public class UserService {
         .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
   }
 
-  public UserDTO getUserToDTO(Long userId) {
-    return UserDTO.from(
-        userRepository
-            .findIdWithKindergarten(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL)));
-  }
-
   @Transactional
   public User signUpByKakao(KakaoUserResponse userResponse) {
     String email = userResponse.getKakao_account().getEmail();
