@@ -70,4 +70,8 @@ public class UserFavoriteKindergartenService {
     // 유치원 존재 여부 확인
     return favoriteRepository.existsByUserAndKindergartenId(user, kindergartenId);
   }
+
+  public Integer countByUserId(Long userId) {
+    return favoriteRepository.countByUserId(userId);
+  }
 }

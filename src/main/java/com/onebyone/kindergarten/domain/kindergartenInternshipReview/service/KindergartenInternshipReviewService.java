@@ -263,4 +263,8 @@ public class KindergartenInternshipReviewService {
     // 리뷰 소프트 삭제 (deletedAt 설정)
     review.markAsDeleted();
   }
+
+  public Integer countByUserId(Long userId) {
+    return kindergartenInternshipReviewRepository.countByUserId(userId);
+  }
 }

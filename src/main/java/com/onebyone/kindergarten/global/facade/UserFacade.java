@@ -17,6 +17,7 @@ import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.EmailCertificationType;
 import com.onebyone.kindergarten.domain.user.service.AppleAuthService;
 import com.onebyone.kindergarten.domain.user.service.UserService;
+import com.onebyone.kindergarten.domain.userFavoriteKindergartens.service.UserFavoriteKindergartenService;
 import com.onebyone.kindergarten.global.feignClient.KakaoApiClient;
 import com.onebyone.kindergarten.global.feignClient.KakaoAuthClient;
 import com.onebyone.kindergarten.global.feignClient.NaverApiClient;
@@ -47,6 +48,7 @@ public class UserFacade {
   private final NaverApiClient naverApiClient;
   private final AppleAuthService appleAuthService;
   private final EmailProvider emailProvider;
+  private final UserFavoriteKindergartenService userFavoriteKindergartenService;
 
   @Value("${oauth.kakao.secret-key}")
   private String kakaoApiKey;
@@ -165,8 +167,8 @@ public class UserFacade {
 
   public PageCommunityCommentsResponseDTO getWroteMyCommunityComments(
       Long userId, int page, int size) {
-    UserDTO user = userService.getUserToDTO(userId);
-    return communityCommentService.getWroteMyCommunityComments(user.getUserId(), page, size);
+    User user = userService.getUserById(userId);
+    return communityCommentService.getWroteMyCommunityComments(user.getId(), page, size);
   }
 
   /// 내가 작성한 실습 리뷰 조회
@@ -224,5 +226,13 @@ public class UserFacade {
       }
     }
     return key.toString();
+  }
+
+  public UserDTO getUserToDTO(Long userId) {
+    return UserDTO.from(
+        userService.getUserById(userId),
+        userFavoriteKindergartenService.countByUserId(userId),
+        kindergartenWorkReviewService.countByUserId(userId),
+        kindergartenInternshipReviewService.countByUserId(userId));
   }
 }

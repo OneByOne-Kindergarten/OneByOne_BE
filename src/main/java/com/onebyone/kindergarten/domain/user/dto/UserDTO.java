@@ -23,8 +23,12 @@ public class UserDTO {
   private boolean communityNotificationsEnabled;
   private boolean eventNotificationsEnabled;
   private boolean hasWrittenReview;
+  private Integer favoriteCount;
+  private Integer workReviewCount;
+  private Integer internshipReviewCount;
 
-  public static UserDTO from(User user) {
+  public static UserDTO from(
+      User user, Integer favoriteCount, Integer workReviewCount, Integer internshipReviewCount) {
     HomeShortcutsDto homeShortcutsDto =
         user.getHomeShortcut() != null
             ? HomeShortcutsDto.fromJson(user.getHomeShortcut())
@@ -43,6 +47,9 @@ public class UserDTO {
         user.hasNotificationEnabled(NotificationSetting.ALL_NOTIFICATIONS),
         user.hasNotificationEnabled(NotificationSetting.COMMUNITY_NOTIFICATIONS),
         user.hasNotificationEnabled(NotificationSetting.EVENT_NOTIFICATIONS),
-        user.hasWrittenReview());
+        user.hasWrittenReview(),
+        favoriteCount != null ? favoriteCount : 0,
+        workReviewCount != null ? workReviewCount : 0,
+        internshipReviewCount != null ? internshipReviewCount : 0);
   }
 }

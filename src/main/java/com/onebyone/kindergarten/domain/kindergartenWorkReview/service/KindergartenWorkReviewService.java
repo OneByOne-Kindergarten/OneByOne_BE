@@ -260,4 +260,8 @@ public class KindergartenWorkReviewService {
   public int countReviewsByUser(Long userId, ReviewStatus reviewStatus) {
     return workReviewRepository.countByUserIdAndReviewStatus(userId, reviewStatus);
   }
+
+  public Integer countByUserId(Long userId) {
+    return kindergartenWorkReviewRepository.countByUserId(userId);
+  }
 }

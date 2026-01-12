@@ -1,6 +1,6 @@
 package com.onebyone.kindergarten.global.facade;
 
-import com.onebyone.kindergarten.domain.user.dto.UserDTO;
+import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.UserRole;
 import com.onebyone.kindergarten.domain.user.service.UserService;
 import com.onebyone.kindergarten.global.exception.BusinessException;
@@ -27,9 +27,9 @@ public class AddressFacade {
   private final Job regionJob;
 
   public void regionBatch(Long userId) {
-    UserDTO user = userService.getUserToDTO(userId);
+    User user = userService.getUserById(userId);
 
-    if (!UserRole.ADMIN.name().equals(user.getRole())) {
+    if (!UserRole.ADMIN.equals(user.getRole())) {
       throw new BusinessException(ErrorCodes.BATCH_NOT_ADMIN_CANNOT_USE);
     }
 
@@ -47,9 +47,9 @@ public class AddressFacade {
   }
 
   public void subRegionBatch(Long userId) {
-    UserDTO user = userService.getUserToDTO(userId);
+    User user = userService.getUserById(userId);
 
-    if (!UserRole.ADMIN.name().equals(user.getRole())) {
+    if (!UserRole.ADMIN.equals(user.getRole())) {
       throw new BusinessException(ErrorCodes.BATCH_NOT_ADMIN_CANNOT_USE);
     }
 

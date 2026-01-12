@@ -197,4 +197,6 @@ public interface KindergartenWorkReviewRepository
       @Param("reviewStatus") ReviewStatus reviewStatus, Pageable pageable);
 
   int countByUserIdAndReviewStatus(Long userId, ReviewStatus status);
+
+  Integer countByUserId(Long userId);
 }

@@ -48,4 +48,8 @@ public interface UserFavoriteKindergartenRepository
       })
   @Query("SELECT uf FROM user_favorite_kindergarten uf WHERE uf.user = :user")
   List<UserFavoriteKindergarten> findByUser(@Param("user") User user);
+
+  List<UserFavoriteKindergarten> user(User user);
+
+  Integer countByUserId(Long userId);
 }
