@@ -80,8 +80,7 @@ public class UserApiController {
   @Operation(summary = "유저-06 유저정보", description = "유저 조회입니다.")
   @GetMapping
   public GetUserResponseDTO getUser(@AuthenticationPrincipal UserDetails userDetails) {
-    return new GetUserResponseDTO(
-        userService.getUserToDTO(Long.valueOf(userDetails.getUsername())));
+    return new GetUserResponseDTO(userFacade.getUserToDTO(Long.valueOf(userDetails.getUsername())));
   }
 
   @Operation(summary = "유저-07 토큰 재발급", description = "토큰 재발급입니다.")

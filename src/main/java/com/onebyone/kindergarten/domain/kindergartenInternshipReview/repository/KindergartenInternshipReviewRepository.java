@@ -143,4 +143,6 @@ public interface KindergartenInternshipReviewRepository
       @Param("reviewStatus") ReviewStatus reviewStatus, Pageable pageable);
 
   int countByUserIdAndReviewStatus(Long userId, ReviewStatus reviewStatus);
+
+  Integer countByUserId(Long userId);
 }
