@@ -115,21 +115,21 @@ public class CommunityService {
   /// 기간별 인기 게시글 TOP 10 조회 (캐싱 적용)
   @Cacheable(value = CacheConfig.TOP_POSTS_CACHE, key = "#periodType")
   public List<CommunityPostResponseDTO> getTopPostsByPeriod(PeriodType periodType) {
-      return switch (periodType) {
-          case WEEKLY -> {
-              LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
-              yield communityRepository.findTop10ByPeriod(weekAgo).stream()
-                      .map(communityPostMapper::toResponse)
-                      .collect(Collectors.toList());
-          }
-          case MONTHLY -> {
-              LocalDateTime monthAgo = LocalDateTime.now().minusDays(30);
-              yield communityRepository.findTop10ByPeriod(monthAgo).stream()
-                      .map(communityPostMapper::toResponse)
-                      .collect(Collectors.toList());
-          }
-          default -> getTopPosts();
-      };
+    return switch (periodType) {
+      case WEEKLY -> {
+        LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
+        yield communityRepository.findTop10ByPeriod(weekAgo).stream()
+            .map(communityPostMapper::toResponse)
+            .collect(Collectors.toList());
+      }
+      case MONTHLY -> {
+        LocalDateTime monthAgo = LocalDateTime.now().minusDays(30);
+        yield communityRepository.findTop10ByPeriod(monthAgo).stream()
+            .map(communityPostMapper::toResponse)
+            .collect(Collectors.toList());
+      }
+      default -> getTopPosts();
+    };
   }
 
   /// 모든 기간의 인기 게시글을 한 번에 조회
