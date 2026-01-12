@@ -3,8 +3,10 @@ package com.onebyone.kindergarten.domain.communityPosts.service;
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CommunitySearchDTO;
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CreateCommunityPostRequestDTO;
 import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityPostResponseDTO;
+import com.onebyone.kindergarten.domain.communityPosts.dto.response.PopularPostsResponseDTO;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityCategory;
 import com.onebyone.kindergarten.domain.communityPosts.entity.CommunityPost;
+import com.onebyone.kindergarten.domain.communityPosts.enums.PeriodType;
 import com.onebyone.kindergarten.domain.communityPosts.mapper.CommunityPostMapper;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityCategoryRepository;
 import com.onebyone.kindergarten.domain.communityPosts.repository.CommunityRepository;
@@ -15,6 +17,7 @@ import com.onebyone.kindergarten.domain.userBlock.repository.UserBlockRepository
 import com.onebyone.kindergarten.global.config.CacheConfig;
 import com.onebyone.kindergarten.global.exception.BusinessException;
 import com.onebyone.kindergarten.global.exception.ErrorCodes;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -101,12 +104,41 @@ public class CommunityService {
     return communityPostMapper.toResponse(post);
   }
 
-  /// 인기 게시글 TOP 10 조회
+  /// 인기 게시글 TOP 10 조회 (전체 기간 - 하위 호환성 유지)
   @Cacheable(value = CacheConfig.TOP_POSTS_CACHE)
   public List<CommunityPostResponseDTO> getTopPosts() {
     return communityRepository.findTop10WithUserOrderByLikeCountDescViewCountDesc().stream()
         .map(communityPostMapper::toResponse)
         .collect(Collectors.toList());
+  }
+
+  /// 기간별 인기 게시글 TOP 10 조회 (캐싱 적용)
+  @Cacheable(value = CacheConfig.TOP_POSTS_CACHE, key = "#periodType")
+  public List<CommunityPostResponseDTO> getTopPostsByPeriod(PeriodType periodType) {
+      return switch (periodType) {
+          case WEEKLY -> {
+              LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
+              yield communityRepository.findTop10ByPeriod(weekAgo).stream()
+                      .map(communityPostMapper::toResponse)
+                      .collect(Collectors.toList());
+          }
+          case MONTHLY -> {
+              LocalDateTime monthAgo = LocalDateTime.now().minusDays(30);
+              yield communityRepository.findTop10ByPeriod(monthAgo).stream()
+                      .map(communityPostMapper::toResponse)
+                      .collect(Collectors.toList());
+          }
+          default -> getTopPosts();
+      };
+  }
+
+  /// 모든 기간의 인기 게시글을 한 번에 조회
+  public PopularPostsResponseDTO getAllPopularPosts() {
+    return PopularPostsResponseDTO.builder()
+        .weekly(getTopPostsByPeriod(PeriodType.WEEKLY))
+        .monthly(getTopPostsByPeriod(PeriodType.MONTHLY))
+        .all(getTopPostsByPeriod(PeriodType.ALL))
+        .build();
   }
 
   /// 인기 게시글 캐시 갱신

@@ -4,6 +4,7 @@ import com.onebyone.kindergarten.domain.communityPosts.dto.request.CommunitySear
 import com.onebyone.kindergarten.domain.communityPosts.dto.request.CreateCommunityPostRequestDTO;
 import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityLikeResponseDTO;
 import com.onebyone.kindergarten.domain.communityPosts.dto.response.CommunityPostResponseDTO;
+import com.onebyone.kindergarten.domain.communityPosts.dto.response.PopularPostsResponseDTO;
 import com.onebyone.kindergarten.domain.communityPosts.service.CommunityLikeService;
 import com.onebyone.kindergarten.domain.communityPosts.service.CommunityService;
 import com.onebyone.kindergarten.global.common.PageResponseDTO;
@@ -65,10 +66,18 @@ public class CommunityController {
 
   @GetMapping("/top")
   @Operation(
-      summary = "인기 게시글 TOP 10 조회",
-      description = "좋아요 수, 조회수, 최신도를 기반으로 한 점수로 인기 게시글 TOP 10을 조회합니다.")
+      summary = "인기 게시글 TOP 10 조회 (전체)",
+      description = "전체 기간의 인기 게시글 TOP 10을 조회합니다. (하위 호환성 유지)")
   public ResponseDto<List<CommunityPostResponseDTO>> getTopPosts() {
     return ResponseDto.success(communityService.getTopPosts());
+  }
+
+  @GetMapping("/popular")
+  @Operation(
+      summary = "인기 게시글 조회 (주간/월간/전체)",
+      description = "주간/월간/전체 기간별 인기 게시글 TOP 10을 한 번에 조회합니다. 좋아요 수, 조회수, 최신도를 기반으로 정렬됩니다.")
+  public ResponseDto<PopularPostsResponseDTO> getPopularPosts() {
+    return ResponseDto.success(communityService.getAllPopularPosts());
   }
 
   @PostMapping("/{postId}/like")

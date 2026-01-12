@@ -14,7 +14,7 @@ public class CommunityServiceInitializer implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-    communityService.getTopPosts();
-    log.info("서버 시작 >> 인기 게시글 캐시 초기화가 완료되었습니다.");
+    communityService.getAllPopularPosts();
+    log.info("서버 시작 >> 인기 게시글 캐시 초기화가 완료되었습니다. (주간/월간/전체)");
   }
 }

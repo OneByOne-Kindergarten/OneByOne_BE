@@ -68,4 +68,17 @@ public interface CommunityRepository extends JpaRepository<CommunityPost, Long> 
   @Modifying
   @Query("UPDATE CommunityPost p SET p.commentCount = p.commentCount - :count WHERE p.id = :postId")
   void decrementCommentCount(@Param("postId") Long postId, @Param("count") int count);
+
+  /// 기간별 인기 게시글 TOP 10 조회
+  @Query(
+      "SELECT p FROM CommunityPost p "
+          + "JOIN FETCH p.user "
+          + "JOIN FETCH p.communityCategory "
+          + "WHERE p.deletedAt IS NULL "
+          + "AND p.createdAt >= :startDate "
+          + "ORDER BY "
+          + "((p.likeCount * 3 + p.viewCount * 0.05) * "
+          + "(1.0 / (1.0 + (FUNCTION('DATEDIFF', CURRENT_DATE, CAST(p.createdAt AS date)) / 7.0)))) DESC "
+          + "LIMIT 10")
+  List<CommunityPost> findTop10ByPeriod(@Param("startDate") java.time.LocalDateTime startDate);
 }

@@ -25,11 +25,12 @@ public class TopPostsCacheRefreshJob extends QuartzJobBean {
       /// 캐시 갱신
       communityService.refreshTopPostsCache();
 
-      /// 데이터 로드
-      communityService.getTopPosts();
+      /// 데이터 로드 (주간, 월간, 전체)
+      communityService.getAllPopularPosts();
 
       log.info("인기 게시글 캐시가 성공적으로 갱신되었습니다.");
     } catch (Exception e) {
+      log.error("인기 게시글 캐시 갱신 중 오류 발생: {}", e.getMessage(), e);
       throw new BusinessException(ErrorCodes.FAILED_TOP_POST_CACHE_EXCEPTION);
     }
 
