@@ -3,6 +3,7 @@ package com.onebyone.kindergarten.domain.websocket.service;
 import com.onebyone.kindergarten.domain.websocket.domain.ChatRoom;
 import com.onebyone.kindergarten.domain.websocket.domain.ChatRoomMember;
 import com.onebyone.kindergarten.domain.websocket.dto.ChatRoomCreateRequest;
+import com.onebyone.kindergarten.domain.websocket.dto.ChatRoomLastMessageDto;
 import com.onebyone.kindergarten.domain.websocket.dto.ChatRoomResponse;
 import com.onebyone.kindergarten.domain.websocket.dto.RoomType;
 import com.onebyone.kindergarten.domain.websocket.repository.ChatRoomMemberRepository;
@@ -26,6 +27,13 @@ public class ChatRoomService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     public ChatRoomResponse createRoom(Long userId, ChatRoomCreateRequest request) {
+        Optional<ChatRoomResponse> existing =
+                findExistingRoom(userId, request);
+
+        if (existing.isPresent()) {
+            logger.info("========== 기존 방 반환 ==========");
+            return existing.get();
+        }
 
         if (request.getType() == RoomType.PRIVATE) {
             logger.info("========== 1대1 대화방 ==========");
@@ -41,6 +49,10 @@ public class ChatRoomService {
     private void validatePrivate(ChatRoomCreateRequest request, Long userId) {
         if (request.getUserIds().size() != 1) {
             throw new BusinessException(ErrorCodes.INVALID_CHAT_ROOM_MEMBER);
+        }
+
+        if (request.getTitle() == null || request.getTitle().isBlank()) {
+            throw new BusinessException(ErrorCodes.INVALID_CHAT_ROOM_TITLE);
         }
 
         if (request.getUserIds().contains(userId)) {
@@ -62,64 +74,24 @@ public class ChatRoomService {
         }
     }
 
+    public Optional<ChatRoomResponse> findExistingRoom(
+            Long userId,
+            ChatRoomCreateRequest request
+    ) {
+        Set<Long> members = new HashSet<>();
+        members.add(userId);
+        members.addAll(request.getUserIds());
 
-//    private ChatRoomResponse createPrivateRoom(Long userId, ChatRoomCreateRequest request) {
-//
-//        if (request.getUserIds().size() != 1) {
-//            throw new BusinessException(ErrorCodes.INVALID_CHAT_ROOM_MEMBER);
-//        }
-//
-//        Long targetUserId = request.getUserIds().get(0);
-//
-//        // 기존 1:1 방 조회
-//        Optional<Long> existingRoomId =
-//                chatRoomRepository.findPrivateRoom(userId, targetUserId);
-//
-//        if (existingRoomId.isPresent()) {
-//            logger.info("========== 기존 방 존재 ==========");
-//            return new ChatRoomResponse(
-//                    existingRoomId.get(),
-//                    RoomType.PRIVATE
-//            );
-//        }
-//
-//        logger.info("========== 개인 방 생성 시작 ==========");
-//        ChatRoom room = ChatRoom.create(request.getTitle(), RoomType.PRIVATE);
-//        chatRoomRepository.save(room);
-//        logger.info("========== 개인 방 생성 종료 ==========");
-//
-//        logger.info("========== 개인 방 멤버 생성 시작 ==========");
-//        saveMembers(room.getId(), List.of(userId, targetUserId));
-//        logger.info("========== 개인 방 멤버 생성 종료 ==========");
-//
-//        return new ChatRoomResponse(room.getId(), RoomType.PRIVATE);
-//    }
+        String hash = ChatRoomHashUtil.generate(members);
 
-//    private ChatRoomResponse createGroupRoom(Long userId, ChatRoomCreateRequest request) {
-//
-//        if (request.getUserIds().size() < 2) {
-//            throw new BusinessException(ErrorCodes.INVALID_CHAT_ROOM_MEMBER);
-//        }
-//
-//        if (request.getTitle() == null || request.getTitle().isBlank()) {
-//            throw new BusinessException(ErrorCodes.INVALID_CHAT_ROOM_TITLE);
-//        }
-//
-//        logger.info("========== 단체 방 생성 시작 ==========");
-//        ChatRoom room = ChatRoom.create(request.getTitle(), RoomType.GROUP);
-//        chatRoomRepository.save(room);
-//        logger.info("========== 단체 방 생성 종료 ==========");
-//
-//        List<Long> members = new ArrayList<>();
-//        members.add(userId);
-//        members.addAll(request.getUserIds());
-//
-//        logger.info("========== 단체 방 멤버 생성 시작 ==========");
-//        saveMembers(room.getId(), members);
-//        logger.info("========== 단체 방 멤버 생성 종료 ==========");
-//
-//        return new ChatRoomResponse(room.getId(), RoomType.GROUP);
-//    }
+        return chatRoomRepository.findByMemberHash(hash)
+                .map(room ->
+                        new ChatRoomResponse(
+                                room.getId(),
+                                room.getType()
+                        )
+                );
+    }
 
     private ChatRoomResponse createRoomInternal(
             Long userId,
@@ -131,24 +103,13 @@ public class ChatRoomService {
 
         String hash = ChatRoomHashUtil.generate(members);
 
-        Optional<ChatRoom> existing =
-                chatRoomRepository.findByMemberHash(hash);
-
-        if (existing.isPresent()) {
-            logger.info("========== 기존에 존재하는 대화방 ==========");
-            return new ChatRoomResponse(
-                    existing.get().getId(),
-                    existing.get().getType()
-            );
-        }
-
         ChatRoom room = ChatRoom.create(
                 request.getTitle(),
                 request.getType(),
                 hash
         );
-        chatRoomRepository.save(room);
 
+        chatRoomRepository.save(room);
         saveMembers(room.getId(), new ArrayList<>(members));
 
         return new ChatRoomResponse(room.getId(), request.getType());
@@ -162,5 +123,9 @@ public class ChatRoomService {
         logger.info("========== members : {} ===========", members);
 
         chatRoomMemberRepository.saveAll(members);
+    }
+
+    public List<ChatRoomLastMessageDto> findParticipatedRooms(Long userId) {
+        return chatRoomRepository.findAllChatRoomAndLastMessageByUserId(userId);
     }
 }

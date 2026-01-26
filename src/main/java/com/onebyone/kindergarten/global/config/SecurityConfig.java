@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -56,7 +57,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-        // .cors(Customizer.withDefaults())
+//        .cors(Customizer.withDefaults())
         .csrf(csrf -> csrf.disable()) // Non-Browser Clients만을 위한 API 서버이므로, CSRF 보호 기능 해제
         .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // h2-console 사용을
         // 위한 설정
@@ -71,6 +72,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(adminOriginList.toArray(new String[0]))
                     .hasRole("ADMIN") // 관리자 전용 API
+                    .requestMatchers("/ws/**")
+                    .permitAll()
                     .anyRequest()
                     .authenticated() // 나머지 요청은 인증된 사용자만 접근 가능
             )

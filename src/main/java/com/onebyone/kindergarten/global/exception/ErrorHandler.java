@@ -18,6 +18,7 @@ public class ErrorHandler {
   @ExceptionHandler(Exception.class)
   @ResponseBody
   public ErrorResponse handleAllExceptions(Exception e) {
+    System.out.println(e.toString());
     return ErrorResponse.buildError(ErrorCodes.INTERNAL_SERVER_ERROR);
   }
 }

@@ -6,7 +6,10 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
+import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+
+import java.security.Principal;
 
 @Component
 @RequiredArgsConstructor
@@ -15,13 +18,18 @@ public class WebSocketEventListener {
     private final WebSocketConnectionManager connectionManager;
 
     @EventListener
-    public void handleConnect(SessionConnectEvent event) {
+    public void handleConnect(SessionConnectedEvent event) {
 
         StompHeaderAccessor accessor =
             StompHeaderAccessor.wrap(event.getMessage());
 
-        Authentication auth = (Authentication) accessor.getUser();
-        Long userId = Long.valueOf(auth.getName());
+        Principal principal = accessor.getUser();
+
+        if (principal == null) {
+            return;
+        }
+
+        Long userId = Long.valueOf(principal.getName());
         String sessionId = accessor.getSessionId();
 
         connectionManager.connect(userId, sessionId);

@@ -66,7 +66,8 @@ public enum ErrorCodes {
   INVALID_CHAT_ROOM_TITLE("E0060", "유효하지 않은 채팅방 제목입니다."),
   INVALID_CHAT_SELF("E0061", "사용자 자신과는 채팅할 수 없습니다"),
   INVALID_CHAT_DUPLICATED_MEMBER("E0062", "중복된 사용자가 존재합니다"),
-  INVALID_USER_STATUS("E0063", "유효하지 않은 사용자 상태입니다."),
+  INVALID_USER_STATUS("E0063", "멤버중에 활동중이지 않은 상태가 존재합니다."),
+  NOT_FOUND_CHAT_MEMBER("E0064", "사용자가 존재하지 않아 채팅방을 생성할 수 없습니다."),
   INTERNAL_SERVER_ERROR("E9999", "알 수 없는 에러 발생");
 
   private final String code;

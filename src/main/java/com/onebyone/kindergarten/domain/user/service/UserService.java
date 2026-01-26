@@ -580,6 +580,9 @@ public class UserService {
     for (Long memberId : uniqueIds) {
       UserStatus status = statusMap.get(memberId);
       logger.info("========== status: {} ==========",  status);
+      if (status == null) {
+        throw new BusinessException(ErrorCodes.NOT_FOUND_CHAT_MEMBER);
+      }
       if (status != UserStatus.ACTIVE) {
         throw new BusinessException(ErrorCodes.INVALID_USER_STATUS);
       }
