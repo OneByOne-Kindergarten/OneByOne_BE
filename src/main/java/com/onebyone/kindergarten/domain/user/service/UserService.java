@@ -5,7 +5,6 @@ import com.onebyone.kindergarten.domain.user.dto.request.*;
 import com.onebyone.kindergarten.domain.user.dto.response.AdminUserResponseDTO;
 import com.onebyone.kindergarten.domain.user.dto.response.AppleUserResponse;
 import com.onebyone.kindergarten.domain.user.dto.response.KakaoUserResponse;
-import com.onebyone.kindergarten.domain.user.dto.response.NaverUserResponse;
 import com.onebyone.kindergarten.domain.user.entity.EmailCertification;
 import com.onebyone.kindergarten.domain.user.entity.User;
 import com.onebyone.kindergarten.domain.user.enums.EmailCertificationType;
@@ -71,7 +70,10 @@ public class UserService {
 
   @Transactional
   public JwtUserInfoDto signIn(SignInRequestDTO request) {
-    User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
+    User user =
+        userRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_USER));
 
     switch (user.getStatus()) {
       case ACTIVE:
@@ -108,7 +110,7 @@ public class UserService {
   @Transactional
   public void changePassword(Long userId, ModifyUserPasswordRequestDTO request) {
     User user = getUserById(userId);
-    validatePassword(request.getNewPassword(), user);
+    validatePassword(request.getCurrentPassword(), user);
 
     user.changePassword(passwordEncoder.encode(request.getNewPassword()));
   }
@@ -152,32 +154,36 @@ public class UserService {
   public User signUpByKakao(KakaoUserResponse userResponse, String fcmToken) {
     String email = userResponse.getKakao_account().getEmail();
 
-    User user = userRepository.findByEmail(email).orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND_EMAIL));
+    Optional<User> user = userRepository.findByEmail(email);
 
-    switch (user.getStatus()) {
-      case ACTIVE:
-        if (StringUtils.hasText(fcmToken)) {
-          user.updateFcmToken(fcmToken);
-        }
-        return user;
-      case DELETED:
-        user.restore();
-        if (StringUtils.hasText(fcmToken)) {
-          user.updateFcmToken(fcmToken);
-        }
-        return user;
-      case SUSPENDED:
-        throw new BusinessException(ErrorCodes.SUSPENDED_USER_EXCEPTION);
+    if (user.isPresent()) {
+      User getUser = user.get();
+
+      switch (getUser.getStatus()) {
+        case ACTIVE:
+          if (StringUtils.hasText(fcmToken)) {
+            getUser.updateFcmToken(fcmToken);
+          }
+          return getUser;
+        case DELETED:
+          getUser.restore();
+          if (StringUtils.hasText(fcmToken)) {
+            getUser.updateFcmToken(fcmToken);
+          }
+          return getUser;
+        case SUSPENDED:
+          throw new BusinessException(ErrorCodes.SUSPENDED_USER_EXCEPTION);
+      }
     }
 
     // 신규 가입자
     String nickname;
     if (userResponse.getKakao_account().getProfile() != null
-            && userResponse.getKakao_account().getProfile().getNickname() != null
-            && !userResponse.getKakao_account().getProfile().getNickname().trim().isEmpty()) {
+        && userResponse.getKakao_account().getProfile().getNickname() != null
+        && !userResponse.getKakao_account().getProfile().getNickname().trim().isEmpty()) {
       String originalNickname = userResponse.getKakao_account().getProfile().getNickname().trim();
       nickname =
-              originalNickname.length() > 10 ? originalNickname.substring(0, 10) : originalNickname;
+          originalNickname.length() > 10 ? originalNickname.substring(0, 10) : originalNickname;
     } else {
       // "카카오" (3글자) + ID 마지막 6자리 = 최대 9글자
       String idSuffix = String.valueOf(userResponse.getId());
@@ -195,7 +201,7 @@ public class UserService {
             ? userResponse.getKakao_account().getProfile().getProfile_image_url()
             : null;
 
-    User user =
+    User registerUser =
         User.registerKakao(
             email,
             dummyPassword,
@@ -204,70 +210,71 @@ public class UserService {
             UserRole.GENERAL,
             profileImageUrl);
 
-    userRepository.save(user);
+    userRepository.save(registerUser);
 
-    return user;
+    return registerUser;
   }
 
-  @Transactional
-  public User signUpByNaver(NaverUserResponse userResponse) {
-    String email = userResponse.getResponse().getEmail();
+  /*
+    @Transactional
+    public User signUpByNaver(NaverUserResponse userResponse) {
+      String email = userResponse.getResponse().getEmail();
 
-    // 활성 사용자 확인
-    Optional<User> activeUser = userRepository.findByEmailAndStatus(email, UserStatus.ACTIVE);
-    if (activeUser.isPresent()) {
-      return activeUser.get();
-    }
-
-    // 탈퇴된 사용자 확인 및 복구
-    Optional<User> deletedUser = userRepository.findByEmailAndStatus(email, UserStatus.DELETED);
-    if (deletedUser.isPresent()) {
-      User user = deletedUser.get();
-      user.restore();
-
-      // 소셜 로그인 정보 업데이트
-      if (userResponse.getResponse().getProfile_image() != null) {
-        user.updateProfileImageUrl(userResponse.getResponse().getProfile_image());
+      // 활성 사용자 확인
+      Optional<User> activeUser = userRepository.findByEmailAndStatus(email, UserStatus.ACTIVE);
+      if (activeUser.isPresent()) {
+        return activeUser.get();
       }
+
+      // 탈퇴된 사용자 확인 및 복구
+      Optional<User> deletedUser = userRepository.findByEmailAndStatus(email, UserStatus.DELETED);
+      if (deletedUser.isPresent()) {
+        User user = deletedUser.get();
+        user.restore();
+
+        // 소셜 로그인 정보 업데이트
+        if (userResponse.getResponse().getProfile_image() != null) {
+          user.updateProfileImageUrl(userResponse.getResponse().getProfile_image());
+        }
+
+        return user;
+      }
+
+      // 새로운 사용자 생성
+      String dummyPassword = encodePassword("naver_" + userResponse.getResponse().getId());
+
+      // 네이버 닉네임 길이 제한 처리
+      String naverNickname = userResponse.getResponse().getNickname();
+      if (naverNickname != null && !naverNickname.trim().isEmpty()) {
+        naverNickname = naverNickname.trim();
+        if (naverNickname.length() > 10) {
+          naverNickname = naverNickname.substring(0, 10);
+        }
+      } else {
+        // 닉네임이 없는 경우 기본 닉네임 생성: "네이버" + ID 마지막 6자리
+        String idSuffix = userResponse.getResponse().getId();
+        if (idSuffix != null && idSuffix.length() > 6) {
+          idSuffix = idSuffix.substring(idSuffix.length() - 6);
+        }
+        naverNickname = "네이버" + (idSuffix != null ? idSuffix : "사용자");
+      }
+
+      User user =
+          User.registerNaver(
+              email,
+              dummyPassword,
+              userResponse.getResponse().getId(),
+              naverNickname,
+              UserRole.GENERAL,
+              userResponse.getResponse().getProfile_image());
+
+      userRepository.save(user);
 
       return user;
     }
-
-    // 새로운 사용자 생성
-    String dummyPassword = encodePassword("naver_" + userResponse.getResponse().getId());
-
-    // 네이버 닉네임 길이 제한 처리
-    String naverNickname = userResponse.getResponse().getNickname();
-    if (naverNickname != null && !naverNickname.trim().isEmpty()) {
-      naverNickname = naverNickname.trim();
-      if (naverNickname.length() > 10) {
-        naverNickname = naverNickname.substring(0, 10);
-      }
-    } else {
-      // 닉네임이 없는 경우 기본 닉네임 생성: "네이버" + ID 마지막 6자리
-      String idSuffix = userResponse.getResponse().getId();
-      if (idSuffix != null && idSuffix.length() > 6) {
-        idSuffix = idSuffix.substring(idSuffix.length() - 6);
-      }
-      naverNickname = "네이버" + (idSuffix != null ? idSuffix : "사용자");
-    }
-
-    User user =
-        User.registerNaver(
-            email,
-            dummyPassword,
-            userResponse.getResponse().getId(),
-            naverNickname,
-            UserRole.GENERAL,
-            userResponse.getResponse().getProfile_image());
-
-    userRepository.save(user);
-
-    return user;
-  }
-
+  */
   @Transactional
-  public User signUpByApple(AppleUserResponse userResponse) {
+  public User signUpByApple(AppleUserResponse userResponse, String fcmToken) {
     String appleUserId = userResponse.getSub();
     String providedEmail = userResponse.getEmail();
 
@@ -291,18 +298,26 @@ public class UserService {
     }
 
     // 활성 사용자 확인
-    Optional<User> activeUser = userRepository.findByEmailAndStatus(systemEmail, UserStatus.ACTIVE);
-    if (activeUser.isPresent()) {
-      return activeUser.get();
-    }
+    Optional<User> user = userRepository.findByEmail(systemEmail);
 
-    // 탈퇴된 사용자 확인 및 복구
-    Optional<User> deletedUser =
-        userRepository.findByEmailAndStatus(systemEmail, UserStatus.DELETED);
-    if (deletedUser.isPresent()) {
-      User user = deletedUser.get();
-      user.restore();
-      return user;
+    if (user.isPresent()) {
+      User getUser = user.get();
+
+      switch (getUser.getStatus()) {
+        case ACTIVE:
+          if (StringUtils.hasText(fcmToken)) {
+            getUser.updateFcmToken(fcmToken);
+          }
+          return getUser;
+        case DELETED:
+          getUser.restore();
+          if (StringUtils.hasText(fcmToken)) {
+            getUser.updateFcmToken(fcmToken);
+          }
+          return getUser;
+        case SUSPENDED:
+          throw new BusinessException(ErrorCodes.SUSPENDED_USER_EXCEPTION);
+      }
     }
 
     // 새로운 사용자 생성
@@ -318,12 +333,12 @@ public class UserService {
       nickname = "애플" + idSuffix;
     }
 
-    User user =
+    User registerUser =
         User.registerApple(systemEmail, dummyPassword, appleUserId, nickname, UserRole.GENERAL);
 
-    userRepository.save(user);
+    userRepository.save(registerUser);
 
-    return user;
+    return registerUser;
   }
 
   @Transactional
@@ -550,5 +565,4 @@ public class UserService {
       user.updateFcmToken(request.getFcmToken());
     }
   }
-
 }

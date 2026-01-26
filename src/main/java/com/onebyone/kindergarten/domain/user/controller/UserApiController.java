@@ -118,14 +118,14 @@ public class UserApiController {
     return userFacade.kakaoLogin(code, fcmToken);
   }
 
-  @Operation(summary = "유저-09 네이버 소셜 로그인", description = "네이버 소셜로그인을 진행합니다")
-  @GetMapping("/naver/callback")
-  public SignInResponseDTO getNaverAuthorizationCode(
-      @RequestParam(name = "code") String code,
-      @RequestParam(name = "state") String state,
-      @RequestParam(name = "fcmToken", required = false) String fcmToken) {
-    return userFacade.naverLogin(code, state, fcmToken);
-  }
+  //  @Operation(summary = "유저-09 네이버 소셜 로그인", description = "네이버 소셜로그인을 진행합니다")
+  //  @GetMapping("/naver/callback")
+  //  public SignInResponseDTO getNaverAuthorizationCode(
+  //      @RequestParam(name = "code") String code,
+  //      @RequestParam(name = "state") String state,
+  //      @RequestParam(name = "fcmToken", required = false) String fcmToken) {
+  //    return userFacade.naverLogin(code, state, fcmToken);
+  //  }
 
   @Operation(summary = "유저-10 애플 소셜 로그인", description = "애플 소셜로그인을 진행합니다")
   @PostMapping("/apple/callback")

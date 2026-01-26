@@ -106,6 +106,7 @@ public class UserFacade {
     return SignInResponseDTO.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
 
+  /*
   @Transactional
   public SignInResponseDTO naverLogin(String code, String state, String fcmToken) {
     MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -138,6 +139,7 @@ public class UserFacade {
     return SignInResponseDTO.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
 
+  */
   public SignInResponseDTO appleLogin(String idToken, String fcmToken) {
 
     log.info("=== 애플 로그인 요청 ===");
@@ -147,11 +149,7 @@ public class UserFacade {
 
     // Apple ID Token 검증 및 사용자 정보 추출
     AppleUserResponse userResponse = appleAuthService.verifyIdToken(idToken);
-    User user = userService.signUpByApple(userResponse);
-
-    if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-      user.updateFcmToken(fcmToken);
-    }
+    User user = userService.signUpByApple(userResponse, fcmToken);
 
     String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getRole());
     String refreshToken = jwtProvider.generateRefreshToken(user.getId(), user.getRole());
