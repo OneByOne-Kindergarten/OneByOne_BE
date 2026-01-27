@@ -85,5 +85,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
           + "AND u.status = 'DELETED' ")
   List<User> findAllByWithdrawAfter30Days(@Param("before30Days") LocalDateTime before30Days);
 
-  Optional<Object> findByEmail(String email);
+  Optional<User> findByEmail(String email);
 }

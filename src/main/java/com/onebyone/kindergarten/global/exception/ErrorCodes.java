@@ -62,6 +62,8 @@ public enum ErrorCodes {
   NOT_FOUND_CERTIFICATION("E0056", "인증 내역이 존재하지 않습니다."),
   CERTIFICATION_CODE_MISMATCH("E0057", "인증 코드가 일치하지 않습니다."),
   FAILED_WITHDRAW_EXCEPTION("E0058", "30일 지난 사용자 익명 처리에 실패했습니다."),
+  SUSPENDED_USER_EXCEPTION("E0059", "정지된 계정입니다."),
+  LOGIN_NOT_ALLOWED_ANONYMOUS("E0060", "로그인할 수 없는 계정입니다."),
   INTERNAL_SERVER_ERROR("E9999", "알 수 없는 에러 발생");
 
   private final String code;
