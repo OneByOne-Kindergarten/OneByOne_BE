@@ -19,6 +19,7 @@ public class CommunityPostResponseDTO {
   private String userEmail;
   private UserRole userRole;
   private String career;
+  private boolean hasWrittenReview;
   private Integer viewCount;
   private Integer likeCount;
   private Integer commentCount;

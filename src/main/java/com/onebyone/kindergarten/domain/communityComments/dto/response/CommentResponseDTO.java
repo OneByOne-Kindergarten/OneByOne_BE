@@ -23,6 +23,8 @@ public class CommentResponseDTO {
 
   private UserRole userRole;
 
+  private boolean hasWrittenReview;
+
   private LocalDateTime createdAt;
 
   private ReportStatus status;
@@ -38,6 +40,7 @@ public class CommentResponseDTO {
       String email,
       String career,
       UserRole userRole,
+      boolean hasWrittenReview,
       LocalDateTime createdAt,
       ReportStatus status,
       Long parentId,
@@ -48,6 +51,7 @@ public class CommentResponseDTO {
     this.email = email;
     this.career = career;
     this.userRole = userRole;
+    this.hasWrittenReview = hasWrittenReview;
     this.createdAt = createdAt;
     this.status = status;
     this.parentId = parentId;
@@ -64,6 +68,7 @@ public class CommentResponseDTO {
         .email(user.getEmail())
         .career(user.getCareer())
         .userRole(user.getRole())
+        .hasWrittenReview(user.hasWrittenReview())
         .createdAt(comment.getCreatedAt())
         .status(comment.getStatus())
         .parentId(comment.getParent() != null ? comment.getParent().getId() : null)

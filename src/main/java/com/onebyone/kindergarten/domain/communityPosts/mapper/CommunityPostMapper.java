@@ -35,6 +35,7 @@ public class CommunityPostMapper {
         .userEmail(post.getUser().getEmail())
         .userRole(post.getUser().getRole())
         .career(post.getUser().getCareer())
+        .hasWrittenReview(post.getUser().hasWrittenReview())
         .viewCount(post.getViewCount())
         .likeCount(post.getLikeCount())
         .commentCount(post.getCommentCount())
